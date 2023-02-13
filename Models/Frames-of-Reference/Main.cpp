@@ -120,7 +120,12 @@ int main(int argc, char** argv){
 	MyHypothesis::data_t mydata;
 
 	Vector origin = {0,0,0};
-	Vector speaker = {1,0,0};
+        Vector east = {1,0,0};
+        Vector west = {-1,0.0};
+        Vector north = {0,1,0};
+        Vector south = {0,-1,0};
+        Vector up = {0,0,1};
+        Vector down = {0,0,-1};
 
 	for(int i=0;i<10;i++) {
 		
