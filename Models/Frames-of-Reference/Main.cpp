@@ -2,8 +2,12 @@
 
 using Vector = std::array<double,3>;
 
-double dot_product(){
-    // TODO: implement
+double dot_product(const Vector &a, const Vector &b){
+    double result = 0.0;
+    for(int i = 0; i < a.size(); i++){
+        result += a[i] * b[i];
+    }
+    return result;
 }
 
 double magnitude(){
