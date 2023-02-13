@@ -51,7 +51,7 @@ class MyGrammar : public Grammar<Scene,bool,   Scene,bool,Object,Vector, double>
 public:
 	MyGrammar() {
 		add("location(%s)",       +[](Object x) -> Vector { return x.location; });
-		
+		add("orientation(%s)", +[](Object x) -> Vector {return x.orientation;});
 		add("distance(%s,%s)",    +[](Vector x, Vector y) -> double { 
 			// TODO: Compute distance..
 		});
