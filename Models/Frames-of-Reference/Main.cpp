@@ -1,6 +1,18 @@
-
+#include <cmath>
 
 using Vector = std::array<double,3>;
+
+double dot_product(){
+    // TODO: implement
+}
+
+double magnitude(){
+    // TODO: implement
+}
+
+double angle_between(){
+    // TODO: implement
+}
 
 struct Object {
 	Vector location;
