@@ -10,8 +10,12 @@ double dot_product(const Vector &a, const Vector &b){
     return result;
 }
 
-double magnitude(){
-    // TODO: implement
+double magnitude(const Vector &a){
+    double result = 0.0;
+    for (int i = 0; i < a.size(); i++){
+        result += a[i] * a[i];
+    }
+    return sqrt(result);
 }
 
 double angle_between(){
