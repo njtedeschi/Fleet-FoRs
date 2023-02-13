@@ -61,6 +61,9 @@ public:
                 add("antiparallel(%s,%s)", +[](Vector x, Vector y) -> bool {
                         return cosine_similarity(x,y) == -1;
                         });
+                add("orthogonal(%s,%s)", +[](Vector x, Vector y) -> bool {
+                        return cosine_similarity(x,y) == 0;
+                        });
 		
 		add("speaker(%s)",       +[](Scene x) -> Object { return x.speaker; });
 		add("figure(%s)",        +[](Scene x) -> Object { return x.figure; });
