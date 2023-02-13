@@ -18,6 +18,10 @@ double magnitude(const Vector &a){
     return sqrt(result);
 }
 
+double cosine_similarity(const Vector &a, const Vector &b){
+    return dot_product(a, b)/(magnitude(a) * magnitude(b));
+}
+
 double angle_between(){
     // TODO: implement
 }
