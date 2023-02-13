@@ -362,10 +362,13 @@ int main(int argc, char** argv){
 
 #include <filesystem>
 #include <sys/resource.h> // just for setting priority defaulty 
+# include <sys/syslimits.h> // for PATH_MAX
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <string>
+
+#include <mach-o/dyld.h> // for _NSGet_Executable_Path
 
 const std::string FLEET_VERSION = "0.1.2";
 
@@ -510,7 +513,10 @@ public:
 			gethostname(hostname, HOST_NAME_MAX);
 
 			// and build the command to get the md5 checksum of myself
-			char tmp[64]; sprintf(tmp, "md5sum /proc/%d/exe", getpid());
+                        char path[PATH_MAX+1];
+                        uint32_t size = sizeof(path);
+                        _NSGetExecutablePath(path, &size);
+                        char tmp[64]; sprintf(tmp, "md5sum %s", path);
 		
 				
 			std::filesystem::path cwd = std::filesystem::current_path();
