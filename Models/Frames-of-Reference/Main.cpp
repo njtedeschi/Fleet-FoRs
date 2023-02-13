@@ -35,6 +35,9 @@ public:
 		add("speaker(%s)",       +[](Scene x) -> Object { return x.speaker; });
 		add("figure(%s)",        +[](Scene x) -> Object { return x.figure; });
 		add("ground(%s)",        +[](Scene x) -> Object { return x.ground; });
+                add("and(%s,%s)",    Builtins::And<MyGrammar>);
+		add("or(%s,%s)",     Builtins::Or<MyGrammar>);
+		add("not(%s)",       Builtins::Not<MyGrammar>);
 		add("x",             Builtins::X<MyGrammar>);
 	}
 } grammar;
