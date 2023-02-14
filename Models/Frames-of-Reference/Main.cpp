@@ -127,18 +127,21 @@ int main(int argc, char** argv){
         Vector up = {0,0,1};
         Vector down = {0,0,-1};
 
-	for(int i=0;i<10;i++) {
+        Object direct_speaker = {origin, east};
+
+        Object nondirect_speaker = {2 * west, east};
+
+	/* for(int i=0;i<10;i++) { */
 		
-		if(flip(0.8)) {
-			mydata.emplace_back(....)
-		}
-		else {
+	/* 	if(flip(0.8)) { */
+	/* 		mydata.emplace_back(....) */
+	/* 	} */
+	/* 	else { */
 			
 			
-		}
+	/* 	} */
 		
-	}
-	
+	/* } */
 	//------------------
 	// Run
 	//------------------
