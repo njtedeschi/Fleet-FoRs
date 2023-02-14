@@ -29,7 +29,7 @@ double angle_between(){
 struct Object {
 	Vector location;
 	Vector orientation;
-	std::string name; 
+	/* std::string name; */ 
 };
 
 struct Scene {
