@@ -131,6 +131,11 @@ int main(int argc, char** argv){
 
         Object nondirect_speaker = {2 * west, east};
 
+        Object east_facing_ground = {origin, east};
+        Object west_facing_ground = {origin, west};
+        Object north_facing_ground = {origin, north};
+        Object south_facing_ground = {origin, south};
+
 	/* for(int i=0;i<10;i++) { */
 		
 	/* 	if(flip(0.8)) { */
