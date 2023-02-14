@@ -128,8 +128,15 @@ int main(int argc, char** argv){
         Vector down = {0,0,-1};
 
         Object direct_speaker = {origin, east};
-
         Object nondirect_speaker = {2 * west, east};
+
+        // TODO: figure out how to handle null orientation
+        Object east_figure = {east, origin};
+        Object west_figure = {west, origin};
+        Object north_figure = {north, origin};
+        Object south_figure = {south, origin};
+        Object up_figure = {up, origin};
+        Object down_figure = {down, origin};
 
         Object east_facing_ground = {origin, east};
         Object west_facing_ground = {origin, west};
