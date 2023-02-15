@@ -183,7 +183,7 @@ int main(int argc, char** argv){
         }
 
         // Calculate truth value
-        bool behind_direct(const auto& scene){
+        bool behind_direct(const Scene& scene){
             Object speaker = scene.speaker;
             Object figure = scene.figure;
 
@@ -191,7 +191,7 @@ int main(int argc, char** argv){
             return cosine_similarity(s_to_f, speaker.orientation) == -1;
         }
 
-        bool behind_nondirect(const auto& scene){
+        bool behind_nondirect(const Scene& scene){
             Object speaker = scene.speaker;
             Object figure = scene.figure;
             Object ground = scene.ground;
