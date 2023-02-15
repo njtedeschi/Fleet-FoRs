@@ -96,7 +96,8 @@ public:
 		bool   true_out = di.output; 
 		bool my_output = this->call(s);
 		
-		// TODO: whatever the likelihood should be
+		double likelihood = (1.0-di.reliability)*0.5 + di.reliability*(my_output == true_output);
+                return log(likelihood);
 		
 	}
 };
