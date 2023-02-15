@@ -225,7 +225,7 @@ int main(int argc, char** argv){
                 label = behind_nondirect(scene);
             }
             // Add noise
-            if (wrong_dist(p_wrong)) {
+            if (wrong_dist(engine)) {
                     label = !label;
                     }
             mydata.emplace_back(scene, label, 1-p_wrong);
