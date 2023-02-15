@@ -1,5 +1,6 @@
 #include <cmath>
 #include <array>
+#include <vector>
 
 using Vector = std::array<double,3>;
 
@@ -159,10 +160,13 @@ int main(int argc, char** argv){
         Object up_figure = {up, origin};
         Object down_figure = {down, origin};
 
+        std::vector<Object> figures = {east_figure, west_figure, north_figure, south_figure, up_figure, down_figure};
+
         Object east_facing_ground = {origin, east};
         Object west_facing_ground = {origin, west};
         Object north_facing_ground = {origin, north};
         Object south_facing_ground = {origin, south};
+        std::vector<Object> grounds = {east_facing_ground, west_facing_ground, north_facing_ground, south_facing_ground};
 
         Scene direct_behind = {direct_speaker, direct_speaker, west_figure};
         Scene direct_front = {direct_speaker, direct_speaker, east_figure};
