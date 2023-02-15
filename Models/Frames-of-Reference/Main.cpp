@@ -182,6 +182,21 @@ int main(int argc, char** argv){
             }
         }
 
+        // Calculate truth value
+        bool behind_direct(const auto& scene){
+            Object speaker = scene.speaker;
+            Object figure = scene.figure;
+
+            Vector s_to_f = figure.location - speaker.location;
+            return cosine_similarity(s_to_f, speaker.orientation) == -1;
+        }
+
+        bool behind_nondirect(const auto& scene){
+            Object speaker = scene.speaker;
+            Object figure = scene.figure;
+            Object ground = scene.ground;
+        }
+
         // Sample
         int num_samples = 100
         std::mt19937 engine(0); // RNG with set seed
