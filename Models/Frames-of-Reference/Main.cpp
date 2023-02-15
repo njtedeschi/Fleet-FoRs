@@ -113,7 +113,7 @@ public:
 		bool   true_out = di.output; 
 		bool my_output = this->call(s);
 		
-		double likelihood = (1.0-di.reliability)*0.5 + di.reliability*(my_output == true_output);
+		double likelihood = (1.0-di.reliability)*0.5 + di.reliability*(my_output == true_out);
                 return log(likelihood);
 		
 	}
