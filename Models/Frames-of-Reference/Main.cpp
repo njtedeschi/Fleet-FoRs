@@ -55,12 +55,15 @@ public:
                         });
 		add("orientation(%s)", +[](Object x) -> Vector {return x.orientation;});
                 add("parallel(%s,%s)", +[](Vector x, Vector y) -> bool {
+                        if (magnitude(x) == 0 || magnitude(y) == 0) {return false;}
                         return cosine_similarity(x,y) == 1;
                         });
                 add("antiparallel(%s,%s)", +[](Vector x, Vector y) -> bool {
+                        if (magnitude(x) == 0 || magnitude(y) == 0) {return false;}
                         return cosine_similarity(x,y) == -1;
                         });
                 add("orthogonal(%s,%s)", +[](Vector x, Vector y) -> bool {
+                        if (magnitude(x) == 0 || magnitude(y) == 0) {return false;}
                         return cosine_similarity(x,y) == 0;
                         });
 		
