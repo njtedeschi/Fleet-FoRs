@@ -68,7 +68,7 @@ class MyGrammar : public Grammar<Scene,bool,   Scene,bool,Object,Vector, double>
 public:
 	MyGrammar() {
                 add("displacement(%s,%s)", +[](Object x, Object y) -> Vector {
-                        return y.location - x.location
+                        return y.location - x.location;
                         });
 		add("orientation(%s)", +[](Object x) -> Vector {return x.orientation;});
                 add("parallel(%s,%s)", +[](Vector x, Vector y) -> bool {
