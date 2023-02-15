@@ -109,7 +109,7 @@ public:
 	
 
 	double compute_single_likelihood(const datum_t& di) override {
-		Scene& s = di.input;
+		const Scene& s = di.input;
 		bool   true_out = di.output; 
 		bool my_output = this->call(s);
 		
