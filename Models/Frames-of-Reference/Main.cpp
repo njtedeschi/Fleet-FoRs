@@ -192,7 +192,7 @@ int main(int argc, char** argv){
         mydata.emplace_back(front_90_rel, false, 0.95);
         mydata.emplace_back(behind_90_int, true, 0.95);
         mydata.emplace_back(behind_90_rel, true, 0.95);
-        mydata.emplace_back(front_180_int, true, 0.95);
+        mydata.emplace_back(front_180_int, false, 0.95);
         mydata.emplace_back(behind_180_int, true, 0.95);
 
 
