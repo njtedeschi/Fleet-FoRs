@@ -147,6 +147,38 @@ int main(int argc, char** argv){
         Object north_facing_ground = {origin, north};
         Object south_facing_ground = {origin, south};
 
+        Scene direct_behind = {direct_speaker, direct_speaker, west_figure};
+        Scene direct_front = {direct_speaker, direct_speaker, east_figure};
+        Scene direct_left = {direct_speaker, direct_speaker, north_figure};
+        Scene direct_right = {direct_speaker, direct_speaker, south_figure};
+        Scene direct_above = {direct_speaker, direct_speaker, up_figure};
+        Scene direct_below = {direct_speaker, direct_speaker, down_figure};
+
+        Scene front_0_int = {nondirect_speaker, east_facing_ground, east_figure};
+        Scene behind_0_int = {nondirect_speaker, east_facing_ground, west_figure};
+        Scene front_90_int = {nondirect_speaker, north_facing_ground, north_figure};
+        Scene front_90_rel ={nondirect_speaker, north_facing_ground, west_figure};
+        Scene behind_90_int = {nondirect_speaker, north_facing_ground, south_figure};
+        Scene behind_90_rel = {nondirect_speaker, north_facing_ground, east_figure};
+        Scene front_180_int = {nondirect_speaker, west_facing_ground, west_figure};
+        Scene behind_180_int = {nondirect_speaker, west_facing_ground, east_figure};
+
+        // Learning 'behind'
+        mydata.emplace_back(direct_behind, true, 0.95);
+        mydata.emplace_back(direct_front, false, 0.95);
+        mydata.emplace_back(direct_left, false, 0.95);
+        mydata.emplace_back(direct_above, false, 0.95);
+        mydata.emplace_back(direct_below, false, 0.95);
+        mydata.emplace_back(front_0_int, true, 0.95);
+        mydata.emplace_back(behind_0_int, true, 0.95);
+        mydata.emplace_back(front_90_int, false, 0.95);
+        mydata.emplace_back(front_90_rel, false, 0.95);
+        mydata.emplace_back(behind_90_int, true, 0.95);
+        mydata.emplace_back(behind_90_rel, true, 0.95);
+        mydata.emplace_back(front_180_int, true, 0.95);
+        mydata.emplace_back(behind_180_int, true, 0.95);
+
+
 	/* for(int i=0;i<10;i++) { */
 		
 	/* 	if(flip(0.8)) { */
