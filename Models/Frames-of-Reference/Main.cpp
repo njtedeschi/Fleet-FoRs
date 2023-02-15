@@ -183,6 +183,7 @@ int main(int argc, char** argv){
         }
 
         // Sample
+        int num_samples = 100
         std::mt19937 engine(0); // RNG with set seed
         p_direct = 0.2; // probability a scene is direct
         std::bernoulli_distribution direct_dist(p_direct);
