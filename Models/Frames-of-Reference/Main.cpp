@@ -222,7 +222,7 @@ int main(int argc, char** argv){
                 label = behind_direct(scene);
             } else {
                 scene = nondirect_scenes[nondirect_scene_dist(engine)];
-                bool behind_nondirect(scene);
+                label = behind_nondirect(scene);
             }
             // Add noise
             if (wrong_dist(p_wrong)) {
