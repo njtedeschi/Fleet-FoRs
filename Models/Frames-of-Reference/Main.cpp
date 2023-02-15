@@ -196,12 +196,19 @@ int main(int argc, char** argv){
 
         for (int i = 0; i < num_samples; i++){
             // Sample scene
-            Scene scene;
+            Scene scene; bool label;
             if (direct_dist(engine)) {
-                scene = scenes[direct_scene_dist(engine)];
+                scene = direct_scenes[direct_scene_dist(engine)];
+                label = behind_direct(scene);
             } else {
-                scene = scenes[nondirect_scene_dist(engine)];
+                scene = nondirect_scenes[nondirect_scene_dist(engine)];
+                bool behind_nondirect(scene);
             }
+            // Add noise
+            if (wrong_dist(p_wrong)) {
+                    label = !label;
+                    }
+            mydata.emplace_back(scene, label, 1-p_wrong);
         }
 
 
