@@ -194,6 +194,15 @@ int main(int argc, char** argv){
         std::uniform_int_distribution<int> direct_scene_dist(0, direct_scenes.size() - 1);
         std::uniform_int_distribution<int> nondirect_scene_dist(0, nondirect_scenes.size() - 1);
 
+        for (int i = 0; i < num_samples; i++){
+            // Sample scene
+            Scene scene;
+            if (direct_dist(engine)) {
+                scene = scenes[direct_scene_dist(engine)];
+            } else {
+                scene = scenes[nondirect_scene_dist(engine)];
+            }
+        }
 
 
         /* Scene direct_behind = {direct_speaker, direct_speaker, west_figure}; */
