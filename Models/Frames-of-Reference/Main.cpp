@@ -1,6 +1,7 @@
 #include <cmath>
 #include <array>
 #include <vector>
+#include <random>
 
 using Vector = std::array<double,3>;
 
@@ -149,25 +150,27 @@ int main(int argc, char** argv){
         Vector up = {0,0,1};
         Vector down = {0,0,-1};
 
+        // Possible speakers
         Object direct_speaker = {origin, east};
         Object nondirect_speaker = {2 * west, east};
 
-        // TODO: figure out how to handle null orientation
+        // Possible figures
         Object east_figure = {east, origin};
         Object west_figure = {west, origin};
         Object north_figure = {north, origin};
         Object south_figure = {south, origin};
         Object up_figure = {up, origin};
         Object down_figure = {down, origin};
-
         std::vector<Object> figures = {east_figure, west_figure, north_figure, south_figure, up_figure, down_figure};
 
+        // Possible grounds
         Object east_facing_ground = {origin, east};
         Object west_facing_ground = {origin, west};
         Object north_facing_ground = {origin, north};
         Object south_facing_ground = {origin, south};
         std::vector<Object> grounds = {east_facing_ground, west_facing_ground, north_facing_ground, south_facing_ground};
 
+        // Possible direct and nondirect scenes
         std::vector<Scene> direct_scenes;
         std::vector<Scene> nondirect_scenes;
         for (const auto& figure : figures) {
