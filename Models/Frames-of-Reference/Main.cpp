@@ -182,6 +182,19 @@ int main(int argc, char** argv){
             }
         }
 
+        // Sample
+        std::mt19937 engine(0); // RNG with set seed
+        p_direct = 0.2; // probability a scene is direct
+        std::bernoulli_distribution direct_dist(p_direct);
+        p_wrong = 0.05; // probability a scene is labeled incorrectly
+        std::bernoulli_distribution wrong_dist(p_wrong);
+
+        // Uniform dists over scenes
+        std::uniform_int_distribution<int> direct_scene_dist(0, direct_scenes.size() - 1);
+        std::uniform_int_distribution<int> nondirect_scene_dist(0, nondirect_scenes.size() - 1);
+
+
+
         /* Scene direct_behind = {direct_speaker, direct_speaker, west_figure}; */
         /* Scene direct_front = {direct_speaker, direct_speaker, east_figure}; */
         /* Scene direct_left = {direct_speaker, direct_speaker, north_figure}; */
