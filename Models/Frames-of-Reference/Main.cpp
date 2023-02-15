@@ -195,6 +195,11 @@ int main(int argc, char** argv){
             Object speaker = scene.speaker;
             Object figure = scene.figure;
             Object ground = scene.ground;
+
+            Vector g_to_f = figure.location - ground.location;
+            bool intrinsic = (cosine_similarity(g_to_f, ground.orientation) == -1);
+            bool relative = (cosine_similarity(g_to_f, speaker.orientation) == 1);
+            return (intrinsic or relative);
         }
 
         // Sample
