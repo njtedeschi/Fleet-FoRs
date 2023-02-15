@@ -1,6 +1,23 @@
 #include <cmath>
+#include <array>
 
 using Vector = std::array<double,3>;
+
+Vector operator*(double s, const Vector& v) {
+    Vector result;
+    for (int i = 0; i < 3; ++i) {
+        result[i] = v[i] * s;
+    }
+    return result;
+}
+
+Vector operator-(const Vector& v1, const Vector& v2) {
+    Vector result;
+    for (int i = 0; i < 3; ++i) {
+        result[i] = v1[i] - v2[i];
+    }
+    return result;
+}
 
 double dot_product(const Vector &a, const Vector &b){
     double result = 0.0;
