@@ -168,11 +168,14 @@ int main(int argc, char** argv){
         Object south_facing_ground = {origin, south};
         std::vector<Object> grounds = {east_facing_ground, west_facing_ground, north_facing_ground, south_facing_ground};
 
+        std::vector<Scene> direct_scenes;
         std::vector<Scene> nondirect_scenes;
         for (const auto& figure : figures) {
+            Scene direct = {direct_speaker, direct_speaker, figure};
+            direct_scenes.push_back(direct);
             for (const auto& ground : grounds) {
-                Scene scene = {nondirect_speaker, ground, figure};
-                nondirect_scenes.push_back(scene);
+                Scene nondirect = {nondirect_speaker, ground, figure};
+                nondirect_scenes.push_back(nondirect);
             }
         }
 
