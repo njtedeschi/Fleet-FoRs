@@ -74,7 +74,7 @@ bool behind_nondirect(const Scene& scene){
     Vector g_to_f = figure.location - ground.location;
     bool intrinsic = (cosine_similarity(g_to_f, ground.orientation) == -1);
     bool relative = (cosine_similarity(g_to_f, speaker.orientation) == 1);
-    return (intrinsic or relative);
+    return (intrinsic || relative);
 }
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -200,26 +200,6 @@ int main(int argc, char** argv){
                 Scene nondirect = {nondirect_speaker, ground, figure};
                 nondirect_scenes.push_back(nondirect);
             }
-        }
-
-        // Calculate truth value
-        bool behind_direct(const Scene& scene){
-            Object speaker = scene.speaker;
-            Object figure = scene.figure;
-
-            Vector s_to_f = figure.location - speaker.location;
-            return cosine_similarity(s_to_f, speaker.orientation) == -1;
-        }
-
-        bool behind_nondirect(const Scene& scene){
-            Object speaker = scene.speaker;
-            Object figure = scene.figure;
-            Object ground = scene.ground;
-
-            Vector g_to_f = figure.location - ground.location;
-            bool intrinsic = (cosine_similarity(g_to_f, ground.orientation) == -1);
-            bool relative = (cosine_similarity(g_to_f, speaker.orientation) == 1);
-            return (intrinsic or relative);
         }
 
         // Sample
