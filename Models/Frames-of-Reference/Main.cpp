@@ -203,11 +203,11 @@ int main(int argc, char** argv){
         }
 
         // Sample
-        int num_samples = 100
+        int num_samples = 100;
         std::mt19937 engine(0); // RNG with set seed
-        p_direct = 0.2; // probability a scene is direct
+        double p_direct = 0.2; // probability a scene is direct
         std::bernoulli_distribution direct_dist(p_direct);
-        p_wrong = 0.05; // probability a scene is labeled incorrectly
+        double p_wrong = 0.05; // probability a scene is labeled incorrectly
         std::bernoulli_distribution wrong_dist(p_wrong);
 
         // Uniform dists over scenes
