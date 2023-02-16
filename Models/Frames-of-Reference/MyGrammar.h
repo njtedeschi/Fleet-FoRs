@@ -5,6 +5,9 @@
 
 class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Vector, double>,
 				  public Singleton<MyGrammar> {
+private:
+        Vector up = {0, 0, 1};
+        Vector down = {0, 0, -1};
 public:
 	MyGrammar() {
                 add("displacement(%s,%s)", +[](Object x, Object y) -> Vector {
@@ -27,6 +30,9 @@ public:
                 add("and(%s,%s)",    Builtins::And<MyGrammar>);
 		add("or(%s,%s)",     Builtins::Or<MyGrammar>);
 		add("not(%s)",       Builtins::Not<MyGrammar>);
+
+		add("up(%s)",       +[](MyInput x) -> Vector { return up});
+		add("down(%s)",     +[](MyInput x) -> Vector { return down});
 
 		add("speaker(%s)",       +[](MyInput x) -> Object { return x.scene.speaker; });
 		add("figure(%s)",        +[](MyInput x) -> Object { return x.scene.figure; });
