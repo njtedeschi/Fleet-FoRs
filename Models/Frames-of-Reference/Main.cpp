@@ -104,7 +104,7 @@ int main(int argc, char** argv){
 
 	TopN<MyHypothesis> top;
 
-	auto h0 = MyHypothesis::sample();
+	auto h0 = MyHypothesis::sample(words);
 	
 	MCMCChain samp(h0, &mydata);
 	//ChainPool samp(h0, &mydata, FleetArgs::nchains);
