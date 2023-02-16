@@ -3,6 +3,7 @@
 #include <vector>
 #include <random>
 #include <set>
+#include <iostream>
 
 const std::vector<std::string> words = {"above", "below", "front", "behind", "side"};
 
