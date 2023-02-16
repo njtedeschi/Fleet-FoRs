@@ -5,6 +5,8 @@
 
 const std::vector<std::string> words = {"above", "below", "front", "behind", "side"};
 
+static const double alpha_t = 0.95; // probability of true description
+
 using Vector = std::array<double,3>;
 
 Vector operator*(double s, const Vector& v) {
