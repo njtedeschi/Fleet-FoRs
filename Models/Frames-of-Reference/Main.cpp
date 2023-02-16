@@ -86,69 +86,11 @@ bool behind_nondirect(const Scene& scene){
     return (intrinsic || relative);
 }
 
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/// Define the grammar
-/// Thid requires the types of the thing we will add to the grammar (bool,MyObject)
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#include "MyGrammar.h"
+#include "MyHypothesis.h"
 
-#include "Grammar.h"
-#include "Singleton.h"
-
-class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Vector, double>,
-				  public Singleton<MyGrammar> {
-public:
-	MyGrammar() {
-                add("displacement(%s,%s)", +[](Object x, Object y) -> Vector {
-                        return y.location - x.location;
-                        });
-		add("orientation(%s)", +[](Object x) -> Vector {return x.orientation;});
-                add("parallel(%s,%s)", +[](Vector x, Vector y) -> bool {
-                        if (magnitude(x) == 0 || magnitude(y) == 0) {return false;}
-                        return cosine_similarity(x,y) == 1;
-                        });
-                /* add("antiparallel(%s,%s)", +[](Vector x, Vector y) -> bool { */
-                /*         if (magnitude(x) == 0 || magnitude(y) == 0) {return false;} */
-                /*         return cosine_similarity(x,y) == -1; */
-                /*         }); */
-                add("orthogonal(%s,%s)", +[](Vector x, Vector y) -> bool {
-                        if (magnitude(x) == 0 || magnitude(y) == 0) {return false;}
-                        return cosine_similarity(x,y) == 0;
-                        });
-		
-                add("and(%s,%s)",    Builtins::And<MyGrammar>);
-		add("or(%s,%s)",     Builtins::Or<MyGrammar>);
-		add("not(%s)",       Builtins::Not<MyGrammar>);
-
-		add("speaker(%s)",       +[](MyInput x) -> Object { return x.scene.speaker; });
-		add("figure(%s)",        +[](MyInput x) -> Object { return x.scene.figure; });
-		add("ground(%s)",        +[](MyInput x) -> Object { return x.scene.ground; });
-		add("x",             Builtins::X<MyGrammar>);
-	}
-} grammar;
-
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/// Define a class for handling my specific hypotheses and data. Everything is defaultly 
-/// a PCFG prior and regeneration proposals, but I have to define a likelihood
-///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-#include "DeterministicLOTHypothesis.h"
-
-class MyHypothesis final : public DeterministicLOTHypothesis<MyHypothesis,Scene,bool,MyGrammar,&grammar> {
-public:
-	using Super = DeterministicLOTHypothesis<MyHypothesis,Scene,bool,MyGrammar,&grammar>;
-	using Super::Super; // inherit the constructors
-	
-
-	double compute_single_likelihood(const datum_t& di) override {
-		const Scene& s = di.input;
-		bool   true_out = di.output; 
-		bool my_output = this->call(s);
-		
-		double likelihood = (1.0-di.reliability)*0.5 + di.reliability*(my_output == true_out);
-                return log(likelihood);
-		
-	}
-};
+// target stores mapping from the words to functions that compute them correctly
+MyHypothesis target;
 
 ///~~~~~ TODO: uncomment when refactoring
 /* #include "MyGrammar.h" */
