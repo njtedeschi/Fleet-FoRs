@@ -123,7 +123,10 @@ public:
 
     // Printing functions: string and show
     virtual void show(std::string prefix="") override {
+        extern MyHypothesis target;
 
+        print(":", prefix, this->posterior, this->prior, this->likelihood, target.likelihood);
+        print(this->string());
     }
 };
 
