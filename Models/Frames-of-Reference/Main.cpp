@@ -105,7 +105,7 @@ int main(int argc, char** argv){
         target["below"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(figure(x),ground(x)),up(x))"));
         target["front"] = InnerHypothesis(grammar.simple_parse("or(parallel(displacement(ground(x),figure(x)),orientation(ground(x))),parallel(displacement(figure(x),ground(x)),orientation(speaker(x))))"));
         target["behind"] = InnerHypothesis(grammar.simple_parse("or(parallel(displacement(figure(x),ground(x)),orientation(ground(x))),parallel(displacement(ground(x),figure(x)),orientation(speaker(x))))"));
-        target["side"] = InnerHypothesis(grammar.simple_parse(""));
+        target["side"] = InnerHypothesis(grammar.simple_parse("or(orthogonal(displacement(ground(x),figure(x)),orientation(ground(x))),orthogonal(displacement(ground(x),figure(x)),orientation(speaker(x))))"));
 	
 	//------------------
 	// set up the data
