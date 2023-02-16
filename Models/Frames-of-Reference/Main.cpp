@@ -101,6 +101,10 @@ MyHypothesis target;
 #include "Fleet.h" 
 #include "Builtins.h"
 
+MyHypothesis::datum_t sample_datum() {
+
+}
+
 int main(int argc, char** argv){ 
 	
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
