@@ -67,9 +67,60 @@ public:
     }
 
     virtual double compute_likelihood(const data_t& data, double breakout=-infinity) override {
+        // need to set this; probably not necessary?
+		for(auto& [k,f] : factors) 
+			f.program.loader = this; 		
 
-    }
+		// get the cached version
+		for(auto& [k,f] : factors) {
+			f.cached_call(data);
+			
+			if(f.got_error) 
+				return likelihood = -infinity;
+		}
+		
+		// Compute weights
+		std::map<key_t,double> weights; 
+		double weight_total = 0.0;
+		for(auto& [k, f] : factors) {
+			weights[k] = f.get_weight_fromcache();
+			weight_total += weights[k];
+		}
+		
 
-    // Printing functions: string and show
+		likelihood = 0.0;
+                for(size_t i=0;i<data.size();i++) {
+			const MyInput& input = data[i];
+			
+			// Check all the words that are true and select 
+			bool word_is_true   = false;
+			double weight_true = 0.0; // total weight of those that are true
+			
+			// must loop over each word and see when it is true
+			for(auto& [k,f] : factors) {
+				// we just call the right factor on utterance -- note that the "word" in u is
+				// ignored within the function call
+				auto tv = f.cache.at(i);
 
-};
+                                if (tv == true) {
+                                    weight_true += weights[k];
+                                }
+				
+				if(input.word == k) {
+					word_is_true   = (tv == true);
+				}
+			}
+			
+			// Size principle calculation with weights
+			double weight_word = weights.at(input.word);
+			double p = (word_is_true ? alpha_t*weight_word/weight_true : 0)  + 
+					   (1.0-alpha_t)*weight_word/weight_total;				
+			likelihood += log(p);
+		}
+		
+		return likelihood;
+            }
+
+        // Printing functions: string and show
+    };
+
