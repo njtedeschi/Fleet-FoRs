@@ -61,7 +61,9 @@ class MyHypothesis : public Lexicon<MyHypothesis, std::string, InnerHypothesis, 
 public:
 
     void clear_cache(){
-        // Is this necessary?
+        for(auto& [k,f] : factors {
+                f.clear_cache();
+                }
     }
 
     virtual double compute_likelihood(const data_t& data, double breakout=-infinity) override {
