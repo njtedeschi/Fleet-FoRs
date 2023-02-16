@@ -96,6 +96,7 @@ int main(int argc, char** argv){
         // Sample
         int num_samples = 100;
 
+        generate_scenes(); // Generate scenes from Scenes.h before sampling
         for (int i = 0; i < num_samples; i++){
             MyInput input = sample_datum();
             mydata.emplace_back(input, true, 1-alpha_t);

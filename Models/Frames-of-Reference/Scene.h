@@ -102,4 +102,3 @@ void generate_scenes(){
         }
     }
 }
-generate_scenes();
