@@ -47,6 +47,7 @@ MyHypothesis target;
 #include "TopN.h"
 #include "ParallelTempering.h"
 #include "Fleet.h" 
+#include "Random.h"
 #include "Builtins.h"
 
 MyHypothesis::datum_t sample_datum() {
