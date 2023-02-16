@@ -121,6 +121,9 @@ public:
 		return likelihood;
             }
 
-        // Printing functions: string and show
-    };
+    // Printing functions: string and show
+    virtual void show(std::string prefix="") override {
+
+    }
+};
 
