@@ -41,7 +41,7 @@ public:
 		if(cache.size() == 0) { return 1.0; } // for empty cache
 		
 		int numtrue = 0;
-		for(auto& v : cache) {
+		for(const auto& v : cache) {
 			numtrue += (v == true);
 		}
 		
