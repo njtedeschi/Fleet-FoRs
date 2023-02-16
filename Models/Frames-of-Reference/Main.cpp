@@ -3,6 +3,8 @@
 #include <vector>
 #include <random>
 
+const std::vector<std::string> words = {"above", "below", "front", "behind", "side"};
+
 using Vector = std::array<double,3>;
 
 Vector operator*(double s, const Vector& v) {
@@ -55,6 +57,11 @@ struct Scene {
 	Object speaker;
 	Object ground;
 	Object figure; 
+};
+
+struct MyInput {
+    Scene scene;
+    std::string word;
 };
 
 // Calculate truth value
