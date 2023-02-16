@@ -61,7 +61,7 @@ class MyHypothesis : public Lexicon<MyHypothesis, std::string, InnerHypothesis, 
 public:
 
     void clear_cache(){
-        for(auto& [k,f] : factors {
+        for(auto& [k,f] : factors) {
                 f.clear_cache();
                 }
     }
