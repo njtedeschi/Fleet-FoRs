@@ -30,7 +30,7 @@ public:
 		add("or(%s,%s)",     Builtins::Or<MyGrammar>);
 		add("not(%s)",       Builtins::Not<MyGrammar>);
 
-		add("up(%s)",       +[](MyInput x) -> Vector { return up});
+		add("up(%s)",       +[](MyInput x) -> Vector { return up;});
 
 		add("speaker(%s)",       +[](MyInput x) -> Object { return x.scene.speaker; });
 		add("figure(%s)",        +[](MyInput x) -> Object { return x.scene.figure; });
