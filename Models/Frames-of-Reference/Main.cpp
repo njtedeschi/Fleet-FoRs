@@ -2,6 +2,7 @@
 #include <array>
 #include <vector>
 #include <random>
+#include <set>
 
 const std::vector<std::string> words = {"above", "below", "front", "behind", "side"};
 
@@ -72,6 +73,7 @@ MyHypothesis::datum_t sample_datum() {
     // Sample word
     std::string word;
     // First evaluate truth values for all words
+    std::set<std::string> true_words;
     for(auto& w : words) {
 
     }
