@@ -92,14 +92,6 @@ bool behind_nondirect(const Scene& scene){
 // target stores mapping from the words to functions that compute them correctly
 MyHypothesis target;
 
-///~~~~~ TODO: uncomment when refactoring
-/* #include "MyGrammar.h" */
-/* #include "MyHypothesis.h" */
-
-/* // target stores a mapping from strings in w to functions that compute them correctly */
-/* MyHypothesis target; */
-///~~~~~
-
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Main code
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -112,8 +104,15 @@ MyHypothesis target;
 int main(int argc, char** argv){ 
 	
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
-	Fleet fleet("Rational rules");
+	Fleet fleet("Frames of Reference");
 	fleet.initialize(argc, argv);
+
+        // Set target concepts for words. TODO: add formulas
+        target["above"] = InnerHypothesis(grammar.simple_parse(""));
+        target["below"] = InnerHypothesis(grammar.simple_parse(""));
+        target["front"] = InnerHypothesis(grammar.simple_parse(""));
+        target["behind"] = InnerHypothesis(grammar.simple_parse(""));
+        target["side"] = InnerHypothesis(grammar.simple_parse(""));
 	
 	//------------------
 	// set up the data
