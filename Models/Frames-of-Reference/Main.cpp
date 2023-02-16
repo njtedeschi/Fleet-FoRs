@@ -62,14 +62,27 @@ std::uniform_int_distribution<int> nondirect_scene_dist(0, nondirect_scenes.size
 MyHypothesis::datum_t sample_datum() {
     // Sample scene
     Scene scene;
+    // Handle direct and nondirect scenes separately
     if(direct_dist(engine)) {
         scene = direct_scenes[direct_scene_dist(engine)];
     } else {
         scene = nondirect_scenes[nondirect_scene_dist(engine)];
     }
-    std::string word;
+
     // Sample word
-    return MyInput{.scene=scene, .word=word}
+    std::string word;
+    // First evaluate truth values for all words
+    for(auto& w : words) {
+
+    }
+    // Then sample accordingly
+    if(correct_dist(engine)) {
+        // Sample from true descriptions
+    } else {
+        // Sample randomly
+    }
+
+    return MyInput{.scene=scene, .word=word};
 }
 
 int main(int argc, char** argv){ 
