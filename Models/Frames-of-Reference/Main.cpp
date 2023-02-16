@@ -101,8 +101,8 @@ int main(int argc, char** argv){
 	fleet.initialize(argc, argv);
 
         // Set target concepts for words. TODO: add formulas
-        target["above"] = InnerHypothesis(grammar.simple_parse(""));
-        target["below"] = InnerHypothesis(grammar.simple_parse(""));
+        target["above"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(ground(x),figure(x)),up(x))"));
+        target["below"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(figure(x),ground(x)),up(x))"));
         target["front"] = InnerHypothesis(grammar.simple_parse(""));
         target["behind"] = InnerHypothesis(grammar.simple_parse(""));
         target["side"] = InnerHypothesis(grammar.simple_parse(""));
