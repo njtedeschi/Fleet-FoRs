@@ -148,6 +148,14 @@ public:
 	}
 };
 
+///~~~~~ TODO: uncomment when refactoring
+/* #include "MyGrammar.h" */
+/* #include "MyHypothesis.h" */
+
+/* // target stores a mapping from strings in w to functions that compute them correctly */
+/* MyHypothesis target; */
+///~~~~~
+
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Main code
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
