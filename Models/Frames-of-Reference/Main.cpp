@@ -75,7 +75,11 @@ MyHypothesis::datum_t sample_datum() {
     // First evaluate truth values for all words
     std::set<std::string> true_words;
     for(auto& w : words) {
-
+        MyInput input{.scene=scene, .word=EMPTY_STRING};
+        auto output = target.at(w).call(input);
+        if (output == true){
+            true_words.insert(w);
+        }
     }
     // Then sample accordingly
     if(correct_dist(engine)) {
