@@ -63,9 +63,9 @@ MyHypothesis::datum_t sample_datum() {
     // Sample scene
     Scene scene;
     if(direct_dist(engine)) {
-
+        scene = direct_scenes[direct_scene_dist(engine)];
     } else {
-
+        scene = nondirect_scenes[nondirect_scene_dist(engine)];
     }
     std::string word;
     // Sample word
