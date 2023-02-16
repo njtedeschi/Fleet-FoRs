@@ -103,7 +103,7 @@ int main(int argc, char** argv){
         // Set target concepts for words. TODO: add formulas
         target["above"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(ground(x),figure(x)),up(x))"));
         target["below"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(figure(x),ground(x)),up(x))"));
-        target["front"] = InnerHypothesis(grammar.simple_parse(""));
+        target["front"] = InnerHypothesis(grammar.simple_parse("or(parallel(displacement(ground(x),figure(x)),orientation(ground(x))),parallel(displacement(figure(x),ground(x)),orientation(speaker(x))))"));
         target["behind"] = InnerHypothesis(grammar.simple_parse(""));
         target["side"] = InnerHypothesis(grammar.simple_parse(""));
 	
