@@ -72,46 +72,6 @@ int main(int argc, char** argv){
 	// mydata stores the data for the inference model
 	MyHypothesis::data_t mydata;
 
-	Vector origin = {0,0,0};
-        Vector east = {1,0,0};
-        Vector west = {-1,0.0};
-        Vector north = {0,1,0};
-        Vector south = {0,-1,0};
-        Vector up = {0,0,1};
-        Vector down = {0,0,-1};
-
-        // Possible speakers
-        Object direct_speaker = {origin, east};
-        Object nondirect_speaker = {2 * west, east};
-
-        // Possible figures
-        Object east_figure = {east, origin};
-        Object west_figure = {west, origin};
-        Object north_figure = {north, origin};
-        Object south_figure = {south, origin};
-        Object up_figure = {up, origin};
-        Object down_figure = {down, origin};
-        std::vector<Object> figures = {east_figure, west_figure, north_figure, south_figure, up_figure, down_figure};
-
-        // Possible grounds
-        Object east_facing_ground = {origin, east};
-        Object west_facing_ground = {origin, west};
-        Object north_facing_ground = {origin, north};
-        Object south_facing_ground = {origin, south};
-        std::vector<Object> grounds = {east_facing_ground, west_facing_ground, north_facing_ground, south_facing_ground};
-
-        // Possible direct and nondirect scenes
-        std::vector<Scene> direct_scenes;
-        std::vector<Scene> nondirect_scenes;
-        for (const auto& figure : figures) {
-            Scene direct = {direct_speaker, direct_speaker, figure};
-            direct_scenes.push_back(direct);
-            for (const auto& ground : grounds) {
-                Scene nondirect = {nondirect_speaker, ground, figure};
-                nondirect_scenes.push_back(nondirect);
-            }
-        }
-
         // Sample
         int num_samples = 100;
         std::mt19937 engine(0); // RNG with set seed
@@ -120,7 +80,7 @@ int main(int argc, char** argv){
         double p_wrong = 0.05; // probability a scene is labeled incorrectly
         std::bernoulli_distribution wrong_dist(p_wrong);
 
-        // Uniform dists over scenes
+        // Uniform dists over scenes (direct_scenes and nondirect_scenes defined in "Scene.h")
         std::uniform_int_distribution<int> direct_scene_dist(0, direct_scenes.size() - 1);
         std::uniform_int_distribution<int> nondirect_scene_dist(0, nondirect_scenes.size() - 1);
 
