@@ -33,6 +33,21 @@ public:
 		CachedCallHypothesis::clear_cache();
 	}
 
+        /**
+	 * @brief This computes the weight of this factor from its cached values
+	 * @return 
+	 */	
+	double get_weight_fromcache() const {
+		if(cache.size() == 0) { return 1.0; } // for empty cache
+		
+		int numtrue = 0;
+		for(auto& v : cache) {
+			numtrue += (v == true);
+		}
+		
+		// use the actual weight formula
+		return 1.0 / (0.1 + double(numtrue) / cache.size());
+	}
 };
 
 #include "Lexicon.h"
