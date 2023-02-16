@@ -92,7 +92,7 @@ bool behind_nondirect(const Scene& scene){
 #include "Grammar.h"
 #include "Singleton.h"
 
-class MyGrammar : public Grammar<Scene,bool,   Scene,bool,Object,Vector, double>,
+class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Vector, double>,
 				  public Singleton<MyGrammar> {
 public:
 	MyGrammar() {
@@ -117,9 +117,9 @@ public:
 		add("or(%s,%s)",     Builtins::Or<MyGrammar>);
 		add("not(%s)",       Builtins::Not<MyGrammar>);
 
-		add("speaker(%s)",       +[](Scene x) -> Object { return x.speaker; });
-		add("figure(%s)",        +[](Scene x) -> Object { return x.figure; });
-		add("ground(%s)",        +[](Scene x) -> Object { return x.ground; });
+		add("speaker(%s)",       +[](MyInput x) -> Object { return x.scene.speaker; });
+		add("figure(%s)",        +[](MyInput x) -> Object { return x.scene.figure; });
+		add("ground(%s)",        +[](MyInput x) -> Object { return x.scene.ground; });
 		add("x",             Builtins::X<MyGrammar>);
 	}
 } grammar;
