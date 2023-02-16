@@ -37,8 +37,9 @@ std::bernoulli_distribution direct_dist(p_direct);
 std::bernoulli_distribution correct_dist(alpha_t);
 
 // Uniform dists over scenes (direct_scenes and nondirect_scenes defined in "Scene.h")
-std::uniform_int_distribution<int> direct_scene_dist(0, direct_scenes.size() - 1);
-std::uniform_int_distribution<int> nondirect_scene_dist(0, nondirect_scenes.size() - 1);
+// Declared here and initialized in main after scenes are generated
+std::uniform_int_distribution<int> direct_scene_dist;
+std::uniform_int_distribution<int> nondirect_scene_dist;
 
 MyHypothesis::datum_t sample_datum() {
     // Sample scene
@@ -94,7 +95,10 @@ int main(int argc, char** argv){
         // Sample
         int num_samples = 100;
 
-        generate_scenes(); // Generate scenes from Scenes.h before sampling
+        generate_scenes(); // Generate scenes from Scenes.h before sampling 
+        // Initialize the uniform distributions after generate_scenes has been called
+        direct_scene_dist = std::uniform_int_distribution<int>(0, direct_scenes.size() - 1);
+        nondirect_scene_dist = std::uniform_int_distribution<int>(0, nondirect_scenes.size() - 1);
         std::vector<MyInput> mydata;
         for (int i = 0; i < num_samples; i++){
             mydata.push_back(sample_datum());
