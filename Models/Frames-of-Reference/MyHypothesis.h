@@ -33,6 +33,10 @@ public:
 		CachedCallHypothesis::clear_cache();
 	}
 
+        virtual double compute_prior() override {
+            return prior = ( get_value().count() < MAX_NODES ? Super::compute_prior() : -infinity);
+        }
+
         /**
 	 * @brief This computes the weight of this factor from its cached values
 	 * @return 
