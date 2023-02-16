@@ -68,7 +68,7 @@ MyHypothesis::datum_t sample_datum() {
         word = *sample<std::string, decltype(true_words)>(true_words).first;
     } else {
         // Sample randomly
-        word = *sample<std::string, decltype(true_words)>(words).first;
+        word = *sample<std::string, decltype(words)>(words).first;
     }
 
     return MyInput{.scene=scene, .word=word};
