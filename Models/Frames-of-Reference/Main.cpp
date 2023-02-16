@@ -82,10 +82,13 @@ MyHypothesis::datum_t sample_datum() {
         }
     }
     // Then sample accordingly
+    // TODO: figure out what's going on with normalizer argument of sample
     if(correct_dist(engine)) {
         // Sample from true descriptions
+        word = *sample<std::string, decltype(true_words)>(true_words).first;
     } else {
         // Sample randomly
+        word = *sample<std::string, decltype(true_words)>(words).first;
     }
 
     return MyInput{.scene=scene, .word=word};
