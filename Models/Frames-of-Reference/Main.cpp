@@ -53,7 +53,7 @@ MyHypothesis target;
 std::mt19937 engine(0); // RNG with set seed
 double p_direct = 0.2; // probability a scene is direct
 std::bernoulli_distribution direct_dist(p_direct);
-std::bernoulli_distribution wrong_dist(1-alpha_t);
+std::bernoulli_distribution correct_dist(alpha_t);
 
 // Uniform dists over scenes (direct_scenes and nondirect_scenes defined in "Scene.h")
 std::uniform_int_distribution<int> direct_scene_dist(0, direct_scenes.size() - 1);
