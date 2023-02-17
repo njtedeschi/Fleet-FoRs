@@ -52,6 +52,10 @@ public:
 		// use the actual weight formula
 		return 1.0 / (0.1 + double(numtrue) / cache.size());
 	}
+
+        virtual bool cached_call_wrapper(const MyInput& di) override {
+            return this->call(di, false);
+        }
 };
 
 #include "Lexicon.h"
