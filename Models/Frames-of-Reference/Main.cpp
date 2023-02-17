@@ -102,10 +102,10 @@ int main(int argc, char** argv){
         // Initialize the uniform distributions after generate_scenes has been called
         direct_scene_dist = std::uniform_int_distribution<int>(0, direct_scenes.size() - 1);
         nondirect_scene_dist = std::uniform_int_distribution<int>(0, nondirect_scenes.size() - 1);
-        std::vector<MyInput> mydata;
 
         for (size_t num_samples : data_amounts) {
 
+            std::vector<MyInput> mydata;
             for (int i = 0; i < num_samples; i++){
                 mydata.push_back(sample_datum());
             }
