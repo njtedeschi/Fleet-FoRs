@@ -97,28 +97,31 @@ int main(int argc, char** argv){
 	//------------------
 	// mydata stores the data for the inference model
         // Sample
-        int num_samples = 100;
 
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
         // Initialize the uniform distributions after generate_scenes has been called
         direct_scene_dist = std::uniform_int_distribution<int>(0, direct_scenes.size() - 1);
         nondirect_scene_dist = std::uniform_int_distribution<int>(0, nondirect_scenes.size() - 1);
         std::vector<MyInput> mydata;
-        for (int i = 0; i < num_samples; i++){
-            mydata.push_back(sample_datum());
+
+        for (size_t num_samples : data_amounts) {
+
+            for (int i = 0; i < num_samples; i++){
+                mydata.push_back(sample_datum());
+            }
+
+            TopN<MyHypothesis> top;
+
+            auto h0 = MyHypothesis::sample(words);
+            
+            MCMCChain samp(h0, &mydata);
+            //ChainPool samp(h0, &mydata, FleetArgs::nchains);
+            //	ParallelTempering samp(h0, &mydata, FleetArgs::nchains, 10.0); 
+            for(auto& h : samp.run(Control()) | printer(FleetArgs::print) | top) {
+                    UNUSED(h);
+            }
+
+            // Show the best we've found
+            top.print();
         }
-
-	TopN<MyHypothesis> top;
-
-	auto h0 = MyHypothesis::sample(words);
-	
-	MCMCChain samp(h0, &mydata);
-	//ChainPool samp(h0, &mydata, FleetArgs::nchains);
-	//	ParallelTempering samp(h0, &mydata, FleetArgs::nchains, 10.0); 
-	for(auto& h : samp.run(Control()) | printer(FleetArgs::print) | top) {
-		UNUSED(h);
-	}
-
-	// Show the best we've found
-	top.print();
 }
