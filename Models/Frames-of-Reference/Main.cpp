@@ -103,14 +103,13 @@ int main(int argc, char** argv){
         direct_scene_dist = std::uniform_int_distribution<int>(0, direct_scenes.size() - 1);
         nondirect_scene_dist = std::uniform_int_distribution<int>(0, nondirect_scenes.size() - 1);
 
+        TopN<MyHypothesis> top;
         for (size_t num_samples : data_amounts) {
 
             std::vector<MyInput> mydata;
             for (int i = 0; i < num_samples; i++){
                 mydata.push_back(sample_datum());
             }
-
-            TopN<MyHypothesis> top;
 
             auto h0 = MyHypothesis::sample(words);
             
