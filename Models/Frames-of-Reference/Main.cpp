@@ -111,8 +111,18 @@ int main(int argc, char** argv){
                 mydata.push_back(sample_datum());
             }
 
+            TopN<MyHypothesis> newtop;
+            for(auto h : top.values()) {
+                h.clear_cache();
+                h.compute_posterior(mydata);
+                newtop << h;
+            }
+            top = newtop;
+
+            target.clear_cache();
+            target.compute_posterior(mydata);
+
             auto h0 = MyHypothesis::sample(words);
-            
             MCMCChain samp(h0, &mydata);
             //ChainPool samp(h0, &mydata, FleetArgs::nchains);
             //	ParallelTempering samp(h0, &mydata, FleetArgs::nchains, 10.0); 
