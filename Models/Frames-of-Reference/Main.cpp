@@ -10,7 +10,7 @@ const std::vector<std::string> words = {"above", "below", "front", "behind", "si
 static const double alpha_t = 0.95; // probability of true description
 static const size_t MAX_NODES = 10;
 
-const std::vector<size_t> data_amounts = {1, 5, 10, 25, 50, 75, 100, 250, 500, 750, 1000};
+const std::vector<size_t> data_amounts = {10, 25, 50, 75, 100, 250, 500, 750, 1000};
 
 #include "Scene.h"
 
