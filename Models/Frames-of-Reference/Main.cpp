@@ -128,9 +128,9 @@ int main(int argc, char** argv){
             target.compute_posterior(mydata);
 
             auto h0 = MyHypothesis::sample(words);
-            MCMCChain samp(h0, &mydata);
+            /* MCMCChain samp(h0, &mydata); */
             //ChainPool samp(h0, &mydata, FleetArgs::nchains);
-            //	ParallelTempering samp(h0, &mydata, FleetArgs::nchains, 10.0); 
+            ParallelTempering samp(h0, &mydata, FleetArgs::nchains, 10.0); 
             for(auto& h : samp.run(Control()) | printer(FleetArgs::print) | top) {
                     UNUSED(h);
             }
