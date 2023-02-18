@@ -131,6 +131,6 @@ int main(int argc, char** argv){
             }
 
             // Show the best we've found
-            top.print();
+            top.print(str(num_samples));
         }
 }
