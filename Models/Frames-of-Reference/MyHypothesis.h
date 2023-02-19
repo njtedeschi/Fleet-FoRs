@@ -136,7 +136,10 @@ public:
         extern MyHypothesis target;
 
         print(":", prefix, this->posterior, this->prior, this->likelihood, target.likelihood);
-        print(this->string());
+        /* print(this->string()); */
+	for(auto& [k, f] : factors) {
+            print(k, f.string());
+        }
     }
 };
 
