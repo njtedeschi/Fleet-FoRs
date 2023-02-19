@@ -9,6 +9,8 @@ public:
 	using Super = DeterministicLOTHypothesis<InnerHypothesis,MyInput,bool,MyGrammar,&grammar>;
 	using Super::Super; // inherit the constructors
 	using CCH = CachedCallHypothesis<InnerHypothesis,MyInput,bool>;
+
+        static const size_t MAX_NODES = 32;
 	
 	InnerHypothesis(const InnerHypothesis& c) : Super(c), CCH(c) {}	
 	InnerHypothesis(const InnerHypothesis&& c) :  Super(c), CCH(c) { }	
