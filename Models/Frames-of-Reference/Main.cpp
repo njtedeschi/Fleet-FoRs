@@ -1,7 +1,6 @@
 #include <cmath>
 #include <array>
 #include <vector>
-#include <random>
 #include <set>
 #include <iostream>
 
@@ -35,24 +34,16 @@ MyHypothesis target;
 #include "Random.h"
 #include "Builtins.h"
 
-std::mt19937 engine(0); // RNG with set seed
 double p_direct = 0.2; // probability a scene is direct
-std::bernoulli_distribution direct_dist(p_direct);
-std::bernoulli_distribution correct_dist(alpha_t);
-
-// Uniform dists over scenes (direct_scenes and nondirect_scenes defined in "Scene.h")
-// Declared here and initialized in main after scenes are generated
-std::uniform_int_distribution<int> direct_scene_dist;
-std::uniform_int_distribution<int> nondirect_scene_dist;
 
 MyHypothesis::datum_t sample_datum() {
     // Sample scene
     Scene scene;
     // Handle direct and nondirect scenes separately
-    if(direct_dist(engine)) {
-        scene = direct_scenes[direct_scene_dist(engine)];
+    if(flip(p_direct)) {
+        scene = direct_scenes[myrandom(direct_scenes.size())];
     } else {
-        scene = nondirect_scenes[nondirect_scene_dist(engine)];
+        scene = nondirect_scenes[myrandom(nondirect_scenes.size())];
     }
 
     // Sample word
@@ -68,7 +59,7 @@ MyHypothesis::datum_t sample_datum() {
     }
     // Then sample accordingly
     // TODO: figure out what's going on with normalizer argument of sample
-    if(correct_dist(engine)) {
+    if(flip(alpha_t)) {
         // Sample from true descriptions
         word = *sample<std::string, decltype(true_words)>(true_words).first;
     } else {
@@ -104,9 +95,6 @@ int main(int argc, char** argv){
         // Sample
 
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
-        // Initialize the uniform distributions after generate_scenes has been called
-        direct_scene_dist = std::uniform_int_distribution<int>(0, direct_scenes.size() - 1);
-        nondirect_scene_dist = std::uniform_int_distribution<int>(0, nondirect_scenes.size() - 1);
 
         TopN<MyHypothesis> top;
         for (size_t num_samples : data_amounts) {
