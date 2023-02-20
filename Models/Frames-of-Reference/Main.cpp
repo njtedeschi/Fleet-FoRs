@@ -78,7 +78,7 @@ int main(int argc, char** argv){
 	Fleet fleet("Frames of Reference");
 	fleet.initialize(argc, argv);
 
-        // Set target concepts for words. TODO: add formulas
+        // Set target concepts for words.
         target["above"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(ground(x),figure(x)),up(x))"));
         target["below"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(figure(x),ground(x)),up(x))"));
         target["front"] = InnerHypothesis(grammar.simple_parse("or(parallel(displacement(ground(x),figure(x)),orientation(ground(x))),parallel(displacement(figure(x),ground(x)),orientation(speaker(x))))"));
@@ -98,7 +98,11 @@ int main(int argc, char** argv){
         intrinsic["side"] = InnerHypothesis(grammar.simple_parse("orthogonal(displacement(ground(x),figure(x)),orientation(ground(x)))")); // Intrinsic only
 
         // Relative concepts
-	
+        target["above"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(ground(x),figure(x)),up(x))"));
+        target["below"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(figure(x),ground(x)),up(x))"));
+        target["front"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(figure(x),ground(x)),orientation(speaker(x)))"));
+        target["behind"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(ground(x),figure(x)),orientation(speaker(x)))"));
+        target["side"] = InnerHypothesis(grammar.simple_parse("orthogonal(displacement(ground(x),figure(x)),orientation(speaker(x)))"));
 	//------------------
 	// set up the data
 	//------------------
