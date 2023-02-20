@@ -74,6 +74,11 @@ struct Scene {
 	Object speaker;
 	Object ground;
 	Object figure; 
+
+        // Default constructor using default objects
+        Scene() : speaker(), ground(), figure() {}
+        Scene(const Object& speaker, const Object& ground, const Object& figure)
+            : speaker(speaker), ground(ground), figure(figure) {}
 };
 
 namespace {
