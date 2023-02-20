@@ -37,12 +37,14 @@ MyHypothesis relative;
 #include "Builtins.h"
 
 double p_direct = 0.2; // probability a scene is direct
+double p_intrinsic = 0.5; // probability that a description is intrinsic
 
 MyHypothesis::datum_t sample_datum() {
     // Sample scene
     Scene scene;
     // Handle direct and nondirect scenes separately
-    if(flip(p_direct)) {
+    bool is_direct = flip(p_direct);
+    if(is_direct) {
         scene = direct_scenes[myrandom(direct_scenes.size())];
     } else {
         scene = nondirect_scenes[myrandom(nondirect_scenes.size())];
@@ -52,9 +54,16 @@ MyHypothesis::datum_t sample_datum() {
     std::string word;
     // First evaluate truth values for all words
     std::set<std::string> true_words;
+    bool is_intrinsic = flip(p_intrinsic);
+
     for(auto& w : words) {
         MyInput input{.scene=scene, .word=EMPTY_STRING};
-        auto output = target.at(w).call(input);
+        bool output;
+        if (is_direct || is_intrinsic) {
+            output = intrinsic.at(w).call(input);
+        } else {
+            output = relative.at(w).call(input);
+        }
         if (output == true){
             true_words.insert(w);
         }
