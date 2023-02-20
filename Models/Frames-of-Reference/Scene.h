@@ -56,8 +56,18 @@ Vector cross_product(const Vector &a, const Vector &b){
 
 struct Object {
 	Vector location;
-	Vector orientation;
-	/* std::string name; */ 
+	Vector forward;
+        Vector upward;
+        Vector rightward;
+	/* std::string name; */
+
+        // Default constructor
+        Object() : location({0,0,0}), forward({0,0,0}), upward({0,0,0}), rightward({0,0,0}) {}
+        // Calculate rightward from forward and upward
+        Object(const Vector& location, const Vector& forward, const Vector& upward = {0, 0, 1})
+        : location(location), forward(forward), upward(upward) {
+            rightward = cross_product(forward, upward);
+        }
 };
 
 struct Scene {
