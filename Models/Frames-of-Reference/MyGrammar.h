@@ -12,7 +12,7 @@ public:
                 add("displacement(%s,%s)", +[](Object x, Object y) -> Vector {
                         return y.location - x.location;
                         }, VECTOR_WEIGHT);
-		add("orientation(%s)", +[](Object x) -> Vector {return x.orientation;}, VECTOR_WEIGHT);
+		add("orientation(%s)", +[](Object x) -> Vector {return x.forward;}, VECTOR_WEIGHT);
                 add("parallel(%s,%s)", +[](Vector x, Vector y) -> bool {
                         if (magnitude(x) == 0 || magnitude(y) == 0) {return false;}
                         return cosine_similarity(x,y) == 1;
