@@ -23,6 +23,8 @@ struct MyInput {
 
 // target stores mapping from the words to functions that compute them correctly
 MyHypothesis target;
+MyHypothesis intrinsic;
+MyHypothesis relative;
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Main code
@@ -87,6 +89,15 @@ int main(int argc, char** argv){
         /* target["behind"] = InnerHypothesis(grammar.simple_parse("or(parallel(displacement(figure(x),ground(x)),orientation(ground(x))),and(parallel(displacement(ground(x),figure(x)),orientation(speaker(x))),not(parallel(orientation(ground(x)),orientation(speaker(x))))))")); // No relative when speaker and ground are aligned */
         target["side"] = InnerHypothesis(grammar.simple_parse("or(orthogonal(displacement(ground(x),figure(x)),orientation(ground(x))),orthogonal(displacement(ground(x),figure(x)),orientation(speaker(x))))"));
         /* target["side"] = InnerHypothesis(grammar.simple_parse("orthogonal(displacement(ground(x),figure(x)),orientation(ground(x)))")); // Intrinsic only */
+
+        // Intrinsic concepts
+        intrinsic["above"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(ground(x),figure(x)),up(x))"));
+        intrinsic["below"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(figure(x),ground(x)),up(x))"));
+        intrinsic["front"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(ground(x),figure(x)),orientation(ground(x)))")); // Intrinsic only
+        intrinsic["behind"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(figure(x),ground(x)),orientation(ground(x)))")); // Intrinsic only
+        intrinsic["side"] = InnerHypothesis(grammar.simple_parse("orthogonal(displacement(ground(x),figure(x)),orientation(ground(x)))")); // Intrinsic only
+
+        // Relative concepts
 	
 	//------------------
 	// set up the data
