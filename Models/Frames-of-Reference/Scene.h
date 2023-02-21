@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <iomanip>
 
 using Vector = std::array<double,3>;
 
@@ -89,11 +90,12 @@ struct Scene {
             : speaker(speaker), ground(ground), figure(figure) {}
 
         void print() const {
-            std::cout << "speaker: " << to_string(speaker.location) << ", " << to_string(speaker.forward) << std::endl;
+            int label_width = 10;
+            std::cout << std::left << std::setw(label_width) << "speaker: " << std::left << std::setw(label_width) << to_string(speaker.location) << to_string(speaker.forward) << std::endl;
 
-            std::cout << "ground: " << to_string(ground.location) << ", " << to_string(ground.forward) << std::endl;
+            std::cout << std::left << std::setw(label_width) << "ground: " << std::left << std::setw(label_width) << to_string(ground.location) << to_string(ground.forward) << std::endl;
 
-            std::cout << "figure: " << to_string(ground.location) << std::endl;
+            std::cout << std::left << std::setw(label_width) << "figure: " << std::left << std::setw(label_width) << to_string(figure.location) << std::endl;
         }
 };
 
