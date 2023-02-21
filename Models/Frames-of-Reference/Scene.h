@@ -3,8 +3,16 @@
 #include <array>
 #include <cmath>
 #include <vector>
+#include <iostream>
+#include <sstream>
 
 using Vector = std::array<double,3>;
+
+std::string to_string(const Vector& v) {
+    std::ostringstream oss;
+    oss << "[" << v[0] << "," << v[1] << "," << v[2] << "]";
+    return oss.str();
+}
 
 Vector operator*(double s, const Vector& v) {
     Vector result;
@@ -79,6 +87,14 @@ struct Scene {
         Scene() : speaker(), ground(), figure() {}
         Scene(const Object& speaker, const Object& ground, const Object& figure)
             : speaker(speaker), ground(ground), figure(figure) {}
+
+        void print() const {
+            std::cout << "speaker: " << to_string(speaker.location) << ", " << to_string(speaker.forward) << std::endl;
+
+            std::cout << "ground: " << to_string(ground.location) << ", " << to_string(ground.forward) << std::endl;
+
+            std::cout << "figure: " << to_string(ground.location) << std::endl;
+        }
 };
 
 namespace {
