@@ -60,4 +60,46 @@ struct MyData {
 
         return MyInput{.scene=scene, .word=word};
     }
+
+    /* MyHypothesis::datum_t sample_datum(double p_direct, double p_intrinsic) { */
+    /*     // Sample scene */
+    /*     Scene scene; */
+    /*     // Handle direct and nondirect scenes separately */
+    /*     bool is_direct = flip(p_direct); */
+    /*     if(is_direct) { */
+    /*         scene = direct_scenes[myrandom(direct_scenes.size())]; */
+    /*     } else { */
+    /*         scene = nondirect_scenes[myrandom(nondirect_scenes.size())]; */
+    /*     } */
+
+    /*     // Sample word */
+    /*     std::string word; */
+    /*     // First evaluate truth values for all words */
+    /*     std::set<std::string> true_words; */
+    /*     bool is_intrinsic = flip(p_intrinsic); */
+
+    /*     for(auto& w : words) { */
+    /*         MyInput input{.scene=scene, .word=EMPTY_STRING}; */
+    /*         bool output; */
+    /*         if (is_direct || is_intrinsic) { */
+    /*             output = intrinsic.at(w).call(input); */
+    /*         } else { */
+    /*             output = relative.at(w).call(input); */
+    /*         } */
+    /*         if (output == true){ */
+    /*             true_words.insert(w); */
+    /*         } */
+    /*     } */
+    /*     // Then sample accordingly */
+    /*     // TODO: figure out what's going on with normalizer argument of sample */
+    /*     if(flip(alpha_t)) { */
+    /*         // Sample from true descriptions */
+    /*         word = *sample<std::string, decltype(true_words)>(true_words).first; */
+    /*     } else { */
+    /*         // Sample randomly */
+    /*         word = *sample<std::string, decltype(words)>(words).first; */
+    /*     } */
+
+    /*     return MyInput{.scene=scene, .word=word}; */
+    /* } */
 };
