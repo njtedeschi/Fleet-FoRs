@@ -133,9 +133,10 @@ public:
 
     // Printing functions: string and show
     virtual void show(std::string prefix="") override {
-        extern MyHypothesis target;
+        /* extern MyHypothesis target; */
 
-        print(":", prefix, this->posterior, this->prior, this->likelihood, target.likelihood);
+        /* print(":", prefix, this->posterior, this->prior, this->likelihood, target.likelihood); */
+        print(":", prefix, this->posterior, this->prior, this->likelihood);
         /* print(this->string()); */
 	for(auto& [k, f] : factors) {
             print(k, f.string());
