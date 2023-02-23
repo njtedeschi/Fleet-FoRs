@@ -32,18 +32,9 @@ struct MyData {
         // Sample word
         std::string word;
         // First evaluate truth values for all words
-        std::set<std::string> true_words;
+        std::set<std::string> true_words = compute_true_words(scene);
 
-        for(auto& w : words) {
-            MyInput input{.scene=scene, .word=EMPTY_STRING};
-            bool output = target.at(w).call(input);
-            
-            if (output == true){
-                true_words.insert(w);
-            }
-        }
         // Then sample accordingly
-        // TODO: figure out what's going on with normalizer argument of sample
         if(flip(alpha_t)) {
             // Sample from true descriptions
             word = *sample<std::string, decltype(true_words)>(true_words).first;
@@ -67,6 +58,19 @@ struct MyData {
         return scene;
     }
 
+    std::set<std::string> compute_true_words(Scene scene){
+        std::set<std::string> true_words;
+
+        for(auto& w : words) {
+            MyInput input{.scene=scene, .word=EMPTY_STRING};
+            bool output = target.at(w).call(input);
+            
+            if (output == true){
+                true_words.insert(w);
+            }
+        }
+        return true_words;
+    }
     /* MyHypothesis::datum_t sample_datum(double p_direct, double p_intrinsic) { */
     /*     // Sample scene */
     /*     Scene scene; */

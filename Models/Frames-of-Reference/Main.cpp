@@ -61,15 +61,12 @@ int main(int argc, char** argv){
             for(auto h : top.values()) {
                 h.clear_cache();
                 h.compute_posterior(data);
-                /* h.compute_posterior(mydata.data); */
                 newtop << h;
             }
             top = newtop;
 
             target.clear_cache();
             target.compute_posterior(data);
-            /* mydata.target.clear_cache(); */
-            /* mydata.target.compute_posterior(mydata.data); */
 
             // Inference steps
             auto h0 = MyHypothesis::sample(words);
