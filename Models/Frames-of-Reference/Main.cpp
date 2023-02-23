@@ -45,32 +45,37 @@ int main(int argc, char** argv){
 	fleet.initialize(argc, argv);
 
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
-        MyData test_my_data;
-        test_my_data.target.show();
 
         TopN<MyHypothesis> top;
         for (size_t num_samples : data_amounts) {
 
-            std::vector<MyInput> mydata;
-            for (int i = 0; i < num_samples; i++){
-                mydata.push_back(test_my_data.sample_datum(p_direct));
-            }
+            // Sample data
+            MyData mydata;
+            mydata.sample_data(num_samples, p_direct);
+
+            // Refer to target hypothesis and sampled data
+            auto& target = mydata.target;
+            auto& data = mydata.data;
 
             TopN<MyHypothesis> newtop;
             for(auto h : top.values()) {
                 h.clear_cache();
-                h.compute_posterior(mydata);
+                h.compute_posterior(data);
+                /* h.compute_posterior(mydata.data); */
                 newtop << h;
             }
             top = newtop;
 
-            test_my_data.target.clear_cache();
-            test_my_data.target.compute_posterior(mydata);
+            target.clear_cache();
+            target.compute_posterior(data);
+            /* mydata.target.clear_cache(); */
+            /* mydata.target.compute_posterior(mydata.data); */
 
+            // Inference steps
             auto h0 = MyHypothesis::sample(words);
             /* MCMCChain samp(h0, &mydata); */
             //ChainPool samp(h0, &mydata, FleetArgs::nchains);
-            ParallelTempering samp(h0, &mydata, FleetArgs::nchains, 10.0); 
+            ParallelTempering samp(h0, &data, FleetArgs::nchains, 10.0); 
             for(auto& h : samp.run(Control()) | printer(FleetArgs::print) | top) {
                     UNUSED(h);
             }

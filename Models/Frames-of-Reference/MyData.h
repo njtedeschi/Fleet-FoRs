@@ -9,6 +9,7 @@ const std::vector<std::string> words = {"above", "below", "front", "behind", "si
 
 struct MyData {
     MyHypothesis target;
+    std::vector<MyInput> data;
 
     MyData() {
          // Set target concepts for words.
@@ -102,4 +103,13 @@ struct MyData {
 
     /*     return MyInput{.scene=scene, .word=word}; */
     /* } */
+
+    // Takes variable number of probability args to call appropriate sample_datum method
+    template<typename... Args>
+    void sample_data(int num_samples, Args... args){
+        for (int i = 0; i < num_samples; i++){
+            data.push_back(sample_datum(args...));
+        }
+    }
+
 };
