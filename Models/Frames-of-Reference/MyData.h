@@ -1,28 +1,15 @@
 #pragma once
 
-const std::vector<std::string> words = {"above", "below", "front", "behind", "side"};
-
-/* struct MyInput { */
-/*     Scene scene; */
-/*     std::string word; */
-/* }; */
-
 struct MyData {
+    std::vector<std::string> words;
     MyHypothesis target;
     std::vector<MyInput> data;
 
-    MyData() {
-         // Set target concepts for words.
-        target["above"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(ground(x),figure(x)),up(x))"));
-        target["below"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(figure(x),ground(x)),up(x))"));
-        target["front"] = InnerHypothesis(grammar.simple_parse("or(parallel(displacement(ground(x),figure(x)),orientation(ground(x))),parallel(displacement(figure(x),ground(x)),orientation(speaker(x))))"));
-        /* target["front"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(ground(x),figure(x)),orientation(ground(x)))")); // Intrinsic only */
-        /* target["front"] = InnerHypothesis(grammar.simple_parse("or(parallel(displacement(ground(x),figure(x)),orientation(ground(x))),and(parallel(displacement(figure(x),ground(x)),orientation(speaker(x))),not(parallel(orientation(ground(x)),orientation(speaker(x))))))")); // No relative when speaker and ground are aligned */
-        target["behind"] = InnerHypothesis(grammar.simple_parse("or(parallel(displacement(figure(x),ground(x)),orientation(ground(x))),parallel(displacement(ground(x),figure(x)),orientation(speaker(x))))"));
-        /* target["behind"] = InnerHypothesis(grammar.simple_parse("parallel(displacement(figure(x),ground(x)),orientation(ground(x)))")); // Intrinsic only */
-        /* target["behind"] = InnerHypothesis(grammar.simple_parse("or(parallel(displacement(figure(x),ground(x)),orientation(ground(x))),and(parallel(displacement(ground(x),figure(x)),orientation(speaker(x))),not(parallel(orientation(ground(x)),orientation(speaker(x))))))")); // No relative when speaker and ground are aligned */
-        target["side"] = InnerHypothesis(grammar.simple_parse("or(orthogonal(displacement(ground(x),figure(x)),orientation(ground(x))),orthogonal(displacement(ground(x),figure(x)),orientation(speaker(x))))"));
-        /* target["side"] = InnerHypothesis(grammar.simple_parse("orthogonal(displacement(ground(x),figure(x)),orientation(ground(x)))")); // Intrinsic only */
+    MyData(const std::unordered_map<std::string, std::string>& formulas) {
+        for (const auto& [word, formula] : formulas) {
+            words.push_back(word);
+            target[word] = InnerHypothesis(grammar.simple_parse(formula));
+        }
     }
 
     MyHypothesis::datum_t sample_datum(double p_direct) {

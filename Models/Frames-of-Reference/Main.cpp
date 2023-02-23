@@ -2,6 +2,7 @@
 #include <array>
 #include <vector>
 #include <set>
+#include <unordered_map>
 #include <iostream>
 
 static const double alpha_t = 0.95; // probability of true description
@@ -46,11 +47,25 @@ int main(int argc, char** argv){
 
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
 
+        // Set target concepts before sampling
+        std::unordered_map<std::string, std::string> formulas = {
+            {"above", "parallel(displacement(ground(x),figure(x)),up(x))"},
+            {"below", "parallel(displacement(figure(x),ground(x)),up(x))"},
+            {"front", "or(parallel(displacement(ground(x),figure(x)),orientation(ground(x))),parallel(displacement(figure(x),ground(x)),orientation(speaker(x))))"},
+            /* {"front", "parallel(displacement(ground(x),figure(x)),orientation(ground(x)))"}, */
+            /* {"front", "or(parallel(displacement(ground(x),figure(x)),orientation(ground(x))),and(parallel(displacement(figure(x),ground(x)),orientation(speaker(x))),not(parallel(orientation(ground(x)),orientation(speaker(x))))))"}, */
+            {"behind", "or(parallel(displacement(figure(x),ground(x)),orientation(ground(x))),parallel(displacement(ground(x),figure(x)),orientation(speaker(x))))"},
+            /* {"behind", "parallel(displacement(figure(x),ground(x)),orientation(ground(x)))"}, */
+            /* {"behind", "or(parallel(displacement(figure(x),ground(x)),orientation(ground(x))),and(parallel(displacement(ground(x),figure(x)),orientation(speaker(x))),not(parallel(orientation(ground(x)),orientation(speaker(x))))))"}, */
+            {"side", "orthogonal(displacement(ground(x),figure(x)),orientation(ground(x)))"}
+            /* {"side", "or(orthogonal(displacement(ground(x),figure(x)),orientation(ground(x))),orthogonal(displacement(ground(x),figure(x)),orientation(speaker(x))))"} */
+        };
+
         TopN<MyHypothesis> top;
         for (size_t num_samples : data_amounts) {
 
             // Sample data
-            MyData mydata;
+            MyData mydata(formulas);
             mydata.sample_data(num_samples, p_direct);
 
             // Refer to target hypothesis and sampled data
@@ -69,7 +84,7 @@ int main(int argc, char** argv){
             target.compute_posterior(data);
 
             // Inference steps
-            auto h0 = MyHypothesis::sample(words);
+            auto h0 = MyHypothesis::sample(mydata.words);
             /* MCMCChain samp(h0, &mydata); */
             //ChainPool samp(h0, &mydata, FleetArgs::nchains);
             ParallelTempering samp(h0, &data, FleetArgs::nchains, 10.0); 
