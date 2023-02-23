@@ -29,19 +29,11 @@ struct MyData {
         // Sample scene
         Scene scene = sample_scene(p_direct);
 
-        // Sample word
-        std::string word;
+        //Sample word
         // First evaluate truth values for all words
         std::set<std::string> true_words = compute_true_words(scene);
-
         // Then sample accordingly
-        if(flip(alpha_t)) {
-            // Sample from true descriptions
-            word = *sample<std::string, decltype(true_words)>(true_words).first;
-        } else {
-            // Sample randomly
-            word = *sample<std::string, decltype(words)>(words).first;
-        }
+        std::string word = sample_word(true_words);
 
         return MyInput{.scene=scene, .word=word};
     }
@@ -70,6 +62,18 @@ struct MyData {
             }
         }
         return true_words;
+    }
+
+    std::string sample_word(std::set<std::string> true_words){
+        std::string word;
+        if(flip(alpha_t)) {
+            // Sample from true descriptions
+            word = *sample<std::string, decltype(true_words)>(true_words).first;
+        } else {
+            // Sample randomly
+            word = *sample<std::string, decltype(words)>(words).first;
+        }
+        return word;
     }
     /* MyHypothesis::datum_t sample_datum(double p_direct, double p_intrinsic) { */
     /*     // Sample scene */
