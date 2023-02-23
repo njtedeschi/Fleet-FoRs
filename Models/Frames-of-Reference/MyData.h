@@ -27,14 +27,7 @@ struct MyData {
 
     MyHypothesis::datum_t sample_datum(double p_direct) {
         // Sample scene
-        Scene scene;
-        // Handle direct and nondirect scenes separately
-        bool is_direct = flip(p_direct);
-        if(is_direct) {
-            scene = direct_scenes[myrandom(direct_scenes.size())];
-        } else {
-            scene = nondirect_scenes[myrandom(nondirect_scenes.size())];
-        }
+        Scene scene = sample_scene(p_direct);
 
         // Sample word
         std::string word;
@@ -60,6 +53,18 @@ struct MyData {
         }
 
         return MyInput{.scene=scene, .word=word};
+    }
+
+    Scene sample_scene(double p_direct){
+        Scene scene;
+        // Handle direct and nondirect scenes separately
+        bool is_direct = flip(p_direct);
+        if(is_direct) {
+            scene = direct_scenes[myrandom(direct_scenes.size())];
+        } else {
+            scene = nondirect_scenes[myrandom(nondirect_scenes.size())];
+        }
+        return scene;
     }
 
     /* MyHypothesis::datum_t sample_datum(double p_direct, double p_intrinsic) { */
