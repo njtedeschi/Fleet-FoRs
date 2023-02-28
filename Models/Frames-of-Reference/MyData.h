@@ -37,6 +37,18 @@ struct MyData {
         return scene;
     }
 
+    std::vector<Scene> parallel_orientation_scenes(){
+
+    }
+
+    std::vector<Scene> antiparallel_orientation_scenes(){
+
+    }
+
+    std::vector<Scene> orthogonal_orientation_scenes(){
+
+    }
+
     std::set<std::string> compute_true_words(Scene scene){
         std::set<std::string> true_words;
 
