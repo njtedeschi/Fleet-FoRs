@@ -5,6 +5,10 @@ struct MyData {
     MyHypothesis target;
     std::vector<MyInput> data;
 
+    // Default constructor
+    MyData() : words(), target(), data() {}
+
+    // Construct from dict of formulas
     MyData(const std::unordered_map<std::string, std::string>& formulas) {
         for (const auto& [word, formula] : formulas) {
             words.push_back(word);
