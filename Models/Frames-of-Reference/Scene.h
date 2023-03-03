@@ -99,34 +99,34 @@ struct Scene {
         }
 };
 
-namespace {
-    static Vector origin = {0,0,0};
-    static Vector east = {1,0,0};
-    static Vector west = {-1,0.0};
-    static Vector north = {0,1,0};
-    static Vector south = {0,-1,0};
-    static Vector up = {0,0,1};
-    static Vector down = {0,0,-1};
+namespace Space {
+    Vector origin = {0,0,0};
+    Vector east = {1,0,0};
+    Vector west = {-1,0.0};
+    Vector north = {0,1,0};
+    Vector south = {0,-1,0};
+    Vector up = {0,0,1};
+    Vector down = {0,0,-1};
 
     // Possible speakers
-    static Object direct_speaker = {origin, east};
-    static Object nondirect_speaker = {2 * west, east};
+    Object direct_speaker = {origin, east};
+    Object nondirect_speaker = {2 * west, east};
 
     // Possible figures
-    static Object east_figure = {east, origin};
-    static Object west_figure = {west, origin};
-    static Object north_figure = {north, origin};
-    static Object south_figure = {south, origin};
-    static Object up_figure = {up, origin};
-    static Object down_figure = {down, origin};
-    static std::vector<Object> figures = {east_figure, west_figure, north_figure, south_figure, up_figure, down_figure};
+    Object east_figure = {east, origin};
+    Object west_figure = {west, origin};
+    Object north_figure = {north, origin};
+    Object south_figure = {south, origin};
+    Object up_figure = {up, origin};
+    Object down_figure = {down, origin};
+    std::vector<Object> figures = {east_figure, west_figure, north_figure, south_figure, up_figure, down_figure};
 
     // Possible grounds
-    static Object east_facing_ground = {origin, east};
-    static Object west_facing_ground = {origin, west};
-    static Object north_facing_ground = {origin, north};
-    static Object south_facing_ground = {origin, south};
-    static std::vector<Object> grounds = {east_facing_ground, west_facing_ground, north_facing_ground, south_facing_ground};
+    Object east_facing_ground = {origin, east};
+    Object west_facing_ground = {origin, west};
+    Object north_facing_ground = {origin, north};
+    Object south_facing_ground = {origin, south};
+    std::vector<Object> grounds = {east_facing_ground, west_facing_ground, north_facing_ground, south_facing_ground};
 }
 
     // Possible direct and nondirect scenes
@@ -134,11 +134,11 @@ std::vector<Scene> direct_scenes;
 std::vector<Scene> nondirect_scenes;
 
 void generate_scenes(){
-    for (const auto& figure : figures) {
-        Scene direct = {direct_speaker, direct_speaker, figure};
+    for (const auto& figure : Space::figures) {
+        Scene direct = {Space::direct_speaker, Space::direct_speaker, figure};
         direct_scenes.push_back(direct);
-        for (const auto& ground : grounds) {
-            Scene nondirect = {nondirect_speaker, ground, figure};
+        for (const auto& ground : Space::grounds) {
+            Scene nondirect = {Space::nondirect_speaker, ground, figure};
             nondirect_scenes.push_back(nondirect);
         }
     }
