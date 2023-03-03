@@ -43,9 +43,34 @@ class MyDataFixture {
 /*     REQUIRE(mydata.words == words); */
 /* } */
 
-TEST_CASE_METHOD(MyDataFixture, "MyData::compute_true_words returns expected words" ) {
-    Scene scene = {Space::nondirect_speaker, Space::north_facing_ground, Space::east_figure};
-    REQUIRE(mydata.compute_true_words(scene) == std::set<std::string>{"behind", "side"});
+TEST_CASE_METHOD(MyDataFixture, "MyData::compute_true_words returns expected words for nondirect scenes" ) {
+    // TODO: better names for scenes later
+    Scene scene1 = {Space::nondirect_speaker, Space::north_facing_ground, Space::east_figure};
+    REQUIRE(mydata.compute_true_words(scene1) == std::set<std::string>{"behind", "side"});
+
+    Scene scene2 = {Space::nondirect_speaker, Space::north_facing_ground, Space::west_figure};
+    REQUIRE(mydata.compute_true_words(scene2) == std::set<std::string>{"front", "side"});
+
+    Scene scene3 = {Space::nondirect_speaker, Space::east_facing_ground, Space::east_figure};
+    REQUIRE(mydata.compute_true_words(scene3) == std::set<std::string>{"behind", "front"});
+
+    Scene scene4 = {Space::nondirect_speaker, Space::east_facing_ground, Space::west_figure};
+    REQUIRE(mydata.compute_true_words(scene4) == std::set<std::string>{"behind", "front"});
+
+    Scene scene5 = {Space::nondirect_speaker, Space::west_facing_ground, Space::east_figure};
+    REQUIRE(mydata.compute_true_words(scene5) == std::set<std::string>{"behind"});
+
+    Scene scene6 = {Space::nondirect_speaker, Space::west_facing_ground, Space::west_figure};
+    REQUIRE(mydata.compute_true_words(scene6) == std::set<std::string>{"front"});
+
+    Scene scene7 = {Space::nondirect_speaker, Space::east_facing_ground, Space::north_figure};
+    REQUIRE(mydata.compute_true_words(scene7) == std::set<std::string>{"side"});
+
+    Scene scene8 = {Space::nondirect_speaker, Space::north_facing_ground, Space::north_figure};
+    REQUIRE(mydata.compute_true_words(scene8) == std::set<std::string>{"front"});
+
+    Scene scene9 = {Space::nondirect_speaker, Space::north_facing_ground, Space::south_figure};
+    REQUIRE(mydata.compute_true_words(scene9) == std::set<std::string>{"behind"});
 }
 
 /* int main( int argc, char* argv[] ) { */
