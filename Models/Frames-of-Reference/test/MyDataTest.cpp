@@ -73,6 +73,20 @@ TEST_CASE_METHOD(MyDataFixture, "MyData::compute_true_words returns expected wor
     REQUIRE(mydata.compute_true_words(scene9) == std::set<std::string>{"behind"});
 }
 
+TEST_CASE_METHOD(MyDataFixture, "MyData::compute_true_words returns expected words for direct scenes" ) {
+    // TODO: better names for scenes later
+    Scene scene_east = {Space::direct_speaker, Space::direct_speaker, Space::east_figure};
+    REQUIRE(mydata.compute_true_words(scene_east) == std::set<std::string>{"front"});
+
+    Scene scene_west = {Space::direct_speaker, Space::direct_speaker, Space::west_figure};
+    REQUIRE(mydata.compute_true_words(scene_west) == std::set<std::string>{"behind"});
+
+    Scene scene_north = {Space::direct_speaker, Space::direct_speaker, Space::north_figure};
+    REQUIRE(mydata.compute_true_words(scene_north) == std::set<std::string>{"side"});
+
+    Scene scene_south = {Space::direct_speaker, Space::direct_speaker, Space::south_figure};
+    REQUIRE(mydata.compute_true_words(scene_south) == std::set<std::string>{"side"});
+}
 /* int main( int argc, char* argv[] ) { */
 /*     // Use Catch's default reporter */
 /*     Catch::Session().run(); */
