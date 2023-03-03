@@ -44,9 +44,7 @@ class MyDataFixture {
 /* } */
 
 TEST_CASE_METHOD(MyDataFixture, "MyData::compute_true_words returns expected words" ) { // test code for compute_true_words
-    /* Scene scene = {{{-2,0,0},{1,0,0}},{{0,0,0},{}},{{},{0,0,0}}}; */
-    /* Scene scene = {{{-2,0,0},{1,0,0}},{{0,0,0},{0,1,0}},{{1,0,0},{0,0,0}}}; */
-    Scene scene = {Space::direct_speaker, Space::north_facing_ground, Space::east_figure};
+    Scene scene = {Space::nondirect_speaker, Space::north_facing_ground, Space::east_figure};
     std::set<std::string> computed_words = mydata.compute_true_words(scene);
     std::set<std::string> expected_words = {"behind", "side"};
     REQUIRE(expected_words == computed_words);
