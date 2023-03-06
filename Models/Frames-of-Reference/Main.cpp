@@ -43,6 +43,7 @@ int main(int argc, char** argv){
 	
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
 	Fleet fleet("Frames of Reference");
+        fleet.add_option("--p_direct", p_direct, "Probability a generated scene is direct");
 	fleet.initialize(argc, argv);
 
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
