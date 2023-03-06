@@ -8,7 +8,8 @@
 static const double alpha_t = 0.95; // probability of true description
 /* static const size_t MAX_NODES = 10; */
 
-const std::vector<size_t> data_amounts = {250};
+std::vector<int> data_amounts = {250};
+int CLI_num_samps = 0; // By default, number of samples comes from data_amounts vector, not a command line argument
 
 #include "Scene.h"
 
@@ -44,7 +45,13 @@ int main(int argc, char** argv){
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
 	Fleet fleet("Frames of Reference");
         fleet.add_option("--p_direct", p_direct, "Probability a generated scene is direct");
+        fleet.add_option("--num_samps", CLI_num_samps, "Number of data points generated");
 	fleet.initialize(argc, argv);
+
+        //Reset data_amounts if num_samps was given on command line
+        if(CLI_num_samps) {
+            data_amounts.assign(1, CLI_num_samps);
+        }
 
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
 
@@ -63,7 +70,7 @@ int main(int argc, char** argv){
         };
 
         TopN<MyHypothesis> top;
-        for (size_t num_samples : data_amounts) {
+        for (int num_samples : data_amounts) {
 
             // Sample data
             MyData mydata(formulas);
