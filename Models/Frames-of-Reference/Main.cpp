@@ -8,7 +8,7 @@
 static const double alpha_t = 0.95; // probability of true description
 /* static const size_t MAX_NODES = 10; */
 
-const std::vector<size_t> data_amounts = {50, 100, 250, 750};
+const std::vector<size_t> data_amounts = {250};
 
 #include "Scene.h"
 
