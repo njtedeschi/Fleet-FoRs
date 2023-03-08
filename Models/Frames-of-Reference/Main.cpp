@@ -63,7 +63,9 @@ int main(int argc, char** argv){
             {"below", Concepts::below_abs},
             {"front", Concepts::front_int_rel},
             {"behind", Concepts::behind_int_rel},
-            {"side", Concepts::side_int}
+            {"side", Concepts::side_int},
+            {"left", Concepts::left_int_rel},
+            {"right", Concepts::right_int_rel}
         };
 
         TopN<MyHypothesis> top;

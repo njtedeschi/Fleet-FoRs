@@ -12,7 +12,11 @@ class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Vector, dou
 public:
 	MyGrammar() {
                 add("displacement(%s,%s)", DSL::displacement, VECTOR_WEIGHT);
+
 		add("forward(%s)", DSL::forward, VECTOR_WEIGHT);
+		add("upward(%s)", DSL::upward, VECTOR_WEIGHT);
+		add("rightward(%s)", DSL::rightward, VECTOR_WEIGHT);
+
                 add("parallel(%s,%s)", DSL::parallel);
                 /* add("antiparallel(%s,%s)", DSL::antiparallel); */
                 add("orthogonal(%s,%s)", DSL::orthogonal);

@@ -20,4 +20,12 @@ namespace Concepts {
     // Side
     std::string side_int = "orthogonal(displacement(ground(x),figure(x)),forward(ground(x)))";
     std::string side_int_rel = "or(orthogonal(displacement(ground(x),figure(x)),forward(ground(x))),orthogonal(displacement(ground(x),figure(x)),forward(speaker(x))))";
+
+    // Left
+    std::string left_int = "parallel(displacement(figure(x),ground(x)),rightward(ground(x)))";
+    std::string left_int_rel = "or(parallel(displacement(figure(x),ground(x)),rightward(ground(x))),parallel(displacement(figure(x),ground(x)),rightward(speaker(x))))";
+
+    // Right
+    std::string right_int = "parallel(displacement(ground(x),figure(x)),rightward(ground(x)))";
+    std::string right_int_rel = "or(parallel(displacement(ground(x),figure(x)),rightward(ground(x))),parallel(displacement(ground(x),figure(x)),rightward(speaker(x))))";
 }
