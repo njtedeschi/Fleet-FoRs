@@ -11,6 +11,8 @@ static const double alpha_t = 0.95; // probability of true description
 std::vector<int> data_amounts = {250};
 int CLI_num_samps = 0; // By default, number of samples comes from data_amounts vector, not a command line argument
 
+double max_temp = 10.0; // maximum temperature for parallel tempering
+
 #include "Scene.h"
 
 struct MyInput {
@@ -46,6 +48,7 @@ int main(int argc, char** argv){
 	
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
 	Fleet fleet("Frames of Reference");
+        fleet.add_option("--max_temp", max_temp, "Max temperature for parallel tempering");
         fleet.add_option("--p_direct", p_direct, "Probability a generated scene is direct");
         fleet.add_option("--num_samps", CLI_num_samps, "Number of data points generated");
 	fleet.initialize(argc, argv);
@@ -94,7 +97,7 @@ int main(int argc, char** argv){
             auto h0 = MyHypothesis::sample(mydata.words);
             /* MCMCChain samp(h0, &mydata); */
             //ChainPool samp(h0, &mydata, FleetArgs::nchains);
-            ParallelTempering samp(h0, &data, FleetArgs::nchains, 10.0); 
+            ParallelTempering samp(h0, &data, FleetArgs::nchains, max_temp);
             for(auto& h : samp.run(Control()) | printer(FleetArgs::print) | top) {
                     UNUSED(h);
             }
