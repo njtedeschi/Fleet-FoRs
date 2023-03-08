@@ -7,7 +7,7 @@
 
 double VECTOR_WEIGHT = 3.0;
 
-class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Vector, double>,
+class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Vector, Position, Direction, Displacement, double>,
 				  public Singleton<MyGrammar> {
 public:
 	MyGrammar() {
@@ -25,7 +25,7 @@ public:
 		add("or(%s,%s)",     Builtins::Or<MyGrammar>);
 		add("not(%s)",       Builtins::Not<MyGrammar>);
 
-		add("UP(%s)",       +[](MyInput x) -> Vector { Vector up = {0,0,1}; return up;}, VECTOR_WEIGHT);
+		add("UP(%s)",       +[](MyInput x) -> Direction {return Space::up;}, VECTOR_WEIGHT);
 
 		add("S(%s)",       +[](MyInput x) -> Object { return x.scene.speaker; });
 		add("F(%s)",        +[](MyInput x) -> Object { return x.scene.figure; });
