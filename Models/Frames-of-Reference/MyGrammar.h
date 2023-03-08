@@ -25,11 +25,11 @@ public:
 		add("or(%s,%s)",     Builtins::Or<MyGrammar>);
 		add("not(%s)",       Builtins::Not<MyGrammar>);
 
-		add("up(%s)",       +[](MyInput x) -> Vector { Vector up = {0,0,1}; return up;}, VECTOR_WEIGHT);
+		add("UP(%s)",       +[](MyInput x) -> Vector { Vector up = {0,0,1}; return up;}, VECTOR_WEIGHT);
 
-		add("speaker(%s)",       +[](MyInput x) -> Object { return x.scene.speaker; });
-		add("figure(%s)",        +[](MyInput x) -> Object { return x.scene.figure; });
-		add("ground(%s)",        +[](MyInput x) -> Object { return x.scene.ground; });
+		add("S(%s)",       +[](MyInput x) -> Object { return x.scene.speaker; });
+		add("F(%s)",        +[](MyInput x) -> Object { return x.scene.figure; });
+		add("G(%s)",        +[](MyInput x) -> Object { return x.scene.ground; });
 		add("x",             Builtins::X<MyGrammar>);
 	}
 } grammar;
