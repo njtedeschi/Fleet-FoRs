@@ -22,6 +22,8 @@ struct MyInput {
 #include "MyHypothesis.h"
 #include "MyData.h"
 
+#include "Concepts.h"
+
 // target stores mapping from the words to functions that compute them correctly
 /* MyHypothesis target; */
 /* MyHypothesis intrinsic; */
@@ -55,29 +57,13 @@ int main(int argc, char** argv){
 
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
 
-        // Above
-        std::string above_abs = "parallel(displacement(ground(x),figure(x)),up(x))";
-        // Below
-        std::string below_abs = "parallel(displacement(figure(x),ground(x)),up(x))";
-        // Front
-        std::string front_int = "parallel(displacement(ground(x),figure(x)),orientation(ground(x)))";
-        std::string front_int_rel = "or(parallel(displacement(ground(x),figure(x)),orientation(ground(x))),parallel(displacement(figure(x),ground(x)),orientation(speaker(x))))";
-            std::string front_int_rel_not_behind = "or(parallel(displacement(ground(x),figure(x)),orientation(ground(x))),and(parallel(displacement(figure(x),ground(x)),orientation(speaker(x))),not(parallel(orientation(ground(x)),orientation(speaker(x))))))"; // No relative front when intrinsic behind
-        // Behind
-        std::string behind_int = "parallel(displacement(figure(x),ground(x)),orientation(ground(x)))";
-        std::string behind_int_rel = "or(parallel(displacement(figure(x),ground(x)),orientation(ground(x))),parallel(displacement(ground(x),figure(x)),orientation(speaker(x))))";
-            std::string behind_int_rel_not_front = "or(parallel(displacement(figure(x),ground(x)),orientation(ground(x))),and(parallel(displacement(ground(x),figure(x)),orientation(speaker(x))),not(parallel(orientation(ground(x)),orientation(speaker(x))))))"; // No relative behind when intrinsic front
-        // Side
-        std::string side_int = "orthogonal(displacement(ground(x),figure(x)),orientation(ground(x)))";
-        std::string side_int_rel = "or(orthogonal(displacement(ground(x),figure(x)),orientation(ground(x))),orthogonal(displacement(ground(x),figure(x)),orientation(speaker(x))))";
-
         // Set target concepts before sampling
         std::unordered_map<std::string, std::string> formulas = {
-            {"above", above_abs},
-            {"below", below_abs},
-            {"front", front_int_rel},
-            {"behind", behind_int_rel},
-            {"side", side_int}
+            {"above", Concepts::above_abs},
+            {"below", Concepts::below_abs},
+            {"front", Concepts::front_int_rel},
+            {"behind", Concepts::behind_int_rel},
+            {"side", Concepts::side_int}
         };
 
         TopN<MyHypothesis> top;
