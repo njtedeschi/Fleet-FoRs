@@ -17,7 +17,7 @@ namespace DSL {
         if (nonzero(x,y)) {return false;}
         return cosine_similarity(x,y) == -1;
     };
-    const auto parallel = +[](Vector x, Vector y) -> bool {
+    const auto orthogonal = +[](Vector x, Vector y) -> bool {
         if (nonzero(x,y)) {return false;}
         return cosine_similarity(x,y) == 0;
     };
