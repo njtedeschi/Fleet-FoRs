@@ -19,6 +19,7 @@ namespace Concepts {
 
     // Side
     std::string side_int = "orthogonal(displacement(G(x),F(x)),forward(G(x)))";
+    std::string side_int_disjunction = "or(parallel(displacement(G(x),F(x)),rightward(G(x))),parallel(displacement(F(x),G(x)),rightward(G(x))))";
     std::string side_int_rel = "or(orthogonal(displacement(G(x),F(x)),forward(G(x))),orthogonal(displacement(G(x),F(x)),forward(S(x))))";
 
     // Left
