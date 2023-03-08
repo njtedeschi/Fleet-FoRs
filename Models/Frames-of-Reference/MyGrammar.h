@@ -3,28 +3,19 @@
 #include "Grammar.h"
 #include "Singleton.h"
 
+#include "DSL.h"
+
 double VECTOR_WEIGHT = 3.0;
 
 class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Vector, double>,
 				  public Singleton<MyGrammar> {
 public:
 	MyGrammar() {
-                add("displacement(%s,%s)", +[](Object x, Object y) -> Vector {
-                        return y.location - x.location;
-                        }, VECTOR_WEIGHT);
+                add("displacement(%s,%s)", DSL::displacement, VECTOR_WEIGHT);
 		add("orientation(%s)", +[](Object x) -> Vector {return x.forward;}, VECTOR_WEIGHT);
-                add("parallel(%s,%s)", +[](Vector x, Vector y) -> bool {
-                        if (magnitude(x) == 0 || magnitude(y) == 0) {return false;}
-                        return cosine_similarity(x,y) == 1;
-                        });
-                /* add("antiparallel(%s,%s)", +[](Vector x, Vector y) -> bool { */
-                /*         if (magnitude(x) == 0 || magnitude(y) == 0) {return false;} */
-                /*         return cosine_similarity(x,y) == -1; */
-                /*         }); */
-                add("orthogonal(%s,%s)", +[](Vector x, Vector y) -> bool {
-                        if (magnitude(x) == 0 || magnitude(y) == 0) {return false;}
-                        return cosine_similarity(x,y) == 0;
-                        });
+                add("parallel(%s,%s)", DSL::parallel);
+                /* add("antiparallel(%s,%s)", DSL::antiparallel); */
+                add("orthogonal(%s,%s)", DSL::orthogonal);
 		
                 add("and(%s,%s)",    Builtins::And<MyGrammar>);
 		add("or(%s,%s)",     Builtins::Or<MyGrammar>);
