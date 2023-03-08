@@ -17,6 +17,8 @@ struct MyInput {
 #include "../MyHypothesis.h"
 #include "../MyData.h"
 
+#include "../Concepts.h"
+
 #include "TopN.h"
 #include "ParallelTempering.h"
 #include "Fleet.h" 
@@ -27,11 +29,11 @@ class MyDataFixture {
     public:
         MyDataFixture() {
             std::unordered_map<std::string, std::string> formulas = {
-            {"above", "parallel(displacement(ground(x),figure(x)),up(x))"},
-            {"below", "parallel(displacement(figure(x),ground(x)),up(x))"},
-            {"front", "or(parallel(displacement(ground(x),figure(x)),orientation(ground(x))),parallel(displacement(figure(x),ground(x)),orientation(speaker(x))))"},
-            {"behind", "or(parallel(displacement(figure(x),ground(x)),orientation(ground(x))),parallel(displacement(ground(x),figure(x)),orientation(speaker(x))))"},
-            {"side", "orthogonal(displacement(ground(x),figure(x)),orientation(ground(x)))"}
+            {"above", Concepts::above_abs},
+            {"below", Concepts::below_abs},
+            {"front", Concepts::front_int_rel},
+            {"behind", Concepts::behind_int_rel},
+            {"side", Concepts::side_int}
         };
             mydata = MyData(formulas);
         }
