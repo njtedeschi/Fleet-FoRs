@@ -1,12 +1,32 @@
 #pragma once
+# include <optional>
+
+struct SceneProbs {
+    std::optional<double> p_direct = std::nullopt;
+};
+
+struct WordProbs {
+    std::optional<double> p_intrinsic = std::nullopt;
+    std::optional<double> p_canonical = std::nullopt;
+};
+
+struct Probabilities {
+    SceneProbs scene_probs;
+    WordProbs word_probs;
+};
 
 struct MyData {
     std::vector<std::string> words;
     MyHypothesis target;
     std::vector<MyInput> data;
 
+    MyHypothesis intrinsic;
+    MyHypothesis relative;
+
+    // SET UP
+
     // Default constructor
-    MyData() : words(), target(), data() {}
+    MyData() : words(), target(), data(), intrinsic(), relative() {}
 
     // Construct from dict of formulas
     MyData(const std::unordered_map<std::string, std::string>& formulas) {
@@ -16,50 +36,80 @@ struct MyData {
         }
     }
 
-    MyHypothesis::datum_t sample_datum(double p_direct) {
-        // Sample scene
-        Scene scene = sample_scene(p_direct);
-
-        //Sample word
-        // First evaluate truth values for all words
-        std::set<std::string> true_words = compute_true_words(scene);
-        // Then sample accordingly
-        std::string word = sample_word(true_words);
-
-        return MyInput{.scene=scene, .word=word};
+    void set_intrinsic(const std::unordered_map<std::string, std::string>& formulas) {
+        for (const auto& [word, formula] : formulas) {
+            intrinsic[word] = InnerHypothesis(grammar.simple_parse(formula));
+        }
     }
 
-    Scene sample_scene(double p_direct){
-        Scene scene;
-        // Handle direct and nondirect scenes separately
-        bool is_direct = flip(p_direct);
-        if(is_direct) {
-            scene = direct_scenes[myrandom(direct_scenes.size())];
-        } else {
-            scene = nondirect_scenes[myrandom(nondirect_scenes.size())];
+    void set_relative(const std::unordered_map<std::string, std::string>& formulas) {
+        for (const auto& [word, formula] : formulas) {
+            relative[word] = InnerHypothesis(grammar.simple_parse(formula));
         }
+    }
+
+    // SAMPLING METHODS
+
+    MyHypothesis::datum_t sample_datum(const Probabilities& probs) {
+        // Sample scene
+        Scene scene = sample_scene(probs.scene_probs);
+
+        //Sample word
+        std::string word;
+        bool true_description = flip(alpha_t);
+        if (!true_description) {
+            word = sample_random_word();
+        }
+        else {
+            word = sample_true_word(probs.word_probs, scene);
+        }
+        return MyInput{.scene=scene, .word=word, .true_description=true_description};
+    }
+
+    Scene sample_scene(const SceneProbs& scene_probs) {
+        Scene scene;
+        std::vector<Scene> candidate_scenes;
+
+        if (scene_probs.p_direct.has_value()) {
+            if(flip(scene_probs.p_direct.value())) {
+                candidate_scenes = direct_scenes;
+            } else {
+                candidate_scenes = nondirect_scenes;
+            }
+        } else {
+            candidate_scenes.insert(candidate_scenes.end(), direct_scenes.begin(), direct_scenes.end());
+        candidate_scenes.insert(candidate_scenes.end(), nondirect_scenes.begin(), nondirect_scenes.end());
+        }
+
+        scene = candidate_scenes[myrandom(candidate_scenes.size())];
         return scene;
     }
 
-    std::vector<Scene> parallel_orientation_scenes(){
+    std::string sample_true_word(const WordProbs& word_probs, Scene scene) {
+        std::string word;
+        std::set<std::string> candidate_words;
 
+        if(word_probs.p_intrinsic.has_value()) {
+            if (flip(word_probs.p_intrinsic.value())) {
+                candidate_words = compute_true_words(intrinsic, scene);
+            } else {
+                candidate_words = compute_true_words(relative, scene);
+            }
+        } else {
+            candidate_words = compute_true_words(target, scene);
+        }
+
+        word = *sample<std::string, decltype(candidate_words)>(candidate_words).first;
+        return word;
     }
 
-    std::vector<Scene> antiparallel_orientation_scenes(){
-
-    }
-
-    std::vector<Scene> orthogonal_orientation_scenes(){
-
-    }
-
-    std::set<std::string> compute_true_words(Scene scene){
+    // Compute words that correctly describe a scene given a set of concepts for each word
+    std::set<std::string> compute_true_words(MyHypothesis concepts, Scene scene){
         std::set<std::string> true_words;
 
         for(auto& w : words) {
-            MyInput input{.scene=scene, .word=EMPTY_STRING};
-            bool output = target.at(w).call(input);
-            
+            MyInput input{.scene=scene, .word=EMPTY_STRING, .true_description=true};
+            bool output = concepts.at(w).call(input); 
             if (output == true){
                 true_words.insert(w);
             }
@@ -67,60 +117,12 @@ struct MyData {
         return true_words;
     }
 
-    std::string sample_word(std::set<std::string> true_words){
-        std::string word;
-        if(flip(alpha_t)) {
-            // Sample from true descriptions
-            word = *sample<std::string, decltype(true_words)>(true_words).first;
-        } else {
-            // Sample randomly
-            word = *sample<std::string, decltype(words)>(words).first;
-        }
-        return word;
+    std::string sample_random_word() {
+        return *sample<std::string, decltype(words)>(words).first;
     }
-    /* MyHypothesis::datum_t sample_datum(double p_direct, double p_intrinsic) { */
-    /*     // Sample scene */
-    /*     Scene scene; */
-    /*     // Handle direct and nondirect scenes separately */
-    /*     bool is_direct = flip(p_direct); */
-    /*     if(is_direct) { */
-    /*         scene = direct_scenes[myrandom(direct_scenes.size())]; */
-    /*     } else { */
-    /*         scene = nondirect_scenes[myrandom(nondirect_scenes.size())]; */
-    /*     } */
-
-    /*     // Sample word */
-    /*     std::string word; */
-    /*     // First evaluate truth values for all words */
-    /*     std::set<std::string> true_words; */
-    /*     bool is_intrinsic = flip(p_intrinsic); */
-
-    /*     for(auto& w : words) { */
-    /*         MyInput input{.scene=scene, .word=EMPTY_STRING}; */
-    /*         bool output; */
-    /*         if (is_direct || is_intrinsic) { */
-    /*             output = intrinsic.at(w).call(input); */
-    /*         } else { */
-    /*             output = relative.at(w).call(input); */
-    /*         } */
-    /*         if (output == true){ */
-    /*             true_words.insert(w); */
-    /*         } */
-    /*     } */
-    /*     // Then sample accordingly */
-    /*     // TODO: figure out what's going on with normalizer argument of sample */
-    /*     if(flip(alpha_t)) { */
-    /*         // Sample from true descriptions */
-    /*         word = *sample<std::string, decltype(true_words)>(true_words).first; */
-    /*     } else { */
-    /*         // Sample randomly */
-    /*         word = *sample<std::string, decltype(words)>(words).first; */
-    /*     } */
-
-    /*     return MyInput{.scene=scene, .word=word}; */
-    /* } */
 
     // Takes variable number of probability args to call appropriate sample_datum method
+    // TODO: maybe update, since it looks like I'm not going to use variable number of arguments
     template<typename... Args>
     void sample_data(int num_samples, Args... args){
         for (int i = 0; i < num_samples; i++){

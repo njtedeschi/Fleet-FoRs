@@ -18,6 +18,7 @@ double max_temp = 10.0; // maximum temperature for parallel tempering
 struct MyInput {
     Scene scene;
     std::string word;
+    bool true_description;
 };
 
 #include "MyGrammar.h"
@@ -100,7 +101,16 @@ int main(int argc, char** argv){
 
             // Sample data
             MyData mydata(target_formulas);
-            mydata.sample_data(num_samples, p_direct);
+            mydata.set_intrinsic(intrinsic_formulas);
+            mydata.set_relative(relative_formulas);
+
+            SceneProbs scene_probs;
+            scene_probs.p_direct = p_direct;
+            WordProbs word_probs;
+            /* word_probs.p_intrinsic = p_intrinsic; */
+            Probabilities probs = {scene_probs, word_probs};
+
+            mydata.sample_data(num_samples, probs);
 
             // Refer to target hypothesis and sampled data
             auto& target = mydata.target;
