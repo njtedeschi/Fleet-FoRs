@@ -61,21 +61,45 @@ int main(int argc, char** argv){
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
 
         // Set target concepts before sampling
-        std::unordered_map<std::string, std::string> formulas = {
+        std::unordered_map<std::string, std::string> target_formulas = {
             {"above", Concepts::above_abs},
             {"below", Concepts::below_abs},
             {"front", Concepts::front_int_rel},
+            /* {"front", Concepts::front_int_rel_not_behind}, */
             {"behind", Concepts::behind_int_rel},
+            /* {"behind", Concepts::behind_int_rel_not_front}, */
             {"side", Concepts::side_int},
             {"left", Concepts::left_int_rel},
+            /* {"left", Concepts::left_int_rel_not_right}, */
             {"right", Concepts::right_int_rel}
+            /* {"right", Concepts::right_int_rel_not_left} */
+        };
+
+        std::unordered_map<std::string, std::string> intrinsic_formulas = {
+            {"above", Concepts::above_abs}, // TODO: replace with above_int when non-canonical orientations are introduced
+            {"below", Concepts::below_abs},
+            {"front", Concepts::front_int},
+            {"behind", Concepts::behind_int},
+            {"side", Concepts::side_int},
+            {"left", Concepts::left_int},
+            {"right", Concepts::right_int}
+        };
+
+        std::unordered_map<std::string, std::string> relative_formulas = {
+            {"above", Concepts::above_abs}, // TODO: replace with above_rel when non-canonical orientations are introduced
+            {"below", Concepts::below_abs},
+            {"front", Concepts::front_rel},
+            {"behind", Concepts::behind_rel},
+            {"side", Concepts::side_rel},
+            {"left", Concepts::left_rel},
+            {"right", Concepts::right_rel}
         };
 
         TopN<MyHypothesis> top;
         for (int num_samples : data_amounts) {
 
             // Sample data
-            MyData mydata(formulas);
+            MyData mydata(target_formulas);
             mydata.sample_data(num_samples, p_direct);
 
             // Refer to target hypothesis and sampled data
