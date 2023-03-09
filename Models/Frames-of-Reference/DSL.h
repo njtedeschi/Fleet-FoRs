@@ -37,6 +37,16 @@ namespace DSL {
         return cosine_similarity(x,y) == 0;
     };
 
+    // Functions only used for data generation
+    const auto parallel_orientation = +[](Direction x, Direction y) -> bool {
+        if (nonzero(x,y)) {return false;}
+        return cosine_similarity(x,y) == 1;
+    };
+    const auto antiparallel_orientation = +[](Direction x, Direction y) -> bool {
+        if (nonzero(x,y)) {return false;}
+        return cosine_similarity(x,y) == -1;
+    };
+
     // Feature extraction
     const auto forward = +[](Object x) -> Direction {return x.forward;};
     const auto upward = +[](Object x) -> Direction {return x.upward;};

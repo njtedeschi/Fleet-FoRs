@@ -22,12 +22,16 @@ public:
                 add("parallel(%s,%s)", DSL::parallel);
                 /* add("antiparallel(%s,%s)", DSL::antiparallel); */
                 add("orthogonal(%s,%s)", DSL::orthogonal);
+
+                // Functions only used for data generation
+                add("Parallel(%s,%s)", DSL::parallel_orientation, 0.0);
+                add("Antiparallel(%s,%s)", DSL::antiparallel_orientation, 0.0);
 		
                 add("and(%s,%s)",    Builtins::And<MyGrammar>);
 		add("or(%s,%s)",     Builtins::Or<MyGrammar>);
 		add("not(%s)",       Builtins::Not<MyGrammar>);
 
-		add("UP(%s)",       +[](MyInput x) -> Direction {return Space::up;}, VECTOR_WEIGHT);
+		add("UP(%s)",       +[](MyInput x) -> Direction {return Space::up;}, UPWARD_WEIGHT*VECTOR_WEIGHT);
 
 		add("S(%s)",       +[](MyInput x) -> Object { return x.scene.speaker; });
 		add("F(%s)",        +[](MyInput x) -> Object { return x.scene.figure; });

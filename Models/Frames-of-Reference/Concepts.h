@@ -10,12 +10,12 @@ namespace Concepts {
     // Front
     std::string front_int = "parallel(displacement(G(x),F(x)),forward(G(x)))";
     std::string front_int_rel = "or(parallel(displacement(G(x),F(x)),forward(G(x))),parallel(displacement(F(x),G(x)),forward(S(x))))";
-        std::string front_int_rel_not_behind = "or(parallel(displacement(G(x),F(x)),forward(G(x))),and(parallel(displacement(F(x),G(x)),forward(S(x))),not(parallel(forward(G(x)),forward(S(x))))))"; // No relative front when intrinsic behind
+        std::string front_int_rel_not_behind = "or(parallel(displacement(G(x),F(x)),forward(G(x))),and(parallel(displacement(F(x),G(x)),forward(S(x))),not(Parallel(forward(G(x)),forward(S(x))))))"; // No relative front when intrinsic behind
 
     // Behind
     std::string behind_int = "parallel(displacement(F(x),G(x)),forward(G(x)))";
     std::string behind_int_rel = "or(parallel(displacement(F(x),G(x)),forward(G(x))),parallel(displacement(G(x),F(x)),forward(S(x))))";
-        std::string behind_int_rel_not_front = "or(parallel(displacement(F(x),G(x)),forward(G(x))),and(parallel(displacement(G(x),F(x)),forward(S(x))),not(parallel(forward(G(x)),forward(S(x))))))"; // No relative behind when intrinsic front
+        std::string behind_int_rel_not_front = "or(parallel(displacement(F(x),G(x)),forward(G(x))),and(parallel(displacement(G(x),F(x)),forward(S(x))),not(Parallel(forward(G(x)),forward(S(x))))))"; // No relative behind when intrinsic front
 
     // Side
     std::string side_int = "orthogonal(displacement(G(x),F(x)),forward(G(x)))";
@@ -25,8 +25,10 @@ namespace Concepts {
     // Left
     std::string left_int = "parallel(displacement(F(x),G(x)),rightward(G(x)))";
     std::string left_int_rel = "or(parallel(displacement(F(x),G(x)),rightward(G(x))),parallel(displacement(F(x),G(x)),rightward(S(x))))";
+    std::string left_int_rel_not_right = "or(parallel(displacement(F(x),G(x)),rightward(G(x))),and(parallel(displacement(F(x),G(x)),rightward(S(x))),not(Antiparallel(forward(G(x)),forward(S(x))))))"; // No relative left when intrinsic right
 
     // Right
     std::string right_int = "parallel(displacement(G(x),F(x)),rightward(G(x)))";
     std::string right_int_rel = "or(parallel(displacement(G(x),F(x)),rightward(G(x))),parallel(displacement(G(x),F(x)),rightward(S(x))))";
+    std::string right_int_rel_not_left = "or(parallel(displacement(G(x),F(x)),rightward(G(x))),and(parallel(displacement(G(x),F(x)),rightward(S(x))),not(Antiparallel(forward(G(x)),forward(S(x))))))"; // No relative right when intrinsic left
 }
