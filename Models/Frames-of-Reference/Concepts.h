@@ -2,7 +2,11 @@
 
 namespace Concepts {
 
-    // Function for "string formatting"
+    // Functions for "string formatting"
+    std::string un_op(std::string function, std::string a) {
+        return function + "(" + a + ")";
+    }
+
     std::string bin_op(std::string function, std::string a, std::string b) {
         return function + "(" + a + "," + b + ")";
     }
@@ -48,4 +52,18 @@ namespace Concepts {
     std::string behind_int_rel_not_front = bin_op("or", behind_int, bin_op("and", behind_rel, fb_rel_condition));
     std::string left_int_rel_not_right = bin_op("or", left_int, bin_op("and", left_rel, lr_rel_condition));
     std::string right_int_rel_not_left = bin_op("or", right_int, bin_op("and", right_rel, lr_rel_condition));
+
+    // Exclusive definitions (distinct intrinsic, relative, or both)
+    std::string front_int_only = bin_op("and", front_int, un_op("not", front_rel));
+    std::string front_rel_only = bin_op("and", front_rel, un_op("not", front_int));
+    std::string front_int_and_rel = bin_op("and", front_int, front_rel);
+    std::string behind_int_only = bin_op("and", behind_int, un_op("not", behind_rel));
+    std::string behind_rel_only = bin_op("and", behind_rel, un_op("not", behind_int));
+    std::string behind_int_and_rel = bin_op("and", behind_int, behind_rel);
+    std::string left_int_only = bin_op("and", left_int, un_op("not", left_rel));
+    std::string left_rel_only = bin_op("and", left_rel, un_op("not", left_int));
+    std::string left_int_and_rel = bin_op("and", left_int, left_rel);
+    std::string right_int_only = bin_op("and", right_int, un_op("not", right_rel));
+    std::string right_rel_only = bin_op("and", right_rel, un_op("not", right_int));
+    std::string right_int_and_rel = bin_op("and", right_int, right_rel);
 }
