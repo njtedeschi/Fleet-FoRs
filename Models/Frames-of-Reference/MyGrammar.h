@@ -21,7 +21,7 @@ public:
 
                 add("parallel(%s,%s)", DSL::parallel);
                 /* add("antiparallel(%s,%s)", DSL::antiparallel); */
-                add("orthogonal(%s,%s)", DSL::orthogonal);
+                /* add("orthogonal(%s,%s)", DSL::orthogonal); */
 
                 // Functions only used for data generation
                 add("Parallel(%s,%s)", DSL::parallel_orientation, 0.0);
