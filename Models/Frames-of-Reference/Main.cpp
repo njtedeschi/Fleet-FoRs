@@ -8,11 +8,6 @@
 static const double alpha_t = 0.95; // probability of true description
 /* static const size_t MAX_NODES = 10; */
 
-std::vector<int> data_amounts = {250};
-int CLI_num_samps = 0; // By default, number of samples comes from data_amounts vector, not a command line argument
-
-double max_temp = 10.0; // maximum temperature for parallel tempering
-
 #include "Scene.h"
 
 struct MyInput {
@@ -42,8 +37,17 @@ struct MyInput {
 #include "Random.h"
 #include "Builtins.h"
 
+// Data sampling parameters
 double p_direct = 0.2; // probability a scene is direct
 double p_intrinsic = 0.5; // probability that a description is intrinsic
+
+// Data amounts
+std::vector<int> data_amounts = {250};
+/* std::vector<int> data_amounts = {0, 1, 5, 10, 25, 50, 75, 100, 250, 500, 750, 1000, 2500, 5000}; */
+int CLI_num_samps = 0; // By default, number of samples comes from data_amounts vector, not a command line argument
+
+// Hypothesis sampling parameters
+double max_temp = 10.0; // maximum temperature for parallel tempering
 
 int main(int argc, char** argv){ 
 	
