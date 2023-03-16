@@ -49,6 +49,9 @@ int CLI_num_samps = 0; // By default, number of samples comes from data_amounts 
 // Hypothesis sampling parameters
 double max_temp = 10.0; // maximum temperature for parallel tempering
 
+// Declare here so MyHypothesis class can reference the specific target instantiated in main
+MyHypothesis target;
+
 int main(int argc, char** argv){ 
 	
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
@@ -100,26 +103,24 @@ int main(int argc, char** argv){
             {"right", Concepts::right_rel}
         };
 
+        MyData data_sampler(target_formulas);
+        data_sampler.set_intrinsic(intrinsic_formulas);
+        data_sampler.set_relative(relative_formulas);
+
+        target = data_sampler.target;
+
         TopN<MyHypothesis> top;
         for (int num_samples : data_amounts) {
-
             // Sample data
-            MyData mydata(target_formulas);
-            mydata.set_intrinsic(intrinsic_formulas);
-            mydata.set_relative(relative_formulas);
-
             SceneProbs scene_probs;
             scene_probs.p_direct = p_direct;
             WordProbs word_probs;
             /* word_probs.p_intrinsic = p_intrinsic; */
             Probabilities probs = {scene_probs, word_probs};
 
-            mydata.sample_data(num_samples, probs);
+            std::vector<MyInput> data = data_sampler.sample_data(num_samples, probs);
 
             // Refer to target hypothesis and sampled data
-            auto& target = mydata.target;
-            auto& data = mydata.data;
-
             TopN<MyHypothesis> newtop;
             for(auto h : top.values()) {
                 h.clear_cache();
@@ -132,7 +133,7 @@ int main(int argc, char** argv){
             target.compute_posterior(data);
 
             // Inference steps
-            auto h0 = MyHypothesis::sample(mydata.words);
+            auto h0 = MyHypothesis::sample(data_sampler.words);
             /* MCMCChain samp(h0, &mydata); */
             //ChainPool samp(h0, &mydata, FleetArgs::nchains);
             ParallelTempering samp(h0, &data, FleetArgs::nchains, max_temp);

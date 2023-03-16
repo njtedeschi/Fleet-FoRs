@@ -18,7 +18,6 @@ struct Probabilities {
 struct MyData {
     std::vector<std::string> words;
     MyHypothesis target;
-    std::vector<MyInput> data;
 
     MyHypothesis intrinsic;
     MyHypothesis relative;
@@ -26,7 +25,7 @@ struct MyData {
     // SET UP
 
     // Default constructor
-    MyData() : words(), target(), data(), intrinsic(), relative() {}
+    MyData() : words(), target(), intrinsic(), relative() {}
 
     // Construct from dict of formulas
     MyData(const std::unordered_map<std::string, std::string>& formulas) {
@@ -124,10 +123,12 @@ struct MyData {
     // Takes variable number of probability args to call appropriate sample_datum method
     // TODO: maybe update, since it looks like I'm not going to use variable number of arguments
     template<typename... Args>
-    void sample_data(int num_samples, Args... args){
+    std::vector<MyInput> sample_data(int num_samples, Args... args){
+        std::vector<MyInput> data;
         for (int i = 0; i < num_samples; i++){
             data.push_back(sample_datum(args...));
         }
+        return data;
     }
 
 };
