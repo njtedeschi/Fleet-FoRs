@@ -4,6 +4,10 @@
 #include <set>
 #include <unordered_map>
 #include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <fstream>
+#include <chrono>
 
 static const double alpha_t = 0.95; // probability of true description
 /* static const size_t MAX_NODES = 10; */
@@ -117,6 +121,22 @@ int main(int argc, char** argv){
         // Initialize amount of data to sample for each iteration
         std::vector<int> data_amounts = generate_range(data_min, data_max, data_step);
 
+        // Output file set up
+        // Save original buffer of std::cout
+        std::streambuf *originalCoutBuffer = std::cout.rdbuf();
+
+        // Create output file stream using date and time
+        auto now = std::chrono::system_clock::now();
+        std::time_t time = std::chrono::system_clock::to_time_t(now);
+        std::stringstream date_time_ss;
+        date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-&d_%H-%M-%S") << ".txt";
+        std::string file_name = date_time_ss.str();
+        std::ofstream outFile(file_name);
+
+        // Redirect std::cout to file
+        std::cout.rdbuf(outFile.rdbuf());
+
+        // Inference
         TopN<MyHypothesis> top;
         for (int num_samples : data_amounts) {
             // Sample data
@@ -152,4 +172,9 @@ int main(int argc, char** argv){
             // Show the best we've found
             top.print(str(num_samples));
         }
+
+        // Restore original buffer of std::cout
+        std::cout.rdbuf(originalCoutBuffer);
+        // Close output file stream
+        outFile.close();
 }
