@@ -42,9 +42,16 @@ double p_direct = 0.2; // probability a scene is direct
 double p_intrinsic = 0.5; // probability that a description is intrinsic
 
 // Data amounts
-std::vector<int> data_amounts = {250};
-/* std::vector<int> data_amounts = {0, 1, 5, 10, 25, 50, 75, 100, 250, 500, 750, 1000, 2500, 5000}; */
-int CLI_num_samps = 0; // By default, number of samples comes from data_amounts vector, not a command line argument
+int data_min = 0;
+int data_max = 250;
+int data_step = 10;
+std::vector<int> generate_range(int start, int stop, int step) {
+    std::vector<int> result;
+    for(int i = start; i <= stop; i+= step) {
+        result.push_back(i);
+    }
+    return result;
+}
 
 // Hypothesis sampling parameters
 double max_temp = 10.0; // maximum temperature for parallel tempering
@@ -58,13 +65,10 @@ int main(int argc, char** argv){
 	Fleet fleet("Frames of Reference");
         fleet.add_option("--max_temp", max_temp, "Max temperature for parallel tempering");
         fleet.add_option("--p_direct", p_direct, "Probability a generated scene is direct");
-        fleet.add_option("--num_samps", CLI_num_samps, "Number of data points generated");
+        fleet.add_option("--data_min", data_min, "Initial number of data points generated");
+        fleet.add_option("--data_max", data_max, "Final number of data points generated");
+        fleet.add_option("--data_step", data_step, "Number of data points added in each iteration");
 	fleet.initialize(argc, argv);
-
-        //Reset data_amounts if num_samps was given on command line
-        if(CLI_num_samps) {
-            data_amounts.assign(1, CLI_num_samps);
-        }
 
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
 
@@ -103,11 +107,15 @@ int main(int argc, char** argv){
             {"right", Concepts::right_rel}
         };
 
+        // Initialize sampler
         MyData data_sampler(target_formulas);
         data_sampler.set_intrinsic(intrinsic_formulas);
         data_sampler.set_relative(relative_formulas);
 
         target = data_sampler.target;
+
+        // Initialize amount of data to sample for each iteration
+        std::vector<int> data_amounts = generate_range(data_min, data_max, data_step);
 
         TopN<MyHypothesis> top;
         for (int num_samples : data_amounts) {
