@@ -4,12 +4,15 @@ import os
 
 def process_input_file(input_file_path, output_file_path):
 
-    with open(input_file_path, 'r') as input_file, open(output_file_path, 'w', newline='') as output_file:
-        csv_writer = csv.writer(output_file)
+    # If output file needs to be created, write header line
+    if not os.path.exists(output_file_path) or os.path.getsize(output_file_path) == 0:
+        with open(output_file_path, 'w', newline='') as output_file:
+            csv_writer = csv.writer(output_file)
+            csv_writer.writerow(['uid','data_amount', 'hypothesis_rank', 'posterior', 'prior', 'likelihood', 'target_likelihood', 'above', 'behind', 'below', 'front', 'left', 'right', 'side'])
 
-        # Write the header row if the output file is empty
-        if os.stat(output_file_path).st_size == 0:
-            csv_writer.writerow(['uid','data_amount', 'hypothesis_rank', 'posterior', 'prior', 'likelihood', 'target_likelihood', 'above', 'behind', 'below', 'front', 'left', 'right', 'side']) # TODO: decide on columns of CSV
+    # If output file is non-empty (even if it's just the header), use append mode for output file
+    with open(input_file_path, 'r') as input_file, open(output_file_path, 'a', newline='') as output_file:
+        csv_writer = csv.writer(output_file)
 
         # Get UID for each line from input .txt file name (date-time format)
         base_filename = os.path.basename(input_file_path)
