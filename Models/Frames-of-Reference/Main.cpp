@@ -129,7 +129,7 @@ int main(int argc, char** argv){
         auto now = std::chrono::system_clock::now();
         std::time_t time = std::chrono::system_clock::to_time_t(now);
         std::stringstream date_time_ss;
-        date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-&d_%H-%M-%S") << ".txt";
+        date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".txt";
         std::string file_name = date_time_ss.str();
         std::ofstream outFile(file_name);
 
