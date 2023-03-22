@@ -228,16 +228,14 @@ public:
 		return z;       
 	}
 	
-	void print(std::string prefix="") {
-		/**
-		 * @brief Sort and print from worst to best
-		 * @param prefix - an optional prefix to print before each line
-		 */
-		
-		for(auto& h : sorted()) {
-			h.show(prefix);
-		}
-	}
+        void print(std::string prefix="") {
+            std::vector<T> sorted_hypotheses = sorted();
+            int hypothesis_rank = sorted_hypotheses.size();
+            for(auto& h : sorted_hypotheses) {
+                h.show(prefix + "\t" + str(hypothesis_rank));
+                hypothesis_rank--;
+            }
+        }
 	
 	/**
 	 * @brief Sorted values
