@@ -27,6 +27,10 @@ namespace Concepts {
     std::string behind_rel = "parallel(displacement(G(x),F(x)),forward(S(x)))";
     std::string behind_int_rel = bin_op("or", behind_int, behind_rel);
 
+    // Front and behind without reflection
+    std::string front_int_rel_no_reflect = bin_op("or", front_int, behind_rel);
+    std::string behind_int_rel_no_reflect = bin_op("or", behind_int, front_rel);
+
     // Left
     std::string left_int = "parallel(displacement(F(x),G(x)),rightward(G(x)))";
     std::string left_rel = "parallel(displacement(F(x),G(x)),rightward(S(x)))";

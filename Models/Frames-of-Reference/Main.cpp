@@ -82,8 +82,10 @@ int main(int argc, char** argv){
             {"below", Concepts::below_abs},
             {"front", Concepts::front_int_rel},
             /* {"front", Concepts::front_int_rel_not_behind}, */
+            /* {"front", Concepts::front_int_rel_no_reflect}, */
             {"behind", Concepts::behind_int_rel},
             /* {"behind", Concepts::behind_int_rel_not_front}, */
+            /* {"behind", Concepts::behind_int_rel_no_reflect}, */
             {"side", Concepts::side_int},
             {"left", Concepts::left_int_rel},
             /* {"left", Concepts::left_int_rel_not_right}, */
