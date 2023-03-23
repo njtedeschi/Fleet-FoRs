@@ -2,13 +2,16 @@ import csv
 import sys
 import os
 
+# Things to include in UID cross reference file:
+# - Hash for git commit of run?
+# - All command line arguments
+# - Anything that was changed from git commit but not actually committed
+
 def process_input_file(input_file_path, output_file_path):
 
     # If output file needs to be created, write header line
     if not os.path.exists(output_file_path) or os.path.getsize(output_file_path) == 0:
-        with open(output_file_path, 'w', newline='') as output_file:
-            csv_writer = csv.writer(output_file)
-            csv_writer.writerow(['uid','data_amount', 'hypothesis_rank', 'posterior', 'prior', 'likelihood', 'target_likelihood', 'above', 'behind', 'below', 'front', 'left', 'right', 'side'])
+        set_header(output_file_path)
 
     # If output file is non-empty (even if it's just the header), use append mode for output file
     with open(input_file_path, 'r') as input_file, open(output_file_path, 'a', newline='') as output_file:
@@ -42,6 +45,11 @@ def process_input_file(input_file_path, output_file_path):
 
             else:
                 line_index += 1
+
+def set_header(output_file_path):
+    with open(output_file_path, 'w', newline='') as output_file:
+        csv_writer = csv.writer(output_file)
+        csv_writer.writerow(['uid','data_amount', 'hypothesis_rank', 'posterior', 'prior', 'likelihood', 'target_likelihood', 'above', 'behind', 'below', 'front', 'left', 'right', 'side'])
 
 if __name__ == "__main__":
     if len(sys.argv) <3:
