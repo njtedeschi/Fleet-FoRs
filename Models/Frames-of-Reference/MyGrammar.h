@@ -6,8 +6,8 @@
 #include "DSL.h"
 
 double VECTOR_WEIGHT = 3.0;
-double UPWARD_WEIGHT = 0.75;
-double RIGHTWARD_WEIGHT = 0.5;
+double UPWARD_WEIGHT = 1.0;
+double RIGHTWARD_WEIGHT = 1.0;
 
 class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Vector, Position, Direction, Displacement, double>,
 				  public Singleton<MyGrammar> {
