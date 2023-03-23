@@ -71,13 +71,14 @@ struct Object {
 	Direction forward;
         Direction upward;
         Direction rightward;
+        bool is_valid;
 	/* std::string name; */
 
         // Default constructor
-        Object() : position({0,0,0}), forward({0,0,0}), upward({0,0,0}), rightward({0,0,0}) {}
+        Object() : position({0,0,0}), forward({0,0,0}), upward({0,0,0}), rightward({0,0,0}), is_valid(false) {}
         // Calculate rightward from forward and upward
-        Object(const Position& position, const Direction& forward, const Direction& upward = {0, 0, 1})
-        : position(position), forward(forward), upward(upward) {
+        Object(const Position& position, const Direction& forward, const Direction& upward = {0, 0, 1}, bool is_valid = true)
+        : position(position), forward(forward), upward(upward), is_valid(is_valid) {
             rightward = cross_product(forward, upward);
         }
 };
@@ -85,12 +86,13 @@ struct Object {
 struct Scene {
 	Object speaker;
 	Object ground;
-	Object figure; 
+	Object figure;
+        bool is_direct;
 
         // Default constructor using default objects
-        Scene() : speaker(), ground(), figure() {}
-        Scene(const Object& speaker, const Object& ground, const Object& figure)
-            : speaker(speaker), ground(ground), figure(figure) {}
+        Scene() : speaker(), ground(), figure(), is_direct(false) {}
+        Scene(const Object& speaker, const Object& ground, const Object& figure, bool is_direct = false)
+            : speaker(speaker), ground(ground), figure(figure), is_direct(is_direct) {}
 
         void print() const {
             int label_width = 10;
@@ -121,6 +123,10 @@ namespace Space {
     Direction up = {0,0,1};
     Direction down = {0,0,-1};
 
+    // "Invalid" default object
+    // Has zero vector for all elements and a false is_valid flag
+    Object invalid_object;
+
     // Possible speakers
     Object direct_speaker = {origin, east};
     Object nondirect_speaker = {nondirect_speaker_spot, east};
@@ -148,10 +154,10 @@ std::vector<Scene> nondirect_scenes;
 
 void generate_scenes(){
     for (const auto& figure : Space::figures) {
-        Scene direct = {Space::direct_speaker, Space::direct_speaker, figure};
+        Scene direct = {Space::direct_speaker, Space::direct_speaker, figure, true};
         direct_scenes.push_back(direct);
         for (const auto& ground : Space::grounds) {
-            Scene nondirect = {Space::nondirect_speaker, ground, figure};
+            Scene nondirect = {Space::nondirect_speaker, ground, figure, false};
             nondirect_scenes.push_back(nondirect);
         }
     }

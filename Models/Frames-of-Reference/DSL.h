@@ -6,10 +6,17 @@ namespace DSL {
     const auto nonzero = +[](Vector x, Vector y) -> bool {
         return magnitude(x) == 0 || magnitude(y) == 0;
     };
+
+    const auto both_valid = +[](Object x, Object y) -> bool {
+        return x.is_valid && y.is_valid;
+    };
     /* const auto displacement = +[](Object x, Object y) -> Vector { */
     /*     return y.position - x.position; */
     /* }; */
     const auto displacement = +[](Object x, Object y) -> Displacement {
+        if(!both_valid(x,y)) {
+            return Displacement {0,0,0};
+        }
         return y.position - x.position;
     };
     /* const auto parallel = +[](Vector x, Vector y) -> bool { */

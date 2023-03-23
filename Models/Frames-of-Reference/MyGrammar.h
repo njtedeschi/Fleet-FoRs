@@ -36,6 +36,14 @@ public:
 		add("S(%s)",       +[](MyInput x) -> Object { return x.scene.speaker; });
 		add("F(%s)",        +[](MyInput x) -> Object { return x.scene.figure; });
 		add("G(%s)",        +[](MyInput x) -> Object { return x.scene.ground; });
+                add("G'(%s)", +[](MyInput x) -> Object {
+                        if(x.scene.is_direct) {
+                            return x.scene.ground;
+                        }
+                        else {
+                            return Space::invalid_object;
+                        }
+                        });
 		add("x",             Builtins::X<MyGrammar>);
 	}
 } grammar;

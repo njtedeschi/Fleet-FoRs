@@ -19,12 +19,12 @@ namespace Concepts {
 
     // Front
     std::string front_int = "parallel(displacement(G(x),F(x)),forward(G(x)))";
-    std::string front_rel = "parallel(displacement(F(x),G(x)),forward(S(x)))";
+    std::string front_rel = "parallel(displacement(F(x),G'(x)),forward(S(x)))";
     std::string front_int_rel = bin_op("or", front_int, front_rel);
 
     // Behind
     std::string behind_int = "parallel(displacement(F(x),G(x)),forward(G(x)))";
-    std::string behind_rel = "parallel(displacement(G(x),F(x)),forward(S(x)))";
+    std::string behind_rel = "parallel(displacement(G'(x),F(x)),forward(S(x)))";
     std::string behind_int_rel = bin_op("or", behind_int, behind_rel);
 
     // Front and behind without reflection
@@ -33,12 +33,12 @@ namespace Concepts {
 
     // Left
     std::string left_int = "parallel(displacement(F(x),G(x)),rightward(G(x)))";
-    std::string left_rel = "parallel(displacement(F(x),G(x)),rightward(S(x)))";
+    std::string left_rel = "parallel(displacement(F(x),G'(x)),rightward(S(x)))";
     std::string left_int_rel = bin_op("or", left_int, left_rel);
 
     // Right
     std::string right_int = "parallel(displacement(G(x),F(x)),rightward(G(x)))";
-    std::string right_rel = "parallel(displacement(G(x),F(x)),rightward(S(x)))";
+    std::string right_rel = "parallel(displacement(G'(x),F(x)),rightward(S(x)))";
     std::string right_int_rel = bin_op("or", right_int, right_rel);
 
     // Side
