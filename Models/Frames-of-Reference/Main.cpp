@@ -56,6 +56,7 @@ std::vector<int> generate_range(int start, int stop, int step) {
     }
     return result;
 }
+int data_amount = 0; // If non-zero, data_min and data_max both get set equal to it
 
 // Hypothesis sampling parameters
 double max_temp = 10.0; // maximum temperature for parallel tempering
@@ -72,7 +73,14 @@ int main(int argc, char** argv){
         fleet.add_option("--data_min", data_min, "Initial number of data points generated");
         fleet.add_option("--data_max", data_max, "Final number of data points generated");
         fleet.add_option("--data_step", data_step, "Number of data points added in each iteration");
+        // Shouldn't be used with data_min, data_max, and data_step flags
+        fleet.add_option("--data_amount", data_amount, "Number of data points for, specifically for a single iteration");
 	fleet.initialize(argc, argv);
+
+        if(data_amount) {
+            data_min = data_amount;
+            data_max = data_amount;
+        }
 
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
 
