@@ -74,7 +74,7 @@ int main(int argc, char** argv){
         fleet.add_option("--data_max", data_max, "Final number of data points generated");
         fleet.add_option("--data_step", data_step, "Number of data points added in each iteration");
         // Shouldn't be used with data_min, data_max, and data_step flags
-        fleet.add_option("--data_amount", data_amount, "Number of data points for, specifically for a single iteration");
+        fleet.add_option("--data_amount", data_amount, "Number of data points, specifically for a single iteration");
 	fleet.initialize(argc, argv);
 
         if(data_amount) {
