@@ -9,6 +9,7 @@ double TERMINAL_WEIGHT = 1.0;
 double TERMINATING_WEIGHT = 3.0;
 double UPWARD_WEIGHT = 1.0;
 double RIGHTWARD_WEIGHT = 1.0;
+double NEGATION_WEIGHT = 0.5;
 
 class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Scene,Vector, Position, Direction, Displacement, double>,
 				  public Singleton<MyGrammar> {
@@ -34,7 +35,7 @@ public:
 		
                 add("and(%s,%s)",    Builtins::And<MyGrammar>);
 		add("or(%s,%s)",     Builtins::Or<MyGrammar>);
-		add("not(%s)",       Builtins::Not<MyGrammar>);
+		add("not(%s)",       Builtins::Not<MyGrammar>, NEGATION_WEIGHT);
 
 
                 add("scene(%s)", +[](MyInput x) -> Scene {return x.scene;}, TERMINAL_WEIGHT);
