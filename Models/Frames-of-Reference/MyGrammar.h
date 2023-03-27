@@ -5,11 +5,11 @@
 
 #include "DSL.h"
 
-double TERMINAL_WEIGHT = 1.0;
-double TERMINATING_WEIGHT = 3.0;
+double TERMINAL_WEIGHT = 3.0;
+double TERMINATING_WEIGHT = 1.0;
 double UPWARD_WEIGHT = 1.0;
 double RIGHTWARD_WEIGHT = 1.0;
-double NEGATION_WEIGHT = 0.5;
+double NEGATION_WEIGHT = 1.0;
 
 class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Scene,Vector, Position, Direction, Displacement, double>,
 				  public Singleton<MyGrammar> {
