@@ -43,6 +43,7 @@ struct MyInput {
 
 // Data sampling parameters
 double p_direct = 0.2; // probability a scene is direct
+double p_listener_ground = 0.2; // probability that the ground of a nondirect scene is the listener
 double p_intrinsic = 0.5; // probability that a description is intrinsic
 
 // Data amounts
@@ -152,6 +153,7 @@ int main(int argc, char** argv){
             // Sample data
             SceneProbs scene_probs;
             scene_probs.p_direct = p_direct;
+            scene_probs.p_listener_ground = p_listener_ground;
             WordProbs word_probs;
             /* word_probs.p_intrinsic = p_intrinsic; */
             Probabilities probs = {scene_probs, word_probs};

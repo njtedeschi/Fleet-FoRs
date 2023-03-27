@@ -3,6 +3,7 @@
 
 struct SceneProbs {
     std::optional<double> p_direct = std::nullopt;
+    std::optional<double> p_listener_ground = std::nullopt;
 };
 
 struct WordProbs {
@@ -69,11 +70,22 @@ struct MyData {
         Scene scene;
         std::vector<Scene> candidate_scenes;
 
+        // TODO fix situation with optional values
         if (scene_probs.p_direct.has_value()) {
             if(flip(scene_probs.p_direct.value())) {
                 candidate_scenes = direct_scenes;
             } else {
-                candidate_scenes = nondirect_scenes;
+                if(scene_probs.p_listener_ground.has_value()) {
+                    if (flip(scene_probs.p_listener_ground.value())) {
+                        candidate_scenes = listener_nondirect_scenes;
+                    }
+                    else {
+                        candidate_scenes = nondirect_scenes;
+                    }
+                }
+                else {
+                    candidate_scenes = nondirect_scenes;
+                }
             }
         } else {
             candidate_scenes.insert(candidate_scenes.end(), direct_scenes.begin(), direct_scenes.end());

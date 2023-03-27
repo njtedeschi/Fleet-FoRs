@@ -93,12 +93,11 @@ struct Scene {
 	Object speaker;
 	Object ground;
 	Object figure;
-        bool is_direct;
 
         // Default constructor using default objects
-        Scene() : speaker(), ground(), figure(), is_direct(false) {}
-        Scene(const Object& speaker, const Object& ground, const Object& figure, bool is_direct = false)
-            : speaker(speaker), ground(ground), figure(figure), is_direct(is_direct) {}
+        Scene() : speaker(), ground(), figure() {}
+        Scene(const Object& speaker, const Object& ground, const Object& figure)
+            : speaker(speaker), ground(ground), figure(figure) {}
 
         void print() const {
             int label_width = 10;
@@ -152,19 +151,31 @@ namespace Space {
     Object north_facing_ground = {origin, north};
     Object south_facing_ground = {origin, south};
     std::vector<Object> grounds = {east_facing_ground, west_facing_ground, north_facing_ground, south_facing_ground};
+
+    // Possible grounds (listener)
+    Object listener_east_facing_ground = {origin, east, true};
+    Object listener_west_facing_ground = {origin, west, true};
+    Object listener_north_facing_ground = {origin, north, true};
+    Object listener_south_facing_ground = {origin, south, true};
+    std::vector<Object> listener_grounds = {listener_east_facing_ground, listener_west_facing_ground, listener_north_facing_ground, listener_south_facing_ground};
 }
 
     // Possible direct and nondirect scenes
 std::vector<Scene> direct_scenes;
 std::vector<Scene> nondirect_scenes;
+std::vector<Scene> listener_nondirect_scenes;
 
 void generate_scenes(){
     for (const auto& figure : Space::figures) {
-        Scene direct = {Space::direct_speaker, Space::direct_speaker, figure, true};
+        Scene direct = {Space::direct_speaker, Space::direct_speaker, figure};
         direct_scenes.push_back(direct);
         for (const auto& ground : Space::grounds) {
-            Scene nondirect = {Space::nondirect_speaker, ground, figure, false};
+            Scene nondirect = {Space::nondirect_speaker, ground, figure};
             nondirect_scenes.push_back(nondirect);
+        }
+        for (const auto& ground : Space::listener_grounds) {
+            Scene listener_nondirect = {Space::nondirect_speaker, ground, figure};
+            listener_nondirect_scenes.push_back(listener_nondirect);
         }
     }
 }
