@@ -46,12 +46,10 @@ public:
 		add("F(%s)",        +[](MyInput x) -> Object { return x.scene.figure; }, TERMINAL_WEIGHT);
 		add("G(%s)",        +[](MyInput x) -> Object { return x.scene.ground; }, TERMINAL_WEIGHT);
                 add("G'(%s)", +[](MyInput x) -> Object {
-                        if(!x.scene.is_direct) {
-                            return x.scene.ground;
-                        }
-                        else {
+                        if(x.scene.ground.is_participant) {
                             return Space::invalid_object;
                         }
+                        return x.scene.ground;
                         }, TERMINAL_WEIGHT);
 		add("x",             Builtins::X<MyGrammar>);
 	}

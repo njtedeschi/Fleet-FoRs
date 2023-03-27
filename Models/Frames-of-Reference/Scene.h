@@ -71,14 +71,20 @@ struct Object {
 	Direction forward;
         Direction upward;
         Direction rightward;
+        bool is_participant;
         bool is_valid;
 	/* std::string name; */
 
         // Default constructor
-        Object() : position({0,0,0}), forward({0,0,0}), upward({0,0,0}), rightward({0,0,0}), is_valid(false) {}
+        Object() : position({0,0,0}), forward({0,0,0}), upward({0,0,0}), rightward({0,0,0}), is_participant(false), is_valid(false) {}
         // Calculate rightward from forward and upward
-        Object(const Position& position, const Direction& forward, const Direction& upward = {0, 0, 1}, bool is_valid = true)
+        Object(const Position& position, const Direction& forward, const Direction& upward = {0, 0, 1}, bool is_participant = false, bool is_valid = true)
         : position(position), forward(forward), upward(upward), is_valid(is_valid) {
+            rightward = cross_product(forward, upward);
+        }
+        // Constructor for conversational participants
+        Object(const Position& position, const Direction& forward, bool is_participant, const Direction& upward = {0, 0, 1}, bool is_valid = true)
+        : position(position), forward(forward), is_participant(is_participant), upward(upward), is_valid(is_valid) {
             rightward = cross_product(forward, upward);
         }
 };
@@ -128,8 +134,8 @@ namespace Space {
     Object invalid_object;
 
     // Possible speakers
-    Object direct_speaker = {origin, east};
-    Object nondirect_speaker = {nondirect_speaker_spot, east};
+    Object direct_speaker = {origin, east, true};
+    Object nondirect_speaker = {nondirect_speaker_spot, east, true};
 
     // Possible figures
     Object east_figure = {east_spot, null_vector};
