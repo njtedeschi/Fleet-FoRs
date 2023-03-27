@@ -47,6 +47,8 @@ public:
 		ProposalType p; 
 		
 		if(flip(0.85))      p = Proposals::regenerate(&grammar, value);	
+                else if(flip(0.5))  p = Proposals::sample_function_leaving_args(&grammar, value);
+		else if(flip(0.5))  p = Proposals::swap_args(&grammar, value);
 		else if(flip(0.5))     p = Proposals::insert_tree(&grammar, value);	
 		else                p = Proposals::delete_tree(&grammar, value);			
 		
