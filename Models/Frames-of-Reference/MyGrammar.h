@@ -5,21 +5,22 @@
 
 #include "DSL.h"
 
-double VECTOR_WEIGHT = 3.0;
+double TERMINAL_WEIGHT = 1.0;
+double TERMINATING_WEIGHT = 3.0;
 double UPWARD_WEIGHT = 1.0;
 double RIGHTWARD_WEIGHT = 1.0;
 
-class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Vector, Position, Direction, Displacement, double>,
+class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Scene,Vector, Position, Direction, Displacement, double>,
 				  public Singleton<MyGrammar> {
 public:
 	MyGrammar() {
-                add("displacement(%s,%s)", DSL::displacement, VECTOR_WEIGHT);
+                add("displacement(%s,%s)", DSL::displacement);
 
-		add("forward(%s)", DSL::forward, VECTOR_WEIGHT);
-		add("upward(%s)", DSL::upward, UPWARD_WEIGHT*VECTOR_WEIGHT);
-		add("rightward(%s)", DSL::rightward, RIGHTWARD_WEIGHT*VECTOR_WEIGHT);
+		add("forward(%s)", DSL::forward);
+		/* add("upward(%s)", DSL::upward, UPWARD_WEIGHT*VECTOR_WEIGHT); */
+		add("rightward(%s)", DSL::rightward, RIGHTWARD_WEIGHT);
 
-                add("parallel(%s,%s)", DSL::parallel);
+                add("parallel(%s,%s)", DSL::parallel, TERMINATING_WEIGHT);
                 /* add("antiparallel(%s,%s)", DSL::antiparallel); */
                 /* add("orthogonal(%s,%s)", DSL::orthogonal); */
 
@@ -31,11 +32,14 @@ public:
 		add("or(%s,%s)",     Builtins::Or<MyGrammar>);
 		add("not(%s)",       Builtins::Not<MyGrammar>);
 
-		add("UP(%s)",       +[](MyInput x) -> Direction {return Space::up;}, UPWARD_WEIGHT*VECTOR_WEIGHT);
 
-		add("S(%s)",       +[](MyInput x) -> Object { return x.scene.speaker; });
-		add("F(%s)",        +[](MyInput x) -> Object { return x.scene.figure; });
-		add("G(%s)",        +[](MyInput x) -> Object { return x.scene.ground; });
+                add("scene(%s)", +[](MyInput x) -> Scene {return x.scene;}, TERMINAL_WEIGHT);
+		add("UP(%s)",       +[](Scene x) -> Direction {return Space::up;}, UPWARD_WEIGHT);
+		add("S(%s)",       +[](Scene x) -> Object { return x.speaker; });
+
+
+		add("F(%s)",        +[](MyInput x) -> Object { return x.scene.figure; }, TERMINAL_WEIGHT);
+		add("G(%s)",        +[](MyInput x) -> Object { return x.scene.ground; }, TERMINAL_WEIGHT);
                 add("G'(%s)", +[](MyInput x) -> Object {
                         if(!x.scene.is_direct) {
                             return x.scene.ground;
@@ -43,7 +47,7 @@ public:
                         else {
                             return Space::invalid_object;
                         }
-                        });
+                        }, TERMINAL_WEIGHT);
 		add("x",             Builtins::X<MyGrammar>);
 	}
 } grammar;

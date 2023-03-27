@@ -42,6 +42,17 @@ public:
             return prior = ( get_value().count() < MAX_NODES ? Super::compute_prior() : -infinity);
         }
 
+        [[nodiscard]] virtual ProposalType propose() const override {
+				
+		ProposalType p; 
+		
+		if(flip(0.85))      p = Proposals::regenerate(&grammar, value);	
+		else if(flip(0.5))     p = Proposals::insert_tree(&grammar, value);	
+		else                p = Proposals::delete_tree(&grammar, value);			
+		
+		return p;
+	}
+
         /**
 	 * @brief This computes the weight of this factor from its cached values
 	 * @return 
