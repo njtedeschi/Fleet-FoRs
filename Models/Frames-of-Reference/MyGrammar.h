@@ -21,6 +21,10 @@ public:
 		add("rightward(%s)", DSL::rightward, RIGHTWARD_WEIGHT);
 
                 add("parallel(%s,%s)", DSL::parallel, TERMINATING_WEIGHT);
+                add("+-parallel(%s,%s)", +[](Displacement x, Direction y) -> bool {
+                    if (DSL::nonzero(x,y)) {return false;}
+                    return cosine_similarity(x,y) == 1 || cosine_similarity(x,y) == -1;
+                        }, TERMINATING_WEIGHT);
                 /* add("antiparallel(%s,%s)", DSL::antiparallel); */
                 /* add("orthogonal(%s,%s)", DSL::orthogonal); */
 
