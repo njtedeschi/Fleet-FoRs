@@ -13,7 +13,7 @@ public:
 	using Super::Super; // inherit the constructors
 	using CCH = CachedCallHypothesis<InnerHypothesis,MyInput,bool>;
 
-        static const size_t MAX_NODES = 32;
+        static const size_t MAX_NODES = 20;
 	
 	InnerHypothesis(const InnerHypothesis& c) : Super(c), CCH(c) {}	
 	InnerHypothesis(const InnerHypothesis&& c) :  Super(c), CCH(c) { }	
@@ -39,7 +39,7 @@ public:
 	}
 
         virtual double compute_prior() override {
-            return prior = ( get_value().count() < MAX_NODES ? Super::compute_prior() : -infinity);
+            return prior = (get_value().count_not_x() < MAX_NODES ? Super::compute_prior() : -infinity);
         }
 
         [[nodiscard]] virtual ProposalType propose() const override {
