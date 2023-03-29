@@ -144,31 +144,32 @@ namespace Space {
     Object invalid_object;
 
     // Possible speakers
-    Object direct_speaker = {origin, east, true};
-    Object nondirect_speaker = {nondirect_speaker_spot, east, true};
+    OrientedObject direct_speaker = {origin, east, true};
+    OrientedObject nondirect_speaker = {nondirect_speaker_spot, east, true};
 
     // Possible figures
-    Object east_figure = {east_spot, null_vector};
-    Object west_figure = {west_spot, null_vector};
-    Object north_figure = {north_spot, null_vector};
-    Object south_figure = {south_spot, null_vector};
-    Object up_figure = {up_spot, null_vector};
-    Object down_figure = {down_spot, null_vector};
+    Object east_figure = {east_spot};
+    Object west_figure = {west_spot};
+    Object north_figure = {north_spot};
+    Object south_figure = {south_spot};
+    Object up_figure = {up_spot};
+    Object down_figure = {down_spot};
     std::vector<Object> figures = {east_figure, west_figure, north_figure, south_figure, up_figure, down_figure};
+    /* std::vector<Object> figures = {east_figure, west_figure, north_figure, south_figure}; */
 
     // Possible grounds
-    Object east_facing_ground = {origin, east};
-    Object west_facing_ground = {origin, west};
-    Object north_facing_ground = {origin, north};
-    Object south_facing_ground = {origin, south};
-    std::vector<Object> grounds = {east_facing_ground, west_facing_ground, north_facing_ground, south_facing_ground};
+    OrientedObject east_facing_ground = {origin, east};
+    OrientedObject west_facing_ground = {origin, west};
+    OrientedObject north_facing_ground = {origin, north};
+    OrientedObject south_facing_ground = {origin, south};
+    std::vector<OrientedObject> grounds = {east_facing_ground, west_facing_ground, north_facing_ground, south_facing_ground};
 
     // Possible grounds (listener)
-    Object listener_east_facing_ground = {origin, east, true};
-    Object listener_west_facing_ground = {origin, west, true};
-    Object listener_north_facing_ground = {origin, north, true};
-    Object listener_south_facing_ground = {origin, south, true};
-    std::vector<Object> listener_grounds = {listener_east_facing_ground, listener_west_facing_ground, listener_north_facing_ground, listener_south_facing_ground};
+    OrientedObject listener_east_facing_ground = {origin, east, true};
+    OrientedObject listener_west_facing_ground = {origin, west, true};
+    OrientedObject listener_north_facing_ground = {origin, north, true};
+    OrientedObject listener_south_facing_ground = {origin, south, true};
+    std::vector<OrientedObject> listener_grounds = {listener_east_facing_ground, listener_west_facing_ground, listener_north_facing_ground, listener_south_facing_ground};
 }
 
     // Possible direct and nondirect scenes
