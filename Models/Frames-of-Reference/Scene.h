@@ -67,26 +67,37 @@ Direction cross_product(const Direction &a, const Direction &b){
 }
 
 struct Object {
-	Position position;
-	Direction forward;
-        Direction upward;
-        Direction rightward;
-        bool is_participant;
-        bool is_valid;
-	/* std::string name; */
+    Position position;
+    bool is_participant;
+    bool is_valid;
 
-        // Default constructor
-        Object() : position({0,0,0}), forward({0,0,0}), upward({0,0,0}), rightward({0,0,0}), is_participant(false), is_valid(false) {}
-        // Calculate rightward from forward and upward
-        Object(const Position& position, const Direction& forward, const Direction& upward = {0, 0, 1}, bool is_participant = false, bool is_valid = true)
-        : position(position), forward(forward), upward(upward), is_valid(is_valid) {
-            rightward = cross_product(forward, upward);
-        }
-        // Constructor for conversational participants
-        Object(const Position& position, const Direction& forward, bool is_participant, const Direction& upward = {0, 0, 1}, bool is_valid = true)
-        : position(position), forward(forward), is_participant(is_participant), upward(upward), is_valid(is_valid) {
-            rightward = cross_product(forward, upward);
-        }
+    // Default constructor
+    Object() : position({0, 0, 0}), is_participant(false), is_valid(false) {}
+
+    // Construct from position
+    Object(const Position& position, bool is_participant=false, bool is_valid = true)
+    : position(position), is_participant(is_participant), is_valid(is_valid) {}
+};
+
+struct OrientedObject : public Object {
+    Direction forward;
+    Direction upward;
+    Direction rightward;
+
+    // Default constructor
+    OrientedObject() : Object(), forward({0, 0, 0}), upward({0, 0, 0}), rightward({0, 0, 0}) {}
+
+    // Calculate rightward from forward and upward
+    OrientedObject(const Position& position, const Direction& forward, const Direction& upward = {0, 0, 1}, bool is_participant = false, bool is_valid = true)
+    : Object(position, is_participant, is_valid), forward(forward), upward(upward) {
+        rightward = cross_product(forward, upward);
+    }
+
+    // Constructor with is_participant parameter
+    OrientedObject(const Position& position, const Direction& forward, bool is_participant, const Direction& upward = {0, 0, 1}, bool is_valid = true)
+    : Object(position, is_participant, is_valid), forward(forward), upward(upward) {
+        rightward = cross_product(forward, upward);
+    }
 };
 
 struct Scene {
