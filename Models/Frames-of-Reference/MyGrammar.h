@@ -11,7 +11,7 @@ double UPWARD_WEIGHT = 1.0;
 double RIGHTWARD_WEIGHT = 1.0;
 double NEGATION_WEIGHT = 1.0;
 
-class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,Scene,Vector, Position, Direction, Displacement, double>,
+class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Object,OrientedObject,Scene,Vector, Position, Direction, Displacement, double>,
 				  public Singleton<MyGrammar> {
 public:
 	MyGrammar() {
@@ -20,6 +20,9 @@ public:
 		add("forward(%s)", DSL::forward);
 		/* add("upward(%s)", DSL::upward, UPWARD_WEIGHT*VECTOR_WEIGHT); */
 		add("rightward(%s)", DSL::rightward, RIGHTWARD_WEIGHT);
+                // Doubled letter to distinguish from rules used in displacement expansions
+		add("SS(%s)",       +[](Scene x) -> OrientedObject { return x.speaker;});
+		add("GG(%s)",        +[](MyInput x) -> OrientedObject { return x.scene.ground;});
 
                 add("parallel(%s,%s)", DSL::parallel, TERMINATING_WEIGHT);
                 add("+-parallel(%s,%s)", +[](Displacement x, Direction y) -> bool {

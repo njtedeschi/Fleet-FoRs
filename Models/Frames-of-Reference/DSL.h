@@ -55,7 +55,7 @@ namespace DSL {
     };
 
     // Feature extraction
-    const auto forward = +[](Object x) -> Direction {return x.forward;};
-    const auto upward = +[](Object x) -> Direction {return x.upward;};
-    const auto rightward = +[](Object x) -> Direction {return x.rightward;};
+    const auto forward = +[](OrientedObject x) -> Direction {return x.forward;};
+    const auto upward = +[](OrientedObject x) -> Direction {return x.upward;};
+    const auto rightward = +[](OrientedObject x) -> Direction {return x.rightward;};
 }
