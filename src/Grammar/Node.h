@@ -190,6 +190,18 @@ public:
 		return n;
 	}
 
+        bool is_x() const {
+            return this->rule->format == "x";
+        }
+
+        virtual size_t count_not_x() const {
+		size_t n = 1*(not this->is_x()); // me
+		for(auto& c : children) {
+			n += c.count_not_x();			
+		}
+		return n;
+        }
+
 	
 	virtual bool is_complete() const {
 		/**
