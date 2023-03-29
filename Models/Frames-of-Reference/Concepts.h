@@ -44,6 +44,8 @@ namespace Concepts {
     // Side
     /* std::string side_int = "orthogonal(displacement(G(x),F(x)),forward(G(x)))"; */
     std::string side_int = bin_op("or", left_int, right_int);
+    // Version of intrinsic side that uses +-parallel instead of disjunction
+    std::string side_int_pm = "+-parallel(displacement(G(x),F(x)),rightward(GG(x)))";
     std::string side_rel = bin_op("or", left_rel, right_rel);
     std::string side_int_rel = bin_op("or", side_int, side_rel);
     /* std::string side_int_rel = "or(orthogonal(displacement(G(x),F(x)),forward(G(x))),orthogonal(displacement(G(x),F(x)),forward(S(scene(x)))))"; */
