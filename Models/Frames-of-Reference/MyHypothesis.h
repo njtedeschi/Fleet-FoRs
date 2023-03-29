@@ -152,6 +152,7 @@ public:
         extern MyHypothesis target;
 
         print(":", prefix, this->posterior, this->prior, this->likelihood, target.likelihood);
+        /* print(":", prefix, this->posterior, this->prior, this->likelihood, target.posterior, target.prior, target.likelihood); */
         /* print(this->string()); */
 	for(auto& [k, f] : factors) {
             // TODO: less hard coding, make trimming optional?
