@@ -800,7 +800,7 @@ public:
 //	}
 //	
 	
-	double log_probability(const Node& n) const {
+	virtual double log_probability(const Node& n) const {
 		/**
 		 * @brief Compute the log probability of a tree according to the grammar. NOTE: here we ignore nodes that are Null
 		 * 		  meaning that we compute the partial probability
