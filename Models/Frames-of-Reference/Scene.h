@@ -101,13 +101,13 @@ struct OrientedObject : public Object {
 };
 
 struct Scene {
-	Object speaker;
-	Object ground;
+	OrientedObject speaker;
+	OrientedObject ground;
 	Object figure;
 
         // Default constructor using default objects
         Scene() : speaker(), ground(), figure() {}
-        Scene(const Object& speaker, const Object& ground, const Object& figure)
+        Scene(const OrientedObject& speaker, const OrientedObject& ground, const Object& figure)
             : speaker(speaker), ground(ground), figure(figure) {}
 
         void print() const {
