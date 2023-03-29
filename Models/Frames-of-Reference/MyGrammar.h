@@ -62,6 +62,10 @@ public:
             double lp = 0.0;
             for(auto& x : n) {
                     if(x.rule == NullRule) continue;
+                    // 0 prior probability for repeated negation
+                    if(x.rule->format == "not(%s)") {
+                        if(x.get_children()[0].rule->format == "not(%s)") return -10000;
+                    }
                     // 0 prior probability for displacement of an object to itself
                     if(x.rule->format == "displacement(%s,%s)") {
                         std::string first_arg = x.get_children()[0].rule->format;
@@ -69,6 +73,7 @@ public:
                         if(first_arg == second_arg) return -1000;
                         if((first_arg == "G(%s)" && second_arg == "G'(%s)")||(first_arg == "G'(%s)" && second_arg == "G(%s)")) return -10000;
                     }
+                    // Otherwise, calculate normally
                     lp += log(x.rule->p) - log(rule_normalizer(x.rule->nt));
             }
 
