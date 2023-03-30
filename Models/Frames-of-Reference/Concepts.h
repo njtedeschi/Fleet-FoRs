@@ -12,19 +12,19 @@ namespace Concepts {
     }
 
     // Above
-    std::string above_abs = "parallel(displacement(G(x),F(x)),UP(scene(x)))";
+    std::string above_abs = "+parallel(G_to_F(x),UP(scene(x)))";
 
     // Below
-    std::string below_abs = "parallel(displacement(F(x),G(x)),UP(scene(x)))";
+    std::string below_abs = "-parallel(G_to_F(x),UP(scene(x)))";
 
     // Front
-    std::string front_int = "parallel(displacement(G(x),F(x)),forward(GG(x)))";
-    std::string front_rel = "parallel(displacement(F(x),G'(x)),forward(SS(scene(x))))";
+    std::string front_int = "+parallel(G_to_F(x),forward(G(x)))";
+    std::string front_rel = "-parallel(G'_to_F(x),forward(S(scene(x))))";
     std::string front_int_rel = bin_op("or", front_int, front_rel);
 
     // Behind
-    std::string behind_int = "parallel(displacement(F(x),G(x)),forward(GG(x)))";
-    std::string behind_rel = "parallel(displacement(G'(x),F(x)),forward(SS(scene(x))))";
+    std::string behind_int ="-parallel(G_to_F(x),forward(G(x)))";
+    std::string behind_rel = "+parallel(G'_to_F(x),forward(S(scene(x))))";
     std::string behind_int_rel = bin_op("or", behind_int, behind_rel);
 
     // Front and behind without reflection
@@ -32,20 +32,19 @@ namespace Concepts {
     std::string behind_int_rel_no_reflect = bin_op("or", behind_int, front_rel);
 
     // Left
-    std::string left_int = "parallel(displacement(F(x),G(x)),rightward(GG(x)))";
-    std::string left_rel = "parallel(displacement(F(x),G'(x)),rightward(SS(scene(x))))";
+    std::string left_int = "-parallel(G_to_F(x),rightward(G(x)))";
+    std::string left_rel = "-parallel(G'_to_F(x),rightward(S(scene(x))))";
     std::string left_int_rel = bin_op("or", left_int, left_rel);
 
     // Right
-    std::string right_int = "parallel(displacement(G(x),F(x)),rightward(GG(x)))";
-    std::string right_rel = "parallel(displacement(G'(x),F(x)),rightward(SS(scene(x))))";
+    std::string right_int = "+parallel(G_to_F(x),rightward(G(x)))";
+    std::string right_rel = "+parallel(G'_to_F(x),rightward(S(scene(x))))";
     std::string right_int_rel = bin_op("or", right_int, right_rel);
 
     // Side
     /* std::string side_int = "orthogonal(displacement(G(x),F(x)),forward(G(x)))"; */
     std::string side_int = bin_op("or", left_int, right_int);
     // Version of intrinsic side that uses +-parallel instead of disjunction
-    std::string side_int_pm = "+-parallel(displacement(G(x),F(x)),rightward(GG(x)))";
     std::string side_rel = bin_op("or", left_rel, right_rel);
     std::string side_int_rel = bin_op("or", side_int, side_rel);
     /* std::string side_int_rel = "or(orthogonal(displacement(G(x),F(x)),forward(G(x))),orthogonal(displacement(G(x),F(x)),forward(S(scene(x)))))"; */
