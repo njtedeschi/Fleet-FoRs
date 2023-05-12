@@ -8,6 +8,45 @@ from scipy.special import logsumexp
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import sympy
+from sympy.parsing.sympy_parser import parse_expr
+
+### SymPy definitions
+
+UP = sympy.Symbol("UP")
+G_to_F = sympy.Symbol("G_to_F")
+S = sympy.Symbol("S")
+G = sympy.Symbol("G")
+GG = sympy.Symbol("GG")
+upward = sympy.Function("upward")
+forward = sympy.Function("forward")
+rightward = sympy.Function("rightward")
+# G_not_P = sympy.Symbol("G_not_P")
+cosine_similarity = sympy.Function("cosine_similiarity")
+
+class BooleanFunction(sympy.Function, sympy.logic.boolalg.Boolean):
+    is_Boolean = True
+
+class is_participant(BooleanFunction):
+    pass
+
+class parallel(BooleanFunction):
+    def simplify(self, *args, **kwargs):
+        arg1, arg2 = self.args
+        # return sympy.Eq(cosine_similarity(arg1, arg2), 1)
+        return cosine_similarity(arg1, arg2) > 0
+
+class antiparallel(BooleanFunction):
+    def simplify(self, *args, **kwargs):
+        arg1, arg2 = self.args
+        # return sympy.Eq(cosine_similarity(arg1, arg2), -1)
+        return cosine_similarity(arg1, arg2) < 0
+
+class pm_parallel(BooleanFunction):
+    def simplify(self, *args, **kwargs):
+        arg1, arg2 = self.args
+        # return sympy.Eq(cosine_similarity(arg1, arg2), -1)
+        return sympy.Or(cosine_similarity(arg1, arg2) > 0, cosine_similarity(arg1, arg2) < 0)
 
 class FoR(Enum):
     INT = 1
@@ -139,6 +178,55 @@ def plot_learning_curves(learning_curve_data):
     plt.title("Learning Curves")
     plt.legend(title="Category")
     plt.show()
+
+### Functions to simplify formula text for SymPy
+
+def reformat_formula(formula):
+    # NOTE: regex in replace_G_prime specifically handles up to two levels of nested parens
+    # More specifically: \(([^()]*|\([^()]*\))*\)
+    formula = replace_G_prime(formula)
+    formula = capitalize_boolean_operators(formula)
+    formula = rename_parallel_functions(formula)
+    formula = remove_scene(formula)
+    formula = rename_absolute_vertical(formula)
+    return formula
+
+def replace_G_prime(formula):
+    return re.sub(r"([a-z+-]+)\((G\'_to_F,)(\w+\(([^()]*|\([^()]*\))*\))\)",r"And(\1(G_to_F,\3),Not(is_participant(GG)))",formula)
+
+def capitalize_boolean_operators(formula):
+    formula = formula.replace('and(', 'And(')
+    formula = formula.replace('or(', 'Or(')
+    formula = formula.replace('not(', 'Not(')
+    return formula
+
+def rename_parallel_functions(formula):
+    formula = formula.replace('+-parallel', 'pm_parallel')
+    formula = formula.replace('+parallel', 'parallel')
+    formula = formula.replace('-parallel', 'antiparallel')
+    return formula
+
+def remove_scene(formula):
+    return formula.replace('(scene)', '')
+
+def rename_absolute_vertical(formula):
+    return formula.replace('UP', 'upward(E)')
+
+
+local_dict = {
+        'G_to_F' : G_to_F,
+        'S' : S,
+        'G' : G,
+        'GG' : GG,
+        'parallel' : parallel,
+        'antiparallel' : antiparallel,
+        'pm_parallel' : pm_parallel,
+        'is_participant' : is_participant,
+        'upward' : upward,
+        'forward' : forward,
+        'righward' : rightward,
+        # 'G_not_P' : G_not_P
+        }
 
 def main():
     # Command-line arguments
