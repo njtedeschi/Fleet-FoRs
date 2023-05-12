@@ -88,7 +88,10 @@ class ConjunctiveClause:
 
     @classmethod
     def from_sympy(cls, sympy_conjunctive_clause):
-        conjuncts = sympy_conjunctive_clause.args
+        if isinstance(sympy_conjunctive_clause, sympy.And):
+            conjuncts = sympy_conjunctive_clause.args
+        else:
+            conjuncts = [sympy_conjunctive_clause]
         conjunctive_clause = cls(conjuncts)
         return conjunctive_clause
 
