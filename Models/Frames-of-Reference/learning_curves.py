@@ -48,20 +48,53 @@ class pm_parallel(BooleanFunction):
         # return sympy.Eq(cosine_similarity(arg1, arg2), -1)
         return sympy.Or(cosine_similarity(arg1, arg2) > 0, cosine_similarity(arg1, arg2) < 0)
 
+class Axis(Enum):
+    ABOVE = 1
+    BELOW = -1
+    FRONT = 2
+    BEHIND = -2
+    RIGHT = 3
+    LEFT = -3
+
 class FoR(Enum):
     INT = 1
     REL = 2
     ABS = 3
     OTHER = 4
 
+class AngularSpecification:
+
+    # parameters:
+    # frame : FoR
+    # direction : Axis
+    def __init__(self,frame,direction):
+        self.frame = frame
+        self.direction = direction
+
+
+def angular_specifications(frames, directions):
+    angular_specifications = set()
+    for frame in frames:
+        for direction in directions:
+            angular_specification = AngularSpecification(frame=frame,direction=direction)
+            angular_specifications.add(angular_specification)
+    return angular_specifications
+
 TARGET = {
-        "above" : {FoR.ABS},
-        "below" : {FoR.ABS},
-        "front" : {FoR.INT, FoR.REL},
-        "behind" : {FoR.INT, FoR.REL},
-        "left" : {FoR.INT, FoR.REL},
-        "right" : {FoR.INT, FoR.REL},
-        "side" : {FoR.INT}
+        "above" : angular_specifications(frames={FoR.ABS},
+                                         directions={Axis.ABOVE}),
+        "below" : angular_specifications(frames={FoR.ABS},
+                                         directions={Axis.BELOW}),
+        "front" : angular_specifications(frames={FoR.INT, FoR.REL},
+                                         directions={Axis.FRONT}),
+        "behind" : angular_specifications(frames={FoR.INT, FoR.REL},
+                                          directions={Axis.BEHIND}),
+        "left" : angular_specifications(frames={FoR.INT, FoR.REL},
+                                        directions={Axis.LEFT}),
+        "right" : angular_specifications(frames={FoR.INT, FoR.REL},
+                                         directions={Axis.RIGHT}),
+        "side" : angular_specifications(frames={FoR.INT},
+                                        directions={Axis.LEFT, Axis.RIGHT})
         }
 
 def categorize_hypothesis(formula):
