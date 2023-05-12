@@ -56,7 +56,13 @@ class Lexicon:
         self.concepts = concepts # word : Concept dict
 
     def classify(self, targets):
-            pass
+        concept_classifications = {word:concept.classify(targets[word])
+                                   for (word, concept) in concepts.items()}
+        lexicon_classification = self.concepts_to_lexicon(concept_classifications)
+        return lexicon_classification
+
+    def concepts_to_lexicon(self, concept_classifications):
+        pass
 
 class DNF:
 
