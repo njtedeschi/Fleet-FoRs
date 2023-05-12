@@ -105,48 +105,58 @@ class Literal:
 
     def classify(self):
         # Parallel/antiparallel literals
-        if isinstance(self.atom, sympy.relational.Relational):
-            inequality = self.atom
-
-            operator = inequality.rel_op
-            if operator == '>=':
-                self.is_negated = True
-                operator = '<'
-            if operator == '<=':
-                self.is_negated = True
-                operator = '>'
-
-            _, direction = inequality.lhs.args
-
-            angular_specification = self.convert_inequality(operator, direction)
-            return (angular_specification, is_negated) # TODO replace tuple
-        # +/- G_is_P literals
+        if isinstance(self.atom, sympy.core.relational.Relational):
+            angular_specification = self.convert_inequality(self.atom)
+            classification = SimpleLiteral(angular_specification, self.is_negated)
         else:
-            # TODO figure out type and conversions for predicate
-            predicate = self.atom.function
-            return (predicate, is_negated)
+            predicate = self.atom
+            classification = SimpleLiteral(predicate, self.is_negated)
+        return classification
 
-    def convert_inequality(self, operator, direction):
+    # inequality : sympy.relational.Relational
+    def convert_inequality(self, inequality):
+        # Extract quantities from sympy inequality
+        operator = inequality.rel_op
+        _, direction = inequality.lhs.args
         ground = direction.args[0]
-        match ground:
-            case G:
-                frame = FoR.INT
-            case S:
-                frame = FoR.REL
-            case E:
-                frame = foR.ABS
 
-        sign = 1 if operator == '>' else -1
-        ward = direction.function
-        match ward:
-            case upward:
-                axis = Axis(sign*1)
-            case forward:
-                axis = Axis(sign*2)
-            case rightward:
-                axis = Axis(sign*3)
+        frame = self.ineq_to_frame(ground)
+        axis = self.ineq_to_axis(operator, direction)
 
         return AngularSpecification(frame=frame,direction=axis)
+
+    def ineq_to_frame(self, ground):
+        if ground == G:
+            frame = FoR.INT
+        elif ground == S:
+            frame = FoR.REL
+        else:
+            frame = FoR.ABS
+        return frame
+
+    def ineq_to_axis(self, operator, direction):
+        if operator == '>=':
+            self.is_negated = True
+            operator = '<'
+        if operator == '<=':
+            self.is_negated = True
+            operator = '>'
+
+        sign = 1 if operator == '>' else -1
+        if direction == upward:
+            axis = Axis(sign*1)
+        elif direction == forward:
+            axis = Axis(sign*2)
+        else:
+            axis = Axis(sign*3)
+
+        return axis
+
+class SimpleLiteral:
+
+    def __init__(self, simple_atom, is_negated):
+        self.atom = simple_atom
+        self.is_negated = is_negated
 
 class Axis(Enum):
     ABOVE = 1
