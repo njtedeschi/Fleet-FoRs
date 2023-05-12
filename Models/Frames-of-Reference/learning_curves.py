@@ -48,6 +48,64 @@ class pm_parallel(BooleanFunction):
         # return sympy.Eq(cosine_similarity(arg1, arg2), -1)
         return sympy.Or(cosine_similarity(arg1, arg2) > 0, cosine_similarity(arg1, arg2) < 0)
 
+### Classification
+
+class Lexicon:
+
+    def __init__(self, concepts):
+        self.concepts = concepts # word : Concept dict
+
+    def classify(self, targets):
+            pass
+
+class DNF:
+
+    def __init__(self, disjuncts):
+        self.disjuncts = disjuncts
+
+    @classmethod
+    def from_sympy(cls, sympy_dnf):
+        disjuncts = sympy_dnf.args
+        dnf = cls(disjuncts)
+        return dnf
+
+    def classify(self, target):
+        pass
+
+class ConjunctiveClause:
+
+    def __init__(self, conjuncts):
+        self.conjuncts = conjuncts
+
+    @classmethod
+    def from_sympy(cls, sympy_conjunctive_clause):
+        conjuncts = sympy_conjunctive_clause.args
+        conjunctive_clause = cls(conjuncts)
+        return conjunctive_clause
+
+    def classify(self):
+        pass
+
+class Literal:
+
+    def __init__(self, atom, is_negated=False):
+        self.atom = atom
+        self.is_negated = is_negated
+
+    @classmethod
+    def from_sympy(cls, sympy_literal):
+        is_negated = False
+        if isinstance(sympy_literal, sympy.Not):
+            is_negated = True
+            atom = sympy_literal.args[0]
+        else:
+            atom = sympy_literal
+        literal = cls(atom, is_negated)
+        return literal
+
+    def classify(self):
+        pass
+
 class Axis(Enum):
     ABOVE = 1
     BELOW = -1
@@ -71,7 +129,6 @@ class AngularSpecification:
         self.frame = frame
         self.direction = direction
 
-
 def angular_specifications(frames, directions):
     angular_specifications = set()
     for frame in frames:
@@ -80,7 +137,7 @@ def angular_specifications(frames, directions):
             angular_specifications.add(angular_specification)
     return angular_specifications
 
-TARGET = {
+TARGETS = {
         "above" : angular_specifications(frames={FoR.ABS},
                                          directions={Axis.ABOVE}),
         "below" : angular_specifications(frames={FoR.ABS},
@@ -170,7 +227,7 @@ def format_for_learning_curves(results, categories):
         # calculate total posterior for each category
         for _, lexicon_results in data_amount_group.iterrows():
             # Categorize lexicon
-            formulas = {word:lexicon_results[word] for word in TARGET.keys()}
+            formulas = {word:lexicon_results[word] for word in TARGETS.keys()}
             lexicon_categorization = categorize_lexicon(formulas)
             # Add lexicon's posterior to corresponding category
             # posteriors[lexicon_categorization] += np.exp(lexicon_results["posterior"])
