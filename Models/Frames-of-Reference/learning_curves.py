@@ -71,7 +71,10 @@ class DNF:
 
     @classmethod
     def from_sympy(cls, sympy_dnf):
-        disjuncts = sympy_dnf.args
+        if isinstance(sympy_dnf, sympy.Or):
+            disjuncts = sympy_dnf.args
+        else:
+            disjuncts = [sympy_dnf]
         dnf = cls(disjuncts)
         return dnf
 
