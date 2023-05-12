@@ -104,7 +104,49 @@ class Literal:
         return literal
 
     def classify(self):
-        pass
+        # Parallel/antiparallel literals
+        if isinstance(self.atom, sympy.relational.Relational):
+            inequality = self.atom
+
+            operator = inequality.rel_op
+            if operator == '>=':
+                self.is_negated = True
+                operator = '<'
+            if operator == '<=':
+                self.is_negated = True
+                operator = '>'
+
+            _, direction = inequality.lhs.args
+
+            angular_specification = self.convert_inequality(operator, direction)
+            return (angular_specification, is_negated) # TODO replace tuple
+        # +/- G_is_P literals
+        else:
+            # TODO figure out type and conversions for predicate
+            predicate = self.atom.function
+            return (predicate, is_negated)
+
+    def convert_inequality(self, operator, direction):
+        ground = direction.args[0]
+        match ground:
+            case G:
+                frame = FoR.INT
+            case S:
+                frame = FoR.REL
+            case E:
+                frame = foR.ABS
+
+        sign = 1 if operator == '>' else -1
+        ward = direction.function
+        match ward:
+            case upward:
+                axis = Axis(sign*1)
+            case forward:
+                axis = Axis(sign*2)
+            case rightward:
+                axis = Axis(sign*3)
+
+        return AngularSpecification(frame=frame,direction=axis)
 
 class Axis(Enum):
     ABOVE = 1
