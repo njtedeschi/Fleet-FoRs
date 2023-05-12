@@ -181,6 +181,9 @@ class AngularSpecification:
         self.frame = frame
         self.direction = direction
 
+    def __str__(self):
+        return f"{self.frame.name} {self.direction.name}"
+
 def angular_specifications(frames, directions):
     angular_specifications = set()
     for frame in frames:
