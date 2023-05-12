@@ -89,14 +89,19 @@ class ConjunctiveClause:
     @classmethod
     def from_sympy(cls, sympy_conjunctive_clause):
         if isinstance(sympy_conjunctive_clause, sympy.And):
-            conjuncts = sympy_conjunctive_clause.args
+            conjuncts = [Literal.from_sympy(conjunct)
+                         for conjunct in sympy_conjunctive_clause.args]
         else:
-            conjuncts = [sympy_conjunctive_clause]
+            conjuncts = [Literal.from_sympy(sympy_conjunctive_clause)]
         conjunctive_clause = cls(conjuncts)
         return conjunctive_clause
 
     def classify(self):
-        pass
+        classification = set()
+        for literal in self.conjuncts:
+            classification.add(literal.classify())
+        # Freeze set to allow nesting at DNF level
+        return frozenset(classification)
 
 class Literal:
 
