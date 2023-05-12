@@ -175,6 +175,9 @@ class SimpleLiteral:
         self.atom = simple_atom
         self.is_negated = is_negated
 
+    def __repr__(self):
+        return f"{self.atom} is {not self.is_negated}"
+
 class Axis(Enum):
     ABOVE = 1
     BELOW = -1
