@@ -72,9 +72,10 @@ class DNF:
     @classmethod
     def from_sympy(cls, sympy_dnf):
         if isinstance(sympy_dnf, sympy.Or):
-            disjuncts = sympy_dnf.args
+            disjuncts = [ConjunctiveClause.from_sympy(disjunct)
+                         for disjunct in sympy_dnf.args]
         else:
-            disjuncts = [sympy_dnf]
+            disjuncts = [ConjunctiveClause.from_sympy(sympy_dnf)]
         dnf = cls(disjuncts)
         return dnf
 
