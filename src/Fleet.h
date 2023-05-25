@@ -368,7 +368,12 @@ int main(int argc, char** argv){
 #include <signal.h>
 #include <string>
 
-#include <mach-o/dyld.h> // for _NSGet_Executable_Path
+// For macs:
+#ifdef __APPLE__
+    #include <sys/syslimits.h> // used to get PATH_MAX
+    #include <mach-o/dyld.h> // dynamic link editor with method to get executable path
+#endif
+
 
 const std::string FLEET_VERSION = "0.1.2";
 
@@ -511,13 +516,17 @@ public:
 		if(FleetArgs::print_header) {
 			// Print standard fleet header
 			gethostname(hostname, HOST_NAME_MAX);
-
-			// and build the command to get the md5 checksum of myself
-                        char path[PATH_MAX+1];
-                        uint32_t size = sizeof(path);
-                        _NSGetExecutablePath(path, &size);
-                        char tmp[64]; sprintf(tmp, "md5sum %s", path);
-		
+			
+			#ifdef __APPLE__
+			     char path[PATH_MAX+1]; 
+				uint32_t size = sizeof(path); 
+				_NSGetExecutablePath(path, &size); 
+				char tmp[128]; sprintf(tmp, "md5sum %s", path);
+			#else 
+			
+				// and build the command to get the md5 checksum of myself
+				char tmp[128]; sprintf(tmp, "md5sum /proc/%d/exe", getpid());
+			#endif
 				
 			std::filesystem::path cwd = std::filesystem::current_path();
 			std::string exc = system_exec(tmp); exc.erase(exc.length()-1); // came with a newline?
@@ -530,7 +539,7 @@ public:
 			print("# Path:", cwd.string() );
 			print("# Run options: ");
 			for(int a=0;a<argc;a++) {
-				print("# \t", argv[a]);
+				print("#\t", argv[a]);
 			}
 			print("# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");	
 			
@@ -566,7 +575,7 @@ public:
 			}
 			
 			COUT "# Total posterior calls:" TAB FleetStatistics::posterior_calls ENDL;
-			COUT "# VM ops per second:" TAB FleetStatistics::vm_ops/elapsed_seconds ENDL;
+			COUT "# Millions of VM ops per second:" TAB (FleetStatistics::vm_ops/1000000)/elapsed_seconds ENDL;
 			
 			COUT "# Fleet completed at " <<  datestring() ENDL;
 			

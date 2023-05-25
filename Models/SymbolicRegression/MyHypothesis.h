@@ -211,12 +211,43 @@ public:
 	/// *****************************************************************************
 	/// Implement MCMC moves as changes to constants
 	/// *****************************************************************************
-	
+
+#if FEYNMAN
+
 	virtual ProposalType propose() const override {
 		// Our proposals will either be to constants, or entirely from the prior
 		// Note that if we have no constants, we will always do prior proposals
 		assert(constants.size() == N_CONSTANTS);
 		
+		ProposalType p; 
+		
+		if(flip(0.75))      p = Proposals::regenerate(&grammar, value);	
+		else if(flip(0.1))  p = Proposals::sample_function_leaving_args(&grammar, value);
+		else if(flip(0.1))  p = Proposals::swap_args(&grammar, value);
+		else if(flip())     p = Proposals::insert_tree(&grammar, value);	
+		else                p = Proposals::delete_tree(&grammar, value);			
+		
+		if(not p) return {};
+		auto x = p.value();
+		
+		MyHypothesis ret{std::move(x.first)};
+		ret.constants = constants; 
+		
+		double fb = x.second;
+		
+		
+		return std::make_pair(ret, fb); 
+	}
+
+#else
+
+	virtual ProposalType propose() const override {
+		// Our proposals will either be to constants, or entirely from the prior
+		// Note that if we have no constants, we will always do prior proposals
+		assert(constants.size() == N_CONSTANTS);
+		
+		// most of the time we are going to propose to a constant 
+		// UNLESS we are using FEYNMAN (in which case we never should)
 		if(flip(0.85)){
 			MyHypothesis ret = *this;
 			
@@ -250,19 +281,26 @@ public:
 			MyHypothesis ret{std::move(x.first)};
 			
 			double fb = x.second;
-			assert( constants.size() == N_CONSTANTS);
-			if(flip(0.5)) {
-				ret.randomize_constants(); // with random constants 
-				fb += ret.constant_prior()-this->constant_prior();
-			}
-			else { // else just copy our constants
+			
+			#if FEYNMAN
 				ret.constants = constants; 
-			}
+			#else
+				assert( constants.size() == N_CONSTANTS);
+				if(flip(0.5)) {
+					ret.randomize_constants(); // with random constants 
+					fb += ret.constant_prior()-this->constant_prior();
+				}
+				else { // else just copy our constants
+					ret.constants = constants; 
+				}
+			#endif 
 			
 			return std::make_pair(ret, fb); 
 		}
 			
 	}
+	
+#endif
 		
 	virtual MyHypothesis restart() const override {
 		MyHypothesis ret = Super::restart(); // reset my structure

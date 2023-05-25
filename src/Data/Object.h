@@ -5,6 +5,7 @@
 #include<tuple>
 
 #include "Random.h"
+#include "Strings.h"
 
 /**
  * @class Object
@@ -56,8 +57,8 @@ struct Object {
 		return get<t>() == v;
 	}
 	
-	bool operator<(const Object& o) const { 
-		return feature < o.feature;
+	auto operator<=>(const Object& o) const { 
+		return feature <=> o.feature;
 	}
 	
 	bool operator==(const Object& o) const { 

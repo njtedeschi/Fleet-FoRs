@@ -145,6 +145,10 @@ double geometric_lpdf(size_t k, double p) {
 	return log(p) + (k-1)*log(1-p);
 }
 
+double random_gamma(double a, double b) {
+	std::gamma_distribution<double> g(a,b);
+	return g(DefaultRNG);
+}
 
 template<typename t>
 std::vector<t> random_multinomial(t a, size_t len) {
@@ -201,13 +205,13 @@ T myrandom(T min, T max) {
 std::vector<bool> random_nonempty_subset(const size_t n, const double p) {
 	assert(n>0); 
 	
-	std::vector<bool> output(n, false);
+	std::vector<bool> myout(n, false);
 	for(size_t i=0;i<n;i++) {
-		output[i] = flip(p);
+		myout[i] = flip(p);
 	}
-	output[myrandom(n)] = true; // always ensure one is true
+	myout[myrandom(n)] = true; // always ensure one is true
 	
-	return output; 
+	return myout; 
 }
 
 

@@ -225,7 +225,7 @@ public:
 		
 		// and then convert S to temperatures again
 		// but never adjust i=0 (T=1) OR the last one
-		for(size_t i=1;i<this->pool.size()-1;i++) { 
+		for(size_t i=1;i<this->pool.size();i++) { 
 			this->pool[i].temperature = this->pool[i-1].temperature + exp(sw[i]);
 		}
 	}
