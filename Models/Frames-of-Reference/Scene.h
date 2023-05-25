@@ -26,6 +26,14 @@ Vector operator*(double s, const Vector& v) {
     return result;
 }
 
+Direction operator-(const Direction& v) {
+    Direction result;
+    for (int i = 0; i < 3; ++i) {
+        result[i] = v[i] * -1;
+    }
+    return result;
+}
+
 Displacement operator-(const Position& v1, const Position& v2) {
     Displacement result;
     for (int i = 0; i < 3; ++i) {
@@ -104,11 +112,16 @@ struct Scene {
 	OrientedObject speaker;
 	OrientedObject ground;
 	Object figure;
+        Displacement g_to_f; // calculated once during construction
 
         // Default constructor using default objects
-        Scene() : speaker(), ground(), figure() {}
+        Scene() : speaker(), ground(), figure() {
+            g_to_f = figure.position - ground.position;
+        }
         Scene(const OrientedObject& speaker, const OrientedObject& ground, const Object& figure)
-            : speaker(speaker), ground(ground), figure(figure) {}
+            : speaker(speaker), ground(ground), figure(figure) {
+                g_to_f = figure.position - ground.position;
+            }
 
         void print() const {
             int label_width = 10;
