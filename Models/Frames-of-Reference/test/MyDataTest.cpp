@@ -14,7 +14,8 @@ struct MyInput {
     bool true_description;
 };
 
-#include "../MyGrammar.h"
+/* #include "../MyGrammar.h" */
+#include "../MyGrammarCylindrical.h"
 #include "../MyHypothesis.h"
 #include "../MyData.h"
 
@@ -32,12 +33,21 @@ MyHypothesis target;
 class MyDataFixture {
     public:
         MyDataFixture() {
-            std::unordered_map<std::string, std::string> formulas = {
-            {"above", Concepts::above_abs},
-            {"below", Concepts::below_abs},
-            {"front", Concepts::front_int_rel},
-            {"behind", Concepts::behind_int_rel},
-            {"side", Concepts::side_int}
+            /* std::unordered_map<std::string, std::string> formulas = { */
+            /* {"above", Concepts::above_abs}, */
+            /* {"below", Concepts::below_abs}, */
+            /* {"front", Concepts::front_int_rel}, */
+            /* {"behind", Concepts::behind_int_rel}, */
+            /* {"side", Concepts::side_int} */
+        /* }; */
+        std::unordered_map<std::string, std::string> formulas = {
+            {"above", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,upward(x))),pf(x))"},
+            {"below", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,downward(x))),pf(x))"},
+            {"front", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),forward(x),z=0(x))),pf(x))"},
+            {"behind", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),backward(x),z=0(x))),pf(x))"},
+            {"side", "exists(as(f=frame(G),cyl(r>0(x),sideward(x),z=0(x))),pf(x))"},
+            {"left", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),leftward(x),z=0(x))),pf(x))"},
+            {"right", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),rightward(x),z=0(x))),pf(x))"},
         };
             mydata = MyData(formulas);
         }

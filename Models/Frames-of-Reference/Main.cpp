@@ -20,7 +20,8 @@ struct MyInput {
     bool true_description;
 };
 
-#include "MyGrammar.h"
+/* #include "MyGrammar.h" */
+#include "MyGrammarCylindrical.h"
 #include "MyHypothesis.h"
 #include "MyData.h"
 
@@ -82,45 +83,19 @@ int main(int argc, char** argv){
 
         // Set target concepts before sampling
         std::unordered_map<std::string, std::string> target_formulas = {
-            {"above", Concepts::above_abs},
-            {"below", Concepts::below_abs},
-            {"front", Concepts::front_int_rel},
-            /* {"front", Concepts::front_int_rel_not_behind}, */
-            /* {"front", Concepts::front_int_rel_no_reflect}, */
-            {"behind", Concepts::behind_int_rel},
-            /* {"behind", Concepts::behind_int_rel_not_front}, */
-            /* {"behind", Concepts::behind_int_rel_no_reflect}, */
-            {"side", Concepts::side_int},
-            {"left", Concepts::left_int_rel},
-            /* {"left", Concepts::left_int_rel_not_right}, */
-            {"right", Concepts::right_int_rel}
-            /* {"right", Concepts::right_int_rel_not_left} */
-        };
-
-        std::unordered_map<std::string, std::string> intrinsic_formulas = {
-            {"above", Concepts::above_abs}, // TODO: replace with above_int when non-canonical orientations are introduced
-            {"below", Concepts::below_abs},
-            {"front", Concepts::front_int},
-            {"behind", Concepts::behind_int},
-            {"side", Concepts::side_int},
-            {"left", Concepts::left_int},
-            {"right", Concepts::right_int}
-        };
-
-        std::unordered_map<std::string, std::string> relative_formulas = {
-            {"above", Concepts::above_abs}, // TODO: replace with above_rel when non-canonical orientations are introduced
-            {"below", Concepts::below_abs},
-            {"front", Concepts::front_rel},
-            {"behind", Concepts::behind_rel},
-            {"side", Concepts::side_rel},
-            {"left", Concepts::left_rel},
-            {"right", Concepts::right_rel}
+            {"above", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,upward(x))),pf(x))"},
+            {"below", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,downward(x))),pf(x))"},
+            {"front", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),forward(x),z=0(x))),pf(x))"},
+            {"behind", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),backward(x),z=0(x))),pf(x))"},
+            {"side", "exists(as(f=frame(G),cyl(r>0(x),sideward(x),z=0(x))),pf(x))"},
+            {"left", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),leftward(x),z=0(x))),pf(x))"},
+            {"right", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),rightward(x),z=0(x))),pf(x))"},
         };
 
         // Initialize sampler
         MyData data_sampler(target_formulas);
-        data_sampler.set_intrinsic(intrinsic_formulas);
-        data_sampler.set_relative(relative_formulas);
+        /* data_sampler.set_intrinsic(intrinsic_formulas); */
+        /* data_sampler.set_relative(relative_formulas); */
 
         target = data_sampler.target;
 
