@@ -90,6 +90,9 @@ int main(int argc, char** argv){
             {"side", "exists(as(f=frame(G),cyl(r>0(x),sideward(x),z=0(x))),pf(x))"},
             {"left", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),leftward(x),z=0(x))),pf(x))"},
             {"right", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),rightward(x),z=0(x))),pf(x))"},
+            {"near", "exists(as(f=frame(G),cyl(r-near(x),tTRUE,zTRUE)),pf(x))"},
+            {"far", "exists(as(f=frame(G),cyl(r-far(x),tTRUE,zTRUE)),pf(x))"},
+            /* {"in", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,z=0(x))),pf(x))"}, */
         };
 
         // Initialize sampler
@@ -123,7 +126,9 @@ int main(int argc, char** argv){
             // Sample data
             SceneProbs scene_probs;
             scene_probs.p_direct = p_direct;
-            scene_probs.p_listener_ground = p_listener_ground;
+            /* scene_probs.p_listener_ground = p_listener_ground; */
+            scene_probs.p_near = 0.5;
+            scene_probs.p_axis = 0.8;
             WordProbs word_probs;
             /* word_probs.p_intrinsic = p_intrinsic; */
             Probabilities probs = {scene_probs, word_probs};
