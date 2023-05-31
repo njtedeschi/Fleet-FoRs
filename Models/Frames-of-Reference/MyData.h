@@ -2,8 +2,10 @@
 # include <optional>
 
 struct SceneProbs {
-    std::optional<double> p_direct = std::nullopt;
-    std::optional<double> p_listener_ground = std::nullopt;
+    double p_direct;
+    /* double p_listener_ground; */
+    double p_near;
+    double p_axis;
 };
 
 struct WordProbs {
@@ -76,34 +78,44 @@ struct MyData {
     }
 
     Scene sample_scene(const SceneProbs& scene_probs) {
-        Scene scene;
-        std::vector<Scene> candidate_scenes;
+            // Ground
+            Direction ground_direction;
+            ground_direction = myrandom_uniform(Space::ground_directions);
 
-        // TODO fix situation with optional values
-        if (scene_probs.p_direct.has_value()) {
-            if(flip(scene_probs.p_direct.value())) {
-                candidate_scenes = direct_scenes;
-            } else {
-                if(scene_probs.p_listener_ground.has_value()) {
-                    if (flip(scene_probs.p_listener_ground.value())) {
-                        candidate_scenes = listener_nondirect_scenes;
-                    }
-                    else {
-                        candidate_scenes = nondirect_scenes;
-                    }
-                }
-                else {
-                    candidate_scenes = nondirect_scenes;
-                }
+            // Figure
+            double distance;
+            distance = (flip(scene_probs.p_near)) ? 0.5 : 1.5;
+
+            bool on_axis;
+            on_axis = flip(scene_probs.p_axis);
+
+            Position figure_position;
+            if (on_axis) {
+                figure_position = {distance * myrandom_uniform(Space::figure_positions_axis)};
             }
-        } else {
-            candidate_scenes.insert(candidate_scenes.end(), direct_scenes.begin(), direct_scenes.end());
-        candidate_scenes.insert(candidate_scenes.end(), nondirect_scenes.begin(), nondirect_scenes.end());
-        }
+            else {
+                figure_position = {distance * myrandom_uniform(Space::figure_positions_off_axis)};
+            }
 
-        scene = candidate_scenes[myrandom(candidate_scenes.size())];
-        return scene;
-    }
+            // Scene
+            bool is_direct;
+            is_direct = flip(scene_probs.p_direct);
+            if (is_direct) {
+                OrientedObject direct_speaker = {Space::origin, ground_direction, true};
+                Object figure = {figure_position};
+
+                Scene direct = {direct_speaker, direct_speaker, figure};
+                return direct;
+            }
+            else {
+                OrientedObject nondirect_speaker = {Space::nondirect_speaker_spot, Space::east, true};
+                OrientedObject ground = {Space::origin, ground_direction, false};
+                Object figure = {figure_position};
+
+                Scene nondirect = {nondirect_speaker, ground, figure};
+                return nondirect;
+            }
+            }
 
     std::string sample_true_word(const WordProbs& word_probs, Scene scene) {
         std::string word;
