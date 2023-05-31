@@ -42,6 +42,16 @@ Displacement operator-(const Position& v1, const Position& v2) {
     return result;
 }
 
+// Really should be something like Position(Position, Displacement)
+// Hack to create "corner" positions
+Position operator+(const Position& v1, const Position& v2) {
+    Position result;
+    for (int i = 0; i < 3; ++i) {
+        result[i] = v1[i] + v2[i];
+    }
+    return result;
+}
+
 double dot_product(const Vector &a, const Vector &b){
     double result = 0.0;
     for(int i = 0; i < a.size(); i++){
