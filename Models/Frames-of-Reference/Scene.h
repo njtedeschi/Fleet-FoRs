@@ -152,7 +152,11 @@ namespace Space {
     Position up_spot = {0,0,1};
     Position down_spot = {0,0,-1};
     Position nondirect_speaker_spot = {-2,0,0};
+    std::vector<Position> figure_positions_axis = {east_spot, west_spot, north_spot, south_spot, up_spot, down_spot};
 
+    // Corner positions
+    std::vector<Position> figure_positions_off_axis;
+    // TODO: figure out where to keep generating loop (currently in generate_scenes)
 
     Direction null_vector = {0,0,0};
     Direction east = {1,0,0};
@@ -161,6 +165,8 @@ namespace Space {
     Direction south = {0,-1,0};
     Direction up = {0,0,1};
     Direction down = {0,0,-1};
+    /* std::vector<Direction> ground_directions = {east, west, north, south, up, down}; */
+    std::vector<Direction> ground_directions = {east, west, north, south};
 
     // "Invalid" default object
     // Has zero vector for all elements and a false is_valid flag
@@ -211,6 +217,19 @@ void generate_scenes(){
         for (const auto& ground : Space::listener_grounds) {
             Scene listener_nondirect = {Space::nondirect_speaker, ground, figure};
             listener_nondirect_scenes.push_back(listener_nondirect);
+        }
+    }
+
+    // Create off-axis positions
+    float sqrt_val = sqrt(2)/2;
+    for(int i = 0; i < 3; i++) {
+        for (int sign1 = -1; sign1 <= 1; sign1 += 2) {
+            for (int sign2 = -1; sign2 <= 1; sign2 += 2) {
+                Position p = {0,0,0};
+                p[(i+1) % 3] = sign1 * sqrt_val;
+                p[(i+2) % 3] = sign2 * sqrt_val;
+                Space::figure_positions_off_axis.push_back(p);
+            }
         }
     }
 }
