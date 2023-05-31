@@ -66,6 +66,15 @@ struct MyData {
         return MyInput{.scene=scene, .word=word, .true_description=true_description};
     }
 
+    // Wrapper for `myrandom` to implement uniform distribution
+    template<typename T>
+    T myrandom_uniform(const std::vector<T>& entries) {
+        if (entries.empty()) {
+        throw std::invalid_argument("Cannot get random entry from empty list");
+    }
+        return entries[myrandom(entries.size())];
+    }
+
     Scene sample_scene(const SceneProbs& scene_probs) {
         Scene scene;
         std::vector<Scene> candidate_scenes;
