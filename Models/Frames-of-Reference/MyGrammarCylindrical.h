@@ -238,6 +238,22 @@ public:
                             return false;
                         });
                     });
+            add("r-near(%s)",
+                    +[](MyInput x) -> rBool {
+                        return rBool([=](Frame f) {
+                            Displacement v = x.scene.g_to_f;
+                            double r = sqrt(v[0]*v[0] + v[1]*v[1]);
+                            return (r < 1);
+                        });
+                    });
+            add("r-far(%s)",
+                    +[](MyInput x) -> rBool {
+                        return rBool([=](Frame f) {
+                            Displacement v = x.scene.g_to_f;
+                            double r = sqrt(v[0]*v[0] + v[1]*v[1]);
+                            return (r > 1);
+                        });
+                    });
             add("r>0(%s)",
                     +[](MyInput x) -> rBool {
                         return rBool([=](Frame f) {
