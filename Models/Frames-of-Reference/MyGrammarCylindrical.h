@@ -62,10 +62,10 @@ struct Frame : AbstractFrame {
                     u = x.speaker.upward;
                     r = x.speaker.rightward;
                     break;
-                /* case Anchor::environment: */
-                /*     u = {0,0,1}; */
-                /*     r = {0,0,0}; */
-                /*     break; */
+                case Anchor::environment:
+                    u = {0,0,1};
+                    r = {0,0,0};
+                    break;
             }
 
             // right-handed by default
@@ -156,18 +156,19 @@ public:
                         std::vector<Frame> possible_frames;
                         AbstractFrame intrinsic(Anchor::ground, Transformation::none);
                         AbstractFrame relative_reflected(Anchor::speaker, Transformation::transreflected);
-                        /* AbstractFrame absolute(Anchor::environment, Transformation::none); */
+                        AbstractFrame absolute(Anchor::environment, Transformation::none);
                         if(x.scene.ground.is_participant){
                             possible_frames = {
-                                Frame(intrinsic, x.scene)
-                            /* , Frame(absolute, x.scene); */
+                                Frame(intrinsic, x.scene),
+                                Frame(absolute, x.scene)
                             };
                         }
                         else {
                             possible_frames = {
                                 Frame(intrinsic, x.scene),
-                                Frame(relative_reflected, x.scene)};
-                                /* Frame(absolute, x.scene); */
+                                Frame(relative_reflected, x.scene),
+                                Frame(absolute, x.scene)
+                                };
                         }
                         return possible_frames;
                     });
@@ -189,6 +190,12 @@ public:
                     +[](fBool a, fBool b) -> fBool {
                         return fBool([=](Frame f) {
                             return a(f) || b(f);
+                        });
+                    });
+            add("f=ABS",
+                    +[]() -> fBool {
+                        return fBool([=](Frame f) {
+                            return (f.anchor == Anchor::environment);
                         });
                     });
             add("f=frame(%s)",
