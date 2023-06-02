@@ -4,39 +4,39 @@
 // INT or REL
 struct AbstractDirection {
     std::string name;
-    std::function<bool(Displacement&, Frame&> truth_condition;
+    std::function<bool(const Displacement&, Frame&)> truth_condition;
 
     // constructor
-    SpatialWord(std::string n, std::function<bool(Displacement&, Frame&)> t)
+    AbstractDirection(std::string n, std::function<bool(const Displacement&, Frame&)> t)
         : name(n), truth_condition(t) {}
 };
 
 std::vector<AbstractDirection> abstract_directions = {
-    AbstractDirection("above", [](Displacement& v, Frame& f){return cosine_similarity(v, f.upward) == 1;}),
-                AbstractDirection("below", [](Displacement& v, Frame& f){return cosine_similarity(v, f.upward) == -1;}),
-                AbstractDirection("front", [](Displacement& v, Frame& f){return cosine_similarity(v, f.forward) == 1;}),
-                AbstractDirection("behind", [](Displacement& v, Frame& f){return cosine_similarity(v, f.forward) == -1;}),
-                AbstractDirection("right", [](Displacement& v, Frame& f){return cosine_similarity(v, f.rightward) == 1;}),
-                AbstractDirection("left", [](Displacement& v, Frame& f){return cosine_similarity(v, f.rightward) == -1;})
+    AbstractDirection("above", [](const Displacement& v, Frame& f){return cosine_similarity(v, f.upward) == 1;}),
+                AbstractDirection("below", [](const Displacement& v, Frame& f){return cosine_similarity(v, f.upward) == -1;}),
+                AbstractDirection("front", [](const Displacement& v, Frame& f){return cosine_similarity(v, f.forward) == 1;}),
+                AbstractDirection("behind", [](const Displacement& v, Frame& f){return cosine_similarity(v, f.forward) == -1;}),
+                AbstractDirection("right", [](const Displacement& v, Frame& f){return cosine_similarity(v, f.rightward) == 1;}),
+                AbstractDirection("left", [](const Displacement& v, Frame& f){return cosine_similarity(v, f.rightward) == -1;})
 };
 
 // ABS
 struct AbsoluteDirection {
     std::string name;
-    std::function<bool(Displacement&> truth_condition;
+    std::function<bool(const Displacement&)> truth_condition;
 
     // constructor
-    SpatialWord(std::string n, std::function<bool(Displacement&, Frame&)> t)
+    AbsoluteDirection(std::string n, std::function<bool(const Displacement&)> t)
         : name(n), truth_condition(t) {}
 };
 
-std::vector<AbsoluteDirection> abstract_directions = {
-    AbsoluteDirection("above", [](Displacement& v){return cosine_similarity(v, Space::up) == 1;}),
-                AbsoluteDirection("below", [](Displacement& v){return cosine_similarity(v, Space::up) == -1;}),
-                AbsoluteDirection("north", [](Displacement& v){return cosine_similarity(v, Space::north) == 1;}),
-                AbsoluteDirection("south", [](Displacement& v){return cosine_similarity(v, Space::north) == -1;}),
-                AbsoluteDirection("east", [](Displacement& v){return cosine_similarity(v, Space::east) == 1;}),
-                AbsoluteDirection("west", [](Displacement& v){return cosine_similarity(v, Space::east) == -1;})
+std::vector<AbsoluteDirection> absolute_directions = {
+    AbsoluteDirection("above", [](const Displacement& v){return cosine_similarity(v, Space::up) == 1;}),
+                AbsoluteDirection("below", [](const Displacement& v){return cosine_similarity(v, Space::up) == -1;}),
+                AbsoluteDirection("north", [](const Displacement& v){return cosine_similarity(v, Space::north) == 1;}),
+                AbsoluteDirection("south", [](const Displacement& v){return cosine_similarity(v, Space::north) == -1;}),
+                AbsoluteDirection("east", [](const Displacement& v){return cosine_similarity(v, Space::east) == 1;}),
+                AbsoluteDirection("west", [](const Displacement& v){return cosine_similarity(v, Space::east) == -1;})
 };
 
 // 1-1 map with scenes (given speaker faces ground)
@@ -47,7 +47,7 @@ struct SpatialDescription {
 
     double dist_ground_figure;
     double dist_speaker_ground;
-    string proximity;
+    std::string proximity;
 
     // Default constructor
     SpatialDescription(std::string i, std::string r, std::string a, double gf, double sg) :
@@ -55,9 +55,11 @@ struct SpatialDescription {
 
     // Convert from scene
     explicit SpatialDescription(const Scene& scene) {
-            this->gf = scene.g_to_f;
-            this->sg = scene.ground.position - scene.speaker.position;
-            this->proximity = (gf < 1) ? "near" : "far";
+            Displacement g_to_f = scene.g_to_f;
+            this-> dist_ground_figure = magnitude(g_to_f);
+            Displacement s_to_g = scene.ground.position - scene.speaker.position;
+            this-> dist_speaker_ground = magnitude(s_to_g);
+            this->proximity = (dist_ground_figure < 1) ? "near" : "far";
 
             this->intrinsic = intrinsic_description(scene);
             this->relative = relative_description(scene);
@@ -65,7 +67,7 @@ struct SpatialDescription {
             }
 
     std::string intrinsic_description(const Scene& scene) {
-        frame = Frame(AbstractFrame(Anchor::ground,Transformation::none),scene);
+        Frame frame(AbstractFrame(Anchor::ground,Transformation::none),scene);
         for (auto& abstract_direction : abstract_directions) {
             if (abstract_direction.truth_condition(scene.g_to_f, frame)){
                 return abstract_direction.name;
@@ -75,7 +77,7 @@ struct SpatialDescription {
         return "";
     }
     std::string relative_description(const Scene& scene) {
-        frame = Frame(AbstractFrame(Anchor::speaker,Transformation::transreflected),scene);
+        Frame frame(AbstractFrame(Anchor::speaker,Transformation::transreflected),scene);
         for (auto& abstract_direction : abstract_directions) {
             if (abstract_direction.truth_condition(scene.g_to_f, frame)){
                 return abstract_direction.name;
@@ -106,8 +108,9 @@ struct SceneProbs {
 };
 
 struct WordProbs {
-    std::optional<double> p_intrinsic = std::nullopt;
-    std::optional<double> p_canonical = std::nullopt;
+    double p_frame = 0;
+    double p_intrinsic = 0;
+    /* std::optional<double> p_canonical = std::nullopt; */
 };
 
 struct Probabilities {
@@ -119,31 +122,20 @@ struct MyData {
     std::vector<std::string> words;
     MyHypothesis target;
 
-    MyHypothesis intrinsic;
-    MyHypothesis relative;
+    /* MyHypothesis intrinsic; */
+    /* MyHypothesis relative; */
 
     // SET UP
 
     // Default constructor
-    MyData() : words(), target(), intrinsic(), relative() {}
+    /* MyData() : words(), target(), intrinsic(), relative() {} */
+    MyData() : words(), target() {}
 
     // Construct from dict of formulas
     MyData(const std::unordered_map<std::string, std::string>& formulas) {
         for (const auto& [word, formula] : formulas) {
             words.push_back(word);
             target[word] = InnerHypothesis(grammar.simple_parse(formula));
-        }
-    }
-
-    void set_intrinsic(const std::unordered_map<std::string, std::string>& formulas) {
-        for (const auto& [word, formula] : formulas) {
-            intrinsic[word] = InnerHypothesis(grammar.simple_parse(formula));
-        }
-    }
-
-    void set_relative(const std::unordered_map<std::string, std::string>& formulas) {
-        for (const auto& [word, formula] : formulas) {
-            relative[word] = InnerHypothesis(grammar.simple_parse(formula));
         }
     }
 
@@ -215,24 +207,34 @@ struct MyData {
             }
 
     std::string sample_true_word(const WordProbs& word_probs, Scene scene) {
-        std::string word;
         std::set<std::string> candidate_words;
-
-        if(word_probs.p_intrinsic.has_value()) {
-            if (flip(word_probs.p_intrinsic.value())) {
-                candidate_words = compute_true_words(intrinsic, scene);
-            } else {
-                candidate_words = compute_true_words(relative, scene);
-            }
-        } else {
+        // Sample from all true words
+        if(word_probs.p_frame == 0 && word_probs.p_intrinsic == 0) {
             candidate_words = compute_true_words(target, scene);
         }
+        // Sample from true words according to WordProbs
+        else {
+            std::string word;
+            SpatialDescription description(scene);
+            bool uses_frame = flip(word_probs.p_frame);
+            bool is_intrinsic = flip(word_probs.p_intrinsic);
+            if(uses_frame) {
+                word = (is_intrinsic) ? description.intrinsic : description.relative;
+            }
+            else {
+                word = description.proximity;
+            }
+            candidate_words.insert(word);
+            // SpatialDescription doesn't encode side, so it mus be added manually
+            if(is_intrinsic && (word == "left" || word == "right")) {
+                candidate_words.insert("side");
+            }
+        }
+        std::string sampled_word = *sample<std::string, decltype(candidate_words)>(candidate_words).first;
+        return sampled_word;
+        }
 
-        word = *sample<std::string, decltype(candidate_words)>(candidate_words).first;
-        return word;
-    }
-
-    // Compute words that correctly describe a scene given a set of concepts for each word
+    // Compute all words that correctly describe a scene given a set of concepts for each word
     std::set<std::string> compute_true_words(MyHypothesis concepts, Scene scene){
         std::set<std::string> true_words;
 
