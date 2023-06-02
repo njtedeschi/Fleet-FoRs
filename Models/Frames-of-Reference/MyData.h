@@ -1,6 +1,103 @@
 #pragma once
 # include <optional>
 
+// INT or REL
+struct AbstractDirection {
+    std::string name;
+    std::function<bool(Displacement&, Frame&> truth_condition;
+
+    // constructor
+    SpatialWord(std::string n, std::function<bool(Displacement&, Frame&)> t)
+        : name(n), truth_condition(t) {}
+};
+
+std::vector<AbstractDirection> abstract_directions = {
+    AbstractDirection("above", [](Displacement& v, Frame& f){return cosine_similarity(v, f.upward) == 1;}),
+                AbstractDirection("below", [](Displacement& v, Frame& f){return cosine_similarity(v, f.upward) == -1;}),
+                AbstractDirection("front", [](Displacement& v, Frame& f){return cosine_similarity(v, f.forward) == 1;}),
+                AbstractDirection("behind", [](Displacement& v, Frame& f){return cosine_similarity(v, f.forward) == -1;}),
+                AbstractDirection("right", [](Displacement& v, Frame& f){return cosine_similarity(v, f.rightward) == 1;}),
+                AbstractDirection("left", [](Displacement& v, Frame& f){return cosine_similarity(v, f.rightward) == -1;})
+};
+
+// ABS
+struct AbsoluteDirection {
+    std::string name;
+    std::function<bool(Displacement&> truth_condition;
+
+    // constructor
+    SpatialWord(std::string n, std::function<bool(Displacement&, Frame&)> t)
+        : name(n), truth_condition(t) {}
+};
+
+std::vector<AbsoluteDirection> abstract_directions = {
+    AbsoluteDirection("above", [](Displacement& v){return cosine_similarity(v, Space::up) == 1;}),
+                AbsoluteDirection("below", [](Displacement& v){return cosine_similarity(v, Space::up) == -1;}),
+                AbsoluteDirection("north", [](Displacement& v){return cosine_similarity(v, Space::north) == 1;}),
+                AbsoluteDirection("south", [](Displacement& v){return cosine_similarity(v, Space::north) == -1;}),
+                AbsoluteDirection("east", [](Displacement& v){return cosine_similarity(v, Space::east) == 1;}),
+                AbsoluteDirection("west", [](Displacement& v){return cosine_similarity(v, Space::east) == -1;})
+};
+
+// 1-1 map with scenes (given speaker faces ground)
+struct SpatialDescription {
+    std::string intrinsic;
+    std::string relative;
+    std::string absolute;
+
+    double dist_ground_figure;
+    double dist_speaker_ground;
+    string proximity;
+
+    // Default constructor
+    SpatialDescription(std::string i, std::string r, std::string a, double gf, double sg) :
+        intrinsic(i), relative(r), absolute(a), dist_ground_figure(gf), dist_speaker_ground(sg) {proximity = (gf < 1) ? "near" : "far";} // proximity word from distance between ground and speaker
+
+    // Convert from scene
+    explicit SpatialDescription(const Scene& scene) {
+            this->gf = scene.g_to_f;
+            this->sg = scene.ground.position - scene.speaker.position;
+            this->proximity = (gf < 1) ? "near" : "far";
+
+            this->intrinsic = intrinsic_description(scene);
+            this->relative = relative_description(scene);
+            this->absolute = absolute_description(scene);
+            }
+
+    std::string intrinsic_description(const Scene& scene) {
+        frame = Frame(AbstractFrame(Anchor::ground,Transformation::none),scene);
+        for (auto& abstract_direction : abstract_directions) {
+            if (abstract_direction.truth_condition(scene.g_to_f, frame)){
+                return abstract_direction.name;
+            }
+        }
+        // Description is empty string if no word applies in frame
+        return "";
+    }
+    std::string relative_description(const Scene& scene) {
+        frame = Frame(AbstractFrame(Anchor::speaker,Transformation::transreflected),scene);
+        for (auto& abstract_direction : abstract_directions) {
+            if (abstract_direction.truth_condition(scene.g_to_f, frame)){
+                return abstract_direction.name;
+            }
+        }
+        // Description is empty string if no word applies in frame
+        return "";
+    }
+    std::string absolute_description(const Scene& scene) {
+        for (auto& absolute_direction : absolute_directions) {
+            if (absolute_direction.truth_condition(scene.g_to_f)) {
+                return absolute_direction.name;
+            }
+        }
+        // Description is empty string if no word applies in frame
+        return "";
+    }
+};
+
+
+/***/
+
 struct SceneProbs {
     double p_direct;
     /* double p_listener_ground; */
