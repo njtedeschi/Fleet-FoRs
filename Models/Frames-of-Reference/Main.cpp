@@ -45,6 +45,8 @@ struct MyInput {
 // Data sampling parameters
 double p_direct = 0.2; // probability a scene is direct
 double p_listener_ground = 0.2; // probability that the ground of a nondirect scene is the listener
+
+double p_frame = 0.9; // probability that a description uses an FoR if one applies
 double p_intrinsic = 0.5; // probability that a description is intrinsic
 
 // Data amounts
@@ -71,7 +73,14 @@ int main(int argc, char** argv){
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
 	Fleet fleet("Frames of Reference");
         fleet.add_option("--max_temp", max_temp, "Max temperature for parallel tempering");
+
+        // p_axis
+        // p_near
         fleet.add_option("--p_direct", p_direct, "Probability a generated scene is direct");
+
+        // p_frame
+        fleet.add_option("--p_intrinsic", p_intrinsic, "Probability a description uses an intrinsic FoR");
+
         fleet.add_option("--data_min", data_min, "Initial number of data points generated");
         fleet.add_option("--data_max", data_max, "Final number of data points generated");
         fleet.add_option("--data_step", data_step, "Number of data points added in each iteration");
