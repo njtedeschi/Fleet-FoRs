@@ -91,16 +91,27 @@ int main(int argc, char** argv){
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
 
         // Set target concepts before sampling
+        /* std::unordered_map<std::string, std::string> target_formulas = { */
+        /*     {"above", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,upward(x))),pf(x))"}, */
+        /*     {"below", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,downward(x))),pf(x))"}, */
+        /*     {"front", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),forward(x),z=0(x))),pf(x))"}, */
+        /*     {"behind", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),backward(x),z=0(x))),pf(x))"}, */
+        /*     {"side", "exists(as(f=frame(G),cyl(r>0(x),sideward(x),z=0(x))),pf(x))"}, */
+        /*     {"left", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),leftward(x),z=0(x))),pf(x))"}, */
+        /*     {"right", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),rightward(x),z=0(x))),pf(x))"}, */
+        /*     {"near", "exists(as(f=frame(G),cyl(r-near(x),tTRUE,zTRUE)),pf(x))"}, */
+        /*     {"far", "exists(as(f=frame(G),cyl(r-far(x),tTRUE,zTRUE)),pf(x))"}, */
+        /*     /1* {"in", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,z=0(x))),pf(x))"}, *1/ */
+        /* }; */
         std::unordered_map<std::string, std::string> target_formulas = {
-            {"above", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,upward(x))),pf(x))"},
-            {"below", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,downward(x))),pf(x))"},
-            {"front", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),forward(x),z=0(x))),pf(x))"},
-            {"behind", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),backward(x),z=0(x))),pf(x))"},
-            {"side", "exists(as(f=frame(G),cyl(r>0(x),sideward(x),z=0(x))),pf(x))"},
-            {"left", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),leftward(x),z=0(x))),pf(x))"},
-            {"right", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),rightward(x),z=0(x))),pf(x))"},
-            {"near", "exists(as(f=frame(G),cyl(r-near(x),tTRUE,zTRUE)),pf(x))"},
-            {"far", "exists(as(f=frame(G),cyl(r-far(x),tTRUE,zTRUE)),pf(x))"},
+            {"above", "parallel(x,UP)"},
+            {"below", "parallel(x,DOWN)"},
+            {"front", "exists(cs(or(f=frame(G),f=frame'(S,TR)),forward-f(x)),pf(x))"},
+            {"behind", "exists(cs(or(f=frame(G),f=frame'(S,TR)),backward-f(x)),pf(x))"},
+            {"left", "exists(cs(or(f=frame(G),f=frame'(S,TR)),leftward-f(x)),pf(x))"},
+            {"right", "exists(cs(or(f=frame(G),f=frame'(S,TR)),rightward-f(x)),pf(x))"},
+            {"near", "near(x)"},
+            {"far", "far(x)"},
             /* {"in", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,z=0(x))),pf(x))"}, */
         };
 

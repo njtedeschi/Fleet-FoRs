@@ -139,10 +139,63 @@ struct zBool {
     }
 };
 
-class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,rBool,thetaBool,zBool>,
+/* struct SpatialWord { */
+/*     std::string name; */
+/*     std::function<Direction(OrientedObject)>; */
+/* }; */
+
+/* class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,rBool,thetaBool,zBool>, */
+class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,OrientedObject,Direction,ft<Direction,Frame>>,
 				  public Singleton<MyGrammar> {
 public:
 	MyGrammar() {
+            /* add("", +[]() -> { */
+            /*             // body */
+            /*         }); */
+            add("near(%s)", +[](MyInput x) -> bool {
+                        return magnitude(x.scene.g_to_f) < 1;
+                    });
+            add("far(%s)", +[](MyInput x) -> bool {
+                        return magnitude(x.scene.g_to_f) > 1;
+                    });
+            add("parallel(%s,%s)", +[](MyInput x, Direction v) -> bool {
+                        return cosine_similarity(x.scene.g_to_f, v) == 1;
+                    });
+            // Directions
+            add("UP", +[]() -> Direction {
+                        return Space::up;
+                    });
+            add("DOWN", +[]() -> Direction {
+                        return Space::down;
+                    });
+            add("upward(%s)", +[](OrientedObject a) -> Direction {
+                        return a.upward;
+                    });
+            add("downward(%s)", +[](OrientedObject a) -> Direction {
+                        return -a.upward;
+                    });
+            add("forward(%s)", +[](OrientedObject a) -> Direction {
+                        return a.forward;
+                    });
+            add("backward(%s)", +[](OrientedObject a) -> Direction {
+                        return -a.upward;
+                    });
+            add("rightward(%s)", +[](OrientedObject a) -> Direction {
+                        return a.rightward;
+                    });
+            add("leftward(%s)", +[](OrientedObject a) -> Direction {
+                        return -a.upward;
+                    });
+            /* add("sideward(%s)", +[](OrientedObject a) -> Direction { */
+            /*             return a.; */
+            /*         }); */
+            // Objects
+            add("ground(%s)", +[](MyInput x) -> OrientedObject {
+                        return x.scene.ground;
+                    });
+            add("speaker(%s)", +[](MyInput x) -> OrientedObject {
+                        return x.scene.speaker;
+                    });
             /* Quantification */
             add("exists(%s,%s)",
                     +[](ft<bool,Frame> func, std::vector<Frame> possible_frames) -> bool {
@@ -173,16 +226,65 @@ public:
                         return possible_frames;
                     });
             /* Angular Specification */
-            add("as(%s,%s)", // Angular Specification
+            /* add("as(%s,%s)", // Angular Specification */
+            /*         +[](fBool fb, coordinateBool cb) ->  ft<bool,Frame>{ */
+            /*             return fBool([=](Frame f){ */
+            /*                 return fb(f) && cb(f); */
+            /*             }); */
+            /*         }); */
+            add("cs(%s,%s)", // Coordinate System
                     +[](fBool fb, coordinateBool cb) ->  ft<bool,Frame>{
                         return fBool([=](Frame f){
                             return fb(f) && cb(f);
                         });
                     });
-            add("cyl(%s,%s,%s)",
-                    +[](rBool rb, thetaBool tb, zBool zb) -> coordinateBool {
-                        return coordinateBool([=](Frame f){
-                            return rb(f) && tb(f) && zb(f);
+            /* add("cyl(%s,%s,%s)", */
+            /*         +[](rBool rb, thetaBool tb, zBool zb) -> coordinateBool { */
+            /*             return coordinateBool([=](Frame f){ */
+            /*                 return rb(f) && tb(f) && zb(f); */
+            /*             }); */
+            /*         }); */
+            add("forward-f(%s)",
+                    +[](MyInput x) -> coordinateBool {
+                        return coordinateBool([=](Frame f) {
+                            return cosine_similarity(x.scene.g_to_f, f.forward) == 1;
+                        });
+                    });
+            add("backward-f(%s)",
+                    +[](MyInput x) -> coordinateBool {
+                        return coordinateBool([=](Frame f) {
+                            return cosine_similarity(x.scene.g_to_f, f.forward) == -1;
+                        });
+                    });
+            add("upward-f(%s)",
+                    +[](MyInput x) -> coordinateBool {
+                        return coordinateBool([=](Frame f) {
+                            return cosine_similarity(x.scene.g_to_f, f.upward) == 1;
+                        });
+                    });
+            add("downward-f(%s)",
+                    +[](MyInput x) -> coordinateBool {
+                        return coordinateBool([=](Frame f) {
+                            return cosine_similarity(x.scene.g_to_f, f.upward) == -1;
+                        });
+                    });
+            add("rightward-f(%s)",
+                    +[](MyInput x) -> coordinateBool {
+                        return coordinateBool([=](Frame f) {
+                            return cosine_similarity(x.scene.g_to_f, f.rightward) == 1;
+                        });
+                    });
+            add("leftward-f(%s)",
+                    +[](MyInput x) -> coordinateBool {
+                        return coordinateBool([=](Frame f) {
+                            return cosine_similarity(x.scene.g_to_f, f.rightward) == -1;
+                        });
+                    });
+            add("sideward-f(%s)",
+                    +[](MyInput x) -> coordinateBool {
+                        return coordinateBool([=](Frame f) {
+                            double cs = cosine_similarity(x.scene.g_to_f, f.rightward);
+                            return cs == 1 or cs == -1;
                         });
                     });
             /* Frame Conditions */
@@ -232,111 +334,111 @@ public:
                     }, TERMINAL_WEIGHT);
             /***/
             /* Radial conditions */
-            add("rTRUE",
-                    +[]() -> rBool {
-                        return rBool([=](Frame f) {
-                            return true;
-                        });
-                    });
-            add("r=0(%s)",
-                    +[](MyInput x) -> rBool {
-                        return rBool([=](Frame f) {
-                            if(x.scene.g_to_f[0] == 0 && x.scene.g_to_f[1] == 0) {return true;}
-                            return false;
-                        });
-                    });
-            add("r-near(%s)",
-                    +[](MyInput x) -> rBool {
-                        return rBool([=](Frame f) {
-                            Displacement v = x.scene.g_to_f;
-                            double r = sqrt(v[0]*v[0] + v[1]*v[1]);
-                            return (r < 1);
-                        });
-                    });
-            add("r-far(%s)",
-                    +[](MyInput x) -> rBool {
-                        return rBool([=](Frame f) {
-                            Displacement v = x.scene.g_to_f;
-                            double r = sqrt(v[0]*v[0] + v[1]*v[1]);
-                            return (r > 1);
-                        });
-                    });
-            add("r>0(%s)",
-                    +[](MyInput x) -> rBool {
-                        return rBool([=](Frame f) {
-                            if(x.scene.g_to_f[0] == 0 && x.scene.g_to_f[1] == 0) {return false;}
-                            return true;
-                        });
-                    });
+            /*add("rTRUE",*/
+            /*        +[]() -> rBool {*/
+            /*            return rBool([=](Frame f) {*/
+            /*                return true;*/
+            /*            });*/
+            /*        });*/
+            /*add("r=0(%s)",*/
+            /*        +[](MyInput x) -> rBool {*/
+            /*            return rBool([=](Frame f) {*/
+            /*                if(x.scene.g_to_f[0] == 0 && x.scene.g_to_f[1] == 0) {return true;}*/
+            /*                return false;*/
+            /*            });*/
+            /*        });*/
+            /*add("r-near(%s)",*/
+            /*        +[](MyInput x) -> rBool {*/
+            /*            return rBool([=](Frame f) {*/
+            /*                Displacement v = x.scene.g_to_f;*/
+            /*                double r = sqrt(v[0]*v[0] + v[1]*v[1]);*/
+            /*                return (r < 1);*/
+            /*            });*/
+            /*        });*/
+            /*add("r-far(%s)",*/
+            /*        +[](MyInput x) -> rBool {*/
+            /*            return rBool([=](Frame f) {*/
+            /*                Displacement v = x.scene.g_to_f;*/
+            /*                double r = sqrt(v[0]*v[0] + v[1]*v[1]);*/
+            /*                return (r > 1);*/
+            /*            });*/
+            /*        });*/
+            /*add("r>0(%s)",*/
+            /*        +[](MyInput x) -> rBool {*/
+            /*            return rBool([=](Frame f) {*/
+            /*                if(x.scene.g_to_f[0] == 0 && x.scene.g_to_f[1] == 0) {return false;}*/
+            /*                return true;*/
+            /*            });*/
+            /*        });*/
             /***/
             /* Azimuthal conditions */
-            add("tTRUE",
-                    +[]() -> thetaBool {
-                        return thetaBool([=](Frame f) {
-                            return true;
-                        });
-                    });
-            // theta=0; theta=pi; theta_mod_pi=0; theta=+pi/2; theta=-pi/2
-            // NOTE: settign theta=0 to right helps with handling front-back mirroring
-            add("rightward(%s)", // theta=0
-                    +[](MyInput x) -> thetaBool {
-                        return thetaBool([=](Frame f) {
-                            return cosine_similarity(x.scene.g_to_f, f.rightward) == 1;
-                        });
-                    });
-            add("leftward(%s)", // theta=180
-                    +[](MyInput x) -> thetaBool {
-                        return thetaBool([=](Frame f) {
-                            return cosine_similarity(x.scene.g_to_f, f.rightward) == -1;
-                        });
-                    });
-            add("sideward(%s)", // theta=0 or 180
-                    +[](MyInput x) -> thetaBool {
-                        return thetaBool([=](Frame f) {
-                            double cs = cosine_similarity(x.scene.g_to_f, f.rightward);
-                            return cs == 1 or cs == -1;
-                        });
-                    });
-            add("forward(%s)", // theta=90
-                    +[](MyInput x) -> thetaBool {
-                        return thetaBool([=](Frame f) {
-                            return cosine_similarity(x.scene.g_to_f, f.forward) == 1;
-                        });
-                    });
-            add("backward(%s)", // theta=270
-                    +[](MyInput x) -> thetaBool {
-                        return thetaBool([=](Frame f) {
-                            return cosine_similarity(x.scene.g_to_f, f.forward) == -1;
-                        });
-                    });
+            /*add("tTRUE",*/
+            /*        +[]() -> thetaBool {*/
+            /*            return thetaBool([=](Frame f) {*/
+            /*                return true;*/
+            /*            });*/
+            /*        });*/
+            /*// theta=0; theta=pi; theta_mod_pi=0; theta=+pi/2; theta=-pi/2*/
+            /*// NOTE: settign theta=0 to right helps with handling front-back mirroring*/
+            /*add("rightward(%s)", // theta=0*/
+            /*        +[](MyInput x) -> thetaBool {*/
+            /*            return thetaBool([=](Frame f) {*/
+            /*                return cosine_similarity(x.scene.g_to_f, f.rightward) == 1;*/
+            /*            });*/
+            /*        });*/
+            /*add("leftward(%s)", // theta=180*/
+            /*        +[](MyInput x) -> thetaBool {*/
+            /*            return thetaBool([=](Frame f) {*/
+            /*                return cosine_similarity(x.scene.g_to_f, f.rightward) == -1;*/
+            /*            });*/
+            /*        });*/
+            /*add("sideward(%s)", // theta=0 or 180*/
+            /*        +[](MyInput x) -> thetaBool {*/
+            /*            return thetaBool([=](Frame f) {*/
+            /*                double cs = cosine_similarity(x.scene.g_to_f, f.rightward);*/
+            /*                return cs == 1 or cs == -1;*/
+            /*            });*/
+            /*        });*/
+            /*add("forward(%s)", // theta=90*/
+            /*        +[](MyInput x) -> thetaBool {*/
+            /*            return thetaBool([=](Frame f) {*/
+            /*                return cosine_similarity(x.scene.g_to_f, f.forward) == 1;*/
+            /*            });*/
+            /*        });*/
+            /*add("backward(%s)", // theta=270*/
+            /*        +[](MyInput x) -> thetaBool {*/
+            /*            return thetaBool([=](Frame f) {*/
+            /*                return cosine_similarity(x.scene.g_to_f, f.forward) == -1;*/
+            /*            });*/
+            /*        });*/
             /***/
             /* Longitudinal conditions */
-            // TODO: generalize to different angles, using Frame f
-            // Right now, this is assuming a canonically-oriented ground at zero height
-            add("zTRUE",
-                    +[]() -> zBool {
-                        return zBool([=](Frame f) {
-                            return true;
-                        });
-                    });
-            add("z=0(%s)",
-                    +[](MyInput x) -> zBool {
-                        return zBool([=](Frame f) {
-                            return x.scene.figure.position[2] == 0;
-                        });
-                    });
-            add("downward(%s)",
-                    +[](MyInput x) -> zBool {
-                        return zBool([=](Frame f) {
-                            return x.scene.figure.position[2] < 0;
-                        });
-                    });
-            add("upward(%s)",
-                    +[](MyInput x) -> zBool {
-                        return zBool([=](Frame f) {
-                            return x.scene.figure.position[2] > 0;
-                        });
-                    });
+            /*// TODO: generalize to different angles, using Frame f*/
+            /*// Right now, this is assuming a canonically-oriented ground at zero height*/
+            /*add("zTRUE",*/
+            /*        +[]() -> zBool {*/
+            /*            return zBool([=](Frame f) {*/
+            /*                return true;*/
+            /*            });*/
+            /*        });*/
+            /*add("z=0(%s)",*/
+            /*        +[](MyInput x) -> zBool {*/
+            /*            return zBool([=](Frame f) {*/
+            /*                return x.scene.figure.position[2] == 0;*/
+            /*            });*/
+            /*        });*/
+            /*add("downward(%s)",*/
+            /*        +[](MyInput x) -> zBool {*/
+            /*            return zBool([=](Frame f) {*/
+            /*                return x.scene.figure.position[2] < 0;*/
+            /*            });*/
+            /*        });*/
+            /*add("upward(%s)",*/
+            /*        +[](MyInput x) -> zBool {*/
+            /*            return zBool([=](Frame f) {*/
+            /*                return x.scene.figure.position[2] > 0;*/
+            /*            });*/
+            /*        });*/
             /***/
             add("x",             Builtins::X<MyGrammar>, TERMINAL_WEIGHT);
 
