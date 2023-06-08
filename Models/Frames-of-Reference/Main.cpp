@@ -165,8 +165,11 @@ int main(int argc, char** argv){
             /* scene_probs.p_listener_ground = p_listener_ground; */
             scene_probs.p_near = 0.5;
             scene_probs.p_axis = 0.8;
+
             WordProbs word_probs;
-            /* word_probs.p_intrinsic = p_intrinsic; */
+            word_probs.p_intrinsic = p_intrinsic;
+            word_probs.p_frame = p_frame;
+
             Probabilities probs = {scene_probs, word_probs};
 
             std::vector<MyInput> data = data_sampler.sample_data(num_samples, probs);
