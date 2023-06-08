@@ -191,7 +191,7 @@ struct MyData {
             is_direct = flip(scene_probs.p_direct);
             if (is_direct) {
                 OrientedObject direct_speaker = {Space::origin, ground_direction, true};
-                Object figure = {figure_position};
+                BaseObject figure = {figure_position};
 
                 Scene direct = {direct_speaker, direct_speaker, figure};
                 return direct;
@@ -199,7 +199,7 @@ struct MyData {
             else {
                 OrientedObject nondirect_speaker = {Space::nondirect_speaker_spot, Space::east, true};
                 OrientedObject ground = {Space::origin, ground_direction, false};
-                Object figure = {figure_position};
+                BaseObject figure = {figure_position};
 
                 Scene nondirect = {nondirect_speaker, ground, figure};
                 return nondirect;
