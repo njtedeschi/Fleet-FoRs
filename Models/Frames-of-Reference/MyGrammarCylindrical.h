@@ -178,7 +178,7 @@ public:
                         return a.forward;
                     });
             add("backward(%s)", +[](OrientedObject a) -> Direction {
-                        return -a.upward;
+                        return -a.forward;
                     });
             add("rightward(%s)", +[](OrientedObject a) -> Direction {
                         return a.rightward;
