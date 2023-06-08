@@ -96,19 +96,25 @@ struct BaseObject {
     : position(p) {}
 };
 
+enum class BodyType {
+    human = 0,
+    quadruped = 1
+};
+
 struct OrientedObject : public BaseObject {
     Direction forward;
     Direction upward;
     Direction rightward;
 
     bool is_participant;
+    BodyType body_type
 
     // Default constructor
-    OrientedObject() : BaseObject(), forward({0, 0, 0}), upward({0, 0, 0}), rightward({0, 0, 0}), is_participant(false) {}
+    OrientedObject() : BaseObject(), forward({0, 0, 0}), upward({0, 0, 0}), rightward({0, 0, 0}), is_participant(false), body_type(BodyType::human) {}
 
     // Calculate rightward from forward and upward
-    OrientedObject(const Position& p, const Direction& f, const Direction& u = {0, 0, 1}, bool is_p = false)
-    : BaseObject(p), forward(f), upward(u), is_participant(is_p) {
+    OrientedObject(const Position& p, const Direction& f, const Direction& u = {0, 0, 1}, bool is_p = false, BodyType bt = BodyType::human)
+    : BaseObject(p), forward(f), upward(u), is_participant(is_p), body_type(bt) {
         rightward = cross_product(forward, upward);
     }
 };
