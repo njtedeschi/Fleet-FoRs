@@ -200,7 +200,9 @@ struct MyData {
             }
             else {
                 OrientedObject nondirect_speaker = {Space::nondirect_speaker_spot, Space::east, Space::up, true};
-                OrientedObject ground = {Space::origin, ground_direction};
+
+                BodyType body_type = (flip(0.5)) ? BodyType::human : BodyType::quadruped;
+                OrientedObject ground = {Space::origin, ground_direction, Space::up, false, body_type};
                 BaseObject figure = {figure_position};
 
                 Scene nondirect = {nondirect_speaker, ground, figure};
