@@ -63,8 +63,8 @@ struct MyInput {
 double p_direct = 0.2; // probability a scene is direct
 double p_listener_ground = 0.2; // probability that the ground of a nondirect scene is the listener
 
-double p_frame = 0.9; // probability that a description uses an FoR if one applies
-double p_intrinsic = 0.5; // probability that a description is intrinsic
+double p_frame = 0.0; // probability that a description uses an FoR if one applies
+double p_intrinsic = 0.0; // probability that a description is intrinsic
 
 // Data amounts
 int data_min = 0;
