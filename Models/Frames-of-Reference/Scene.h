@@ -107,7 +107,7 @@ struct OrientedObject : public BaseObject {
     Direction rightward;
 
     bool is_participant;
-    BodyType body_type
+    BodyType body_type;
 
     // Default constructor
     OrientedObject() : BaseObject(), forward({0, 0, 0}), upward({0, 0, 0}), rightward({0, 0, 0}), is_participant(false), body_type(BodyType::human) {}
