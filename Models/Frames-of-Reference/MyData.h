@@ -119,6 +119,7 @@ struct Probabilities {
 };
 
 struct MyData {
+    std::unordered_map<std::string,WordMeaning> word_meanings;
     std::vector<std::string> words;
     MyHypothesis target;
 
@@ -129,13 +130,14 @@ struct MyData {
 
     // Default constructor
     /* MyData() : words(), target(), intrinsic(), relative() {} */
-    MyData() : words(), target() {}
+    MyData() : word_meanings(), words(), target() {}
 
-    // Construct from dict of formulas
-    MyData(const std::unordered_map<std::string, std::string>& formulas) {
-        for (const auto& [word, formula] : formulas) {
+    // Construct from dict of WordMeaning objects tbat contain
+    // target formula and lamba function for potential body part direction
+    MyData(const std::unordered_map<std::string, WordMeaning> wm) : word_meanings(wm) {
+        for (const auto& [word, meaning] : word_meanings) {
             words.push_back(word);
-            target[word] = InnerHypothesis(grammar.simple_parse(formula));
+            target[word] = InnerHypothesis(grammar.simple_parse(meaning.target_formula));
         }
     }
 
@@ -154,7 +156,7 @@ struct MyData {
         else {
             word = sample_true_word(probs.word_probs, scene);
         }
-        return MyInput{.scene=scene, .word=word, .true_description=true_description};
+        return MyInput{.scene=scene, .word=word, .body_part_meaning=word_meanings[word].body_part, .true_description=true_description};
     }
 
     // Wrapper for `myrandom` to implement uniform distribution
@@ -239,7 +241,7 @@ struct MyData {
         std::set<std::string> true_words;
 
         for(auto& w : words) {
-            MyInput input{.scene=scene, .word=EMPTY_STRING, .true_description=true};
+            MyInput input{.scene=scene, .word=w, .body_part_meaning=word_meanings[w].body_part, .true_description=true};
             bool output = concepts.at(w).call(input); 
             if (output == true){
                 true_words.insert(w);

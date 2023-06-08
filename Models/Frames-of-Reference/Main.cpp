@@ -3,6 +3,7 @@
 #include <vector>
 #include <set>
 #include <unordered_map>
+#include <functional>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
@@ -14,9 +15,25 @@ static const double alpha_t = 0.95; // probability of true description
 
 #include "Scene.h"
 
+struct WordMeaning {
+    std::string target_formula;
+    std::function<Direction(OrientedObject&)> body_part;
+
+    // No argument constructor
+    WordMeaning() : target_formula(""), body_part([](const OrientedObject& a) -> Direction {return {0,0,0};}) {}
+
+    // Default body part direction is the zero vector
+    WordMeaning(std::string tf) : target_formula(tf), body_part([](const OrientedObject& a) -> Direction {return {0,0,0};}) {}
+
+    WordMeaning(std::string tf, std::function<Direction(const OrientedObject&)> bp) :
+        target_formula(tf), body_part(bp) {}
+};
+
+// TODO: Possibly switch body_part_meaning to using a pointer
 struct MyInput {
     Scene scene;
     std::string word;
+    std::function<Direction(OrientedObject&)> body_part_meaning;
     bool true_description;
 };
 
@@ -103,16 +120,15 @@ int main(int argc, char** argv){
         /*     {"far", "exists(as(f=frame(G),cyl(r-far(x),tTRUE,zTRUE)),pf(x))"}, */
         /*     /1* {"in", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,z=0(x))),pf(x))"}, *1/ */
         /* }; */
-        std::unordered_map<std::string, std::string> target_formulas = {
-            {"above", "parallel(x,UP)"},
-            {"below", "parallel(x,DOWN)"},
-            {"front", "exists(cs(or(f=frame(G),f=frame'(S,TR)),forward-f(x)),pf(x))"},
-            {"behind", "exists(cs(or(f=frame(G),f=frame'(S,TR)),backward-f(x)),pf(x))"},
-            {"left", "exists(cs(or(f=frame(G),f=frame'(S,TR)),leftward-f(x)),pf(x))"},
-            {"right", "exists(cs(or(f=frame(G),f=frame'(S,TR)),rightward-f(x)),pf(x))"},
-            {"near", "near(x)"},
-            {"far", "far(x)"},
-            /* {"in", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,z=0(x))),pf(x))"}, */
+        std::unordered_map<std::string, WordMeaning> target_formulas = {
+            {"above", WordMeaning("parallel(x,UP)")},
+            {"below", WordMeaning("parallel(x,DOWN)")},
+            {"front", WordMeaning("exists(cs(or(f=frame(G),f=frame'(S,TR)),forward-f(x)),pf(x))")},
+            {"behind", WordMeaning("exists(cs(or(f=frame(G),f=frame'(S,TR)),backward-f(x)),pf(x))")},
+            {"left", WordMeaning("exists(cs(or(f=frame(G),f=frame'(S,TR)),leftward-f(x)),pf(x))")},
+            {"right", WordMeaning("exists(cs(or(f=frame(G),f=frame'(S,TR)),rightward-f(x)),pf(x))")},
+            {"near", WordMeaning("near(x)")},
+            {"far", WordMeaning("far(x)")},
         };
 
         // Initialize sampler
