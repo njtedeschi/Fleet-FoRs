@@ -184,7 +184,7 @@ public:
                         return a.rightward;
                     });
             add("leftward(%s)", +[](OrientedObject a) -> Direction {
-                        return -a.upward;
+                        return -a.rightward;
                     });
             /* add("sideward(%s)", +[](OrientedObject a) -> Direction { */
             /*             return a.; */
