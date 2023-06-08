@@ -189,17 +189,17 @@ namespace Space {
     std::vector<OrientedObject> grounds = {east_facing_ground, west_facing_ground, north_facing_ground, south_facing_ground};
 
     // Possible grounds (listener)
-    OrientedObject listener_east_facing_ground = {origin, east, true};
-    OrientedObject listener_west_facing_ground = {origin, west, true};
-    OrientedObject listener_north_facing_ground = {origin, north, true};
-    OrientedObject listener_south_facing_ground = {origin, south, true};
-    std::vector<OrientedObject> listener_grounds = {listener_east_facing_ground, listener_west_facing_ground, listener_north_facing_ground, listener_south_facing_ground};
+    /* OrientedObject listener_east_facing_ground = {origin, east, true}; */
+    /* OrientedObject listener_west_facing_ground = {origin, west, true}; */
+    /* OrientedObject listener_north_facing_ground = {origin, north, true}; */
+    /* OrientedObject listener_south_facing_ground = {origin, south, true}; */
+    /* std::vector<OrientedObject> listener_grounds = {listener_east_facing_ground, listener_west_facing_ground, listener_north_facing_ground, listener_south_facing_ground}; */
 }
 
     // Possible direct and nondirect scenes
 std::vector<Scene> direct_scenes;
 std::vector<Scene> nondirect_scenes;
-std::vector<Scene> listener_nondirect_scenes;
+/* std::vector<Scene> listener_nondirect_scenes; */
 
 void generate_scenes(){
     for (const auto& figure : Space::figures) {
@@ -209,10 +209,10 @@ void generate_scenes(){
             Scene nondirect = {Space::nondirect_speaker, ground, figure};
             nondirect_scenes.push_back(nondirect);
         }
-        for (const auto& ground : Space::listener_grounds) {
-            Scene listener_nondirect = {Space::nondirect_speaker, ground, figure};
-            listener_nondirect_scenes.push_back(listener_nondirect);
-        }
+        /* for (const auto& ground : Space::listener_grounds) { */
+        /*     Scene listener_nondirect = {Space::nondirect_speaker, ground, figure}; */
+        /*     listener_nondirect_scenes.push_back(listener_nondirect); */
+        /* } */
     }
 
     // Create off-axis positions
