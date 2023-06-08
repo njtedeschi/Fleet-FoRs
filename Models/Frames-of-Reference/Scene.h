@@ -106,7 +106,7 @@ struct OrientedObject : public BaseObject {
 
     // Calculate rightward from forward and upward
     OrientedObject(const Position& position, const Direction& forward, const Direction& upward = {0, 0, 1}, bool is_participant = false)
-    : BaseObject(position, is_participant, is_valid), forward(forward), upward(upward) {
+    : BaseObject(position, is_participant), forward(forward), upward(upward) {
         rightward = cross_product(forward, upward);
     }
 
