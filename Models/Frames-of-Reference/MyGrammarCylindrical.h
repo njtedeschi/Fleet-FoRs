@@ -144,8 +144,7 @@ struct zBool {
 /*     std::function<Direction(OrientedObject)>; */
 /* }; */
 
-/* class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,rBool,thetaBool,zBool>, */
-class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,OrientedObject,Direction,ft<Direction,Frame>,std::function<Direction(OrientedObject&)>>,
+class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,OrientedObject,Direction,ft<Direction,Frame>>,
 				  public Singleton<MyGrammar> {
 public:
 	MyGrammar() {
@@ -164,10 +163,10 @@ public:
             // Directions
             add("UP", +[]() -> Direction {
                         return Space::up;
-                    });
+                    }, TERMINAL_WEIGHT);
             add("DOWN", +[]() -> Direction {
                         return Space::down;
-                    });
+                    }, TERMINAL_WEIGHT);
             add("upward(%s)", +[](OrientedObject a) -> Direction {
                         return a.upward;
                     });
@@ -189,14 +188,13 @@ public:
             /* add("sideward(%s)", +[](OrientedObject a) -> Direction { */
             /*             return a.; */
             /*         }); */
-            /* add("", +[]() -> { */
-            /*             // body */
-            /*         }); */
-            add("normal(%s,%s)", +[](OrientedObject a, std::function<Direction(OrientedObject&)> body_part_meaning) -> Direction {
-                        return body_part_meaning(a);
-                    });
-            add("word(%s)", +[](MyInput x) -> std::function<Direction(OrientedObject&)> {
-                        return x.body_part_meaning;
+            /* Body Part Directions */
+            add("back(%s)", +[](MyInput x) -> Direction {
+                    WordMeaning meaning = *(x.meaning); // dereference pointer
+                    if(meaning.body_part_noun != BodyPartNoun::back){
+                        return {0,0,0};
+                    }
+                    return meaning.body_part_direction(x.scene.ground);
                     });
             // Objects
             add("ground(%s)", +[](MyInput x) -> OrientedObject {

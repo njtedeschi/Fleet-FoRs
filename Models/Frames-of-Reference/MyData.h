@@ -156,7 +156,7 @@ struct MyData {
         else {
             word = sample_true_word(probs.word_probs, scene);
         }
-        return MyInput{.scene=scene, .word=word, .body_part_meaning=word_meanings[word].body_part, .true_description=true_description};
+        return MyInput{.scene=scene, .word=word, .meaning=&(word_meanings[word]), .true_description=true_description};
     }
 
     // Wrapper for `myrandom` to implement uniform distribution
@@ -243,7 +243,7 @@ struct MyData {
         std::set<std::string> true_words;
 
         for(auto& w : words) {
-            MyInput input{.scene=scene, .word=w, .body_part_meaning=word_meanings[w].body_part, .true_description=true};
+            MyInput input{.scene=scene, .word=w, .meaning=&(word_meanings[w]), .true_description=true};
             bool output = concepts.at(w).call(input); 
             if (output == true){
                 true_words.insert(w);

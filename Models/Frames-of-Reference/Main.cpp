@@ -15,25 +15,37 @@ static const double alpha_t = 0.95; // probability of true description
 
 #include "Scene.h"
 
+enum class BodyPartNoun {
+    none = 0,
+    head = 1,
+    belly = 2,
+    face = 3,
+    back = 4,
+    side = 5,
+    tail = 6
+};
+
 struct WordMeaning {
     std::string target_formula;
-    std::function<Direction(OrientedObject&)> body_part;
+    BodyPartNoun body_part_noun;
+    std::function<Direction(OrientedObject&)> body_part_direction;
 
     // No argument constructor
-    WordMeaning() : target_formula(""), body_part([](const OrientedObject& a) -> Direction {return {0,0,0};}) {}
+    WordMeaning() : target_formula(""), body_part_noun(BodyPartNoun::none), body_part_direction([](const OrientedObject& a) -> Direction {return {0,0,0};}) {}
 
     // Default body part direction is the zero vector
-    WordMeaning(std::string tf) : target_formula(tf), body_part([](const OrientedObject& a) -> Direction {return {0,0,0};}) {}
+    WordMeaning(std::string tf) : target_formula(tf), body_part_noun(BodyPartNoun::none), body_part_direction([](const OrientedObject& a) -> Direction {return {0,0,0};}) {}
 
-    WordMeaning(std::string tf, std::function<Direction(const OrientedObject&)> bp) :
-        target_formula(tf), body_part(bp) {}
+    WordMeaning(std::string tf, BodyPartNoun bpn, std::function<Direction(const OrientedObject&)> bpd) :
+        target_formula(tf), body_part_noun(bpn), body_part_direction(bpd) {}
 };
 
 // TODO: Possibly switch body_part_meaning to using a pointer
 struct MyInput {
     Scene scene;
     std::string word;
-    std::function<Direction(OrientedObject&)> body_part_meaning;
+    WordMeaning* meaning;
+    /* std::function<Direction(OrientedObject&)> body_part_meaning; */
     bool true_description;
 };
 
@@ -120,7 +132,8 @@ int main(int argc, char** argv){
         /*     {"far", "exists(as(f=frame(G),cyl(r-far(x),tTRUE,zTRUE)),pf(x))"}, */
         /*     /1* {"in", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,z=0(x))),pf(x))"}, *1/ */
         /* }; */
-        std::unordered_map<std::string, WordMeaning> target_formulas = {
+
+        std::unordered_map<std::string, WordMeaning> english_words = {
             {"above", WordMeaning("parallel(x,UP)")},
             {"below", WordMeaning("parallel(x,DOWN)")},
             {"front", WordMeaning("exists(cs(or(f=frame(G),f=frame'(S,TR)),forward-f(x)),pf(x))")},
@@ -131,8 +144,46 @@ int main(int argc, char** argv){
             {"far", WordMeaning("far(x)")},
         };
 
+        std::unordered_map<std::string, WordMeaning> mixtec_words = {
+            {"head", WordMeaning(
+                    "parallel(x,UP)",
+                    BodyPartNoun::head,
+                    [](const OrientedObject& a) -> Direction {
+                    switch(a.body_type) {
+                        case BodyType::human:
+                            return a.upward;
+                        case BodyType::quadruped:
+                            return {0,0,0};
+                    }
+                    })},
+            {"belly", WordMeaning(
+                    "parallel(x,DOWN)",
+                    BodyPartNoun::belly,
+                    [](const OrientedObject& a) -> Direction {return -a.upward;})},
+            {"face", WordMeaning(
+                    "parallel(x,forward(ground(x)))",
+                    BodyPartNoun::face,
+                    [](const OrientedObject& a) -> Direction {return a.forward;})},
+            {"back", WordMeaning(
+                    /* "parallel(x,back(x))", */
+                    "parallel(x,backward(ground(x)))",
+                    BodyPartNoun::back,
+                    [](const OrientedObject& a) -> Direction {
+                    switch(a.body_type) {
+                        case BodyType::human:
+                            return -a.forward;
+                        case BodyType::quadruped:
+                            return a.upward;
+                    }
+                    })},
+            {"right", WordMeaning("parallel(x,rightward(ground(x)))")},
+            {"left", WordMeaning("parallel(x,leftward(ground(x)))")},
+            {"near", WordMeaning("near(x)")},
+            {"far", WordMeaning("far(x)")},
+        };
+
         // Initialize sampler
-        MyData data_sampler(target_formulas);
+        MyData data_sampler(mixtec_words);
         /* data_sampler.set_intrinsic(intrinsic_formulas); */
         /* data_sampler.set_relative(relative_formulas); */
 
