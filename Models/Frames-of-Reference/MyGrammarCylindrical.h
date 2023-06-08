@@ -145,7 +145,7 @@ struct zBool {
 /* }; */
 
 /* class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,rBool,thetaBool,zBool>, */
-class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,OrientedObject,Direction,ft<Direction,Frame>>,
+class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,OrientedObject,Direction,ft<Direction,Frame>,std::function<Direction(OrientedObject&)>>,
 				  public Singleton<MyGrammar> {
 public:
 	MyGrammar() {
@@ -189,6 +189,15 @@ public:
             /* add("sideward(%s)", +[](OrientedObject a) -> Direction { */
             /*             return a.; */
             /*         }); */
+            /* add("", +[]() -> { */
+            /*             // body */
+            /*         }); */
+            add("normal(%s,%s)", +[](OrientedObject a, std::function<Direction(OrientedObject&)> body_part_meaning) -> Direction {
+                        return body_part_meaning(a);
+                    });
+            add("word(%s)", +[](MyInput x) -> std::function<Direction(OrientedObject&)> {
+                        return x.body_part_meaning;
+                    });
             // Objects
             add("ground(%s)", +[](MyInput x) -> OrientedObject {
                         return x.scene.ground;
