@@ -89,11 +89,11 @@ struct BaseObject {
     bool is_participant;
 
     // Default constructor
-    BaseObject() : position({0, 0, 0}), is_participant(false) {}
+    BaseObject() : position({0, 0, 0}) {}
 
     // Construct from position
-    BaseObject(const Position& position, bool is_participant=false)
-    : position(position), is_participant(is_participant) {}
+    BaseObject(const Position& p)
+    : position(p) {}
 };
 
 struct OrientedObject : public BaseObject {
@@ -101,18 +101,14 @@ struct OrientedObject : public BaseObject {
     Direction upward;
     Direction rightward;
 
+    bool is_participant;
+
     // Default constructor
-    OrientedObject() : BaseObject(), forward({0, 0, 0}), upward({0, 0, 0}), rightward({0, 0, 0}) {}
+    OrientedObject() : BaseObject(), forward({0, 0, 0}), upward({0, 0, 0}), rightward({0, 0, 0}), is_participant(false) {}
 
     // Calculate rightward from forward and upward
-    OrientedObject(const Position& position, const Direction& forward, const Direction& upward = {0, 0, 1}, bool is_participant = false)
-    : BaseObject(position, is_participant), forward(forward), upward(upward) {
-        rightward = cross_product(forward, upward);
-    }
-
-    // Constructor with is_participant parameter
-    OrientedObject(const Position& position, const Direction& forward, bool is_participant, const Direction& upward = {0, 0, 1})
-    : BaseObject(position, is_participant), forward(forward), upward(upward) {
+    OrientedObject(const Position& p, const Direction& f, const Direction& u = {0, 0, 1}, bool is_p = false)
+    : BaseObject(p), forward(f), upward(u), is_participant(is_p) {
         rightward = cross_product(forward, upward);
     }
 };
@@ -168,8 +164,8 @@ namespace Space {
     std::vector<Direction> ground_directions = {east, west, north, south};
 
     // Possible speakers
-    OrientedObject direct_speaker = {origin, east, true};
-    OrientedObject nondirect_speaker = {nondirect_speaker_spot, east, true};
+    OrientedObject direct_speaker = {origin, east, up, true};
+    OrientedObject nondirect_speaker = {nondirect_speaker_spot, east, up, true};
 
     // Possible figures
     BaseObject east_figure = {east_spot};
