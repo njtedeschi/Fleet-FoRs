@@ -106,7 +106,7 @@ struct OrientedObject : public BaseObject {
 
     // Calculate rightward from forward and upward
     OrientedObject(const Position& position, const Direction& forward, const Direction& upward = {0, 0, 1}, bool is_participant = false)
-    : Object(position, is_participant, is_valid), forward(forward), upward(upward) {
+    : BaseObject(position, is_participant, is_valid), forward(forward), upward(upward) {
         rightward = cross_product(forward, upward);
     }
 
@@ -127,7 +127,7 @@ struct Scene {
         Scene() : speaker(), ground(), figure() {
             g_to_f = figure.position - ground.position;
         }
-        Scene(const OrientedObject& speaker, const OrientedObject& ground, const Object& figure)
+        Scene(const OrientedObject& speaker, const OrientedObject& ground, const BaseObject& figure)
             : speaker(speaker), ground(ground), figure(figure) {
                 g_to_f = figure.position - ground.position;
             }
@@ -172,14 +172,14 @@ namespace Space {
     OrientedObject nondirect_speaker = {nondirect_speaker_spot, east, true};
 
     // Possible figures
-    Object east_figure = {east_spot};
-    Object west_figure = {west_spot};
-    Object north_figure = {north_spot};
-    Object south_figure = {south_spot};
-    Object up_figure = {up_spot};
-    Object down_figure = {down_spot};
-    std::vector<Object> figures = {east_figure, west_figure, north_figure, south_figure, up_figure, down_figure};
-    /* std::vector<Object> figures = {east_figure, west_figure, north_figure, south_figure}; */
+    BaseObject east_figure = {east_spot};
+    BaseObject west_figure = {west_spot};
+    BaseObject north_figure = {north_spot};
+    BaseObject south_figure = {south_spot};
+    BaseObject up_figure = {up_spot};
+    BaseObject down_figure = {down_spot};
+    std::vector<BaseObject> figures = {east_figure, west_figure, north_figure, south_figure, up_figure, down_figure};
+    /* std::vector<BaseObject> figures = {east_figure, west_figure, north_figure, south_figure}; */
 
     // Possible grounds
     OrientedObject east_facing_ground = {origin, east};
