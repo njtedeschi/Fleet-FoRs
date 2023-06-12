@@ -151,6 +151,11 @@ public:
             /* add("", +[]() -> { */
             /*             // body */
             /*         }); */
+            // Logical connectives
+            add("and(%s,%s)", Builtins::And<MyGrammar>);
+            add("or(%s,%s)", Builtins::Or<MyGrammar>);
+            add("not(%s)", Builtins::Not<MyGrammar>);
+            // Input (x.scene.g_to_f) -> bool functions
             add("near(%s)", +[](MyInput x) -> bool {
                         return magnitude(x.scene.g_to_f) < 1;
                     });
@@ -295,7 +300,8 @@ public:
                         });
                     });
             /* Frame Conditions */
-            add("or(%s,%s)",
+            // Disjunction for frame conditions
+            add("or-f(%s,%s)",
                     +[](fBool a, fBool b) -> fBool {
                         return fBool([=](Frame f) {
                             return a(f) || b(f);
