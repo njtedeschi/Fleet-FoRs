@@ -194,6 +194,27 @@ public:
             /*             return a.; */
             /*         }); */
             /* Body Part Directions */
+            add("head(%s)", +[](MyInput x) -> Direction {
+                    WordMeaning meaning = *(x.meaning); // dereference pointer
+                    if(meaning.body_part_noun != BodyPartNoun::head){
+                        return {0,0,0};
+                    }
+                    return meaning.body_part_direction(x.scene.ground);
+                    });
+            add("belly(%s)", +[](MyInput x) -> Direction {
+                    WordMeaning meaning = *(x.meaning); // dereference pointer
+                    if(meaning.body_part_noun != BodyPartNoun::belly){
+                        return {0,0,0};
+                    }
+                    return meaning.body_part_direction(x.scene.ground);
+                    });
+            add("face(%s)", +[](MyInput x) -> Direction {
+                    WordMeaning meaning = *(x.meaning); // dereference pointer
+                    if(meaning.body_part_noun != BodyPartNoun::face){
+                        return {0,0,0};
+                    }
+                    return meaning.body_part_direction(x.scene.ground);
+                    });
             add("back(%s)", +[](MyInput x) -> Direction {
                     WordMeaning meaning = *(x.meaning); // dereference pointer
                     if(meaning.body_part_noun != BodyPartNoun::back){
