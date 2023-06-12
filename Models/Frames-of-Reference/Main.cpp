@@ -21,8 +21,10 @@ enum class BodyPartNoun {
     belly = 2,
     face = 3,
     back = 4,
-    side = 5,
-    tail = 6
+    right_side = 5,
+    left_side = 6,
+    side = 7,
+    tail = 8
 };
 
 struct WordMeaning {

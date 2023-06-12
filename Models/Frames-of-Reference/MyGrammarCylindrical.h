@@ -222,6 +222,20 @@ public:
                     }
                     return meaning.body_part_direction(x.scene.ground);
                     });
+            add("right_side(%s)", +[](MyInput x) -> Direction {
+                    WordMeaning meaning = *(x.meaning); // dereference pointer
+                    if(meaning.body_part_noun != BodyPartNoun::right_side){
+                        return {0,0,0};
+                    }
+                    return meaning.body_part_direction(x.scene.ground);
+                    });
+            add("left_side(%s)", +[](MyInput x) -> Direction {
+                    WordMeaning meaning = *(x.meaning); // dereference pointer
+                    if(meaning.body_part_noun != BodyPartNoun::left_side){
+                        return {0,0,0};
+                    }
+                    return meaning.body_part_direction(x.scene.ground);
+                    });
             // Objects
             add("ground(%s)", +[](MyInput x) -> OrientedObject {
                         return x.scene.ground;
