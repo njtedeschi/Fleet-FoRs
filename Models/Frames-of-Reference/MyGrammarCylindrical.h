@@ -144,7 +144,7 @@ struct zBool {
 /*     std::function<Direction(OrientedObject)>; */
 /* }; */
 
-class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,OrientedObject,Direction,ft<Direction,Frame>>,
+class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,OrientedObject,Direction,ft<Direction,Frame>,BodyPartNoun>,
 				  public Singleton<MyGrammar> {
 public:
 	MyGrammar() {
@@ -194,48 +194,19 @@ public:
             /*             return a.; */
             /*         }); */
             /* Body Part Directions */
-            add("head(%s)", +[](MyInput x) -> Direction {
+            add("normal(%s,%s)", +[](MyInput x, BodyPartNoun bpn) -> Direction {
                     WordMeaning meaning = *(x.meaning); // dereference pointer
-                    if(meaning.body_part_noun != BodyPartNoun::head){
+                    if(meaning.body_part_noun != bpn){
                         return {0,0,0};
                     }
                     return meaning.body_part_direction(x.scene.ground);
                     });
-            add("belly(%s)", +[](MyInput x) -> Direction {
-                    WordMeaning meaning = *(x.meaning); // dereference pointer
-                    if(meaning.body_part_noun != BodyPartNoun::belly){
-                        return {0,0,0};
-                    }
-                    return meaning.body_part_direction(x.scene.ground);
-                    });
-            add("face(%s)", +[](MyInput x) -> Direction {
-                    WordMeaning meaning = *(x.meaning); // dereference pointer
-                    if(meaning.body_part_noun != BodyPartNoun::face){
-                        return {0,0,0};
-                    }
-                    return meaning.body_part_direction(x.scene.ground);
-                    });
-            add("back(%s)", +[](MyInput x) -> Direction {
-                    WordMeaning meaning = *(x.meaning); // dereference pointer
-                    if(meaning.body_part_noun != BodyPartNoun::back){
-                        return {0,0,0};
-                    }
-                    return meaning.body_part_direction(x.scene.ground);
-                    });
-            add("right_side(%s)", +[](MyInput x) -> Direction {
-                    WordMeaning meaning = *(x.meaning); // dereference pointer
-                    if(meaning.body_part_noun != BodyPartNoun::right_side){
-                        return {0,0,0};
-                    }
-                    return meaning.body_part_direction(x.scene.ground);
-                    });
-            add("left_side(%s)", +[](MyInput x) -> Direction {
-                    WordMeaning meaning = *(x.meaning); // dereference pointer
-                    if(meaning.body_part_noun != BodyPartNoun::left_side){
-                        return {0,0,0};
-                    }
-                    return meaning.body_part_direction(x.scene.ground);
-                    });
+            add("head", +[]() -> BodyPartNoun {return BodyPartNoun::head;});
+            add("belly", +[]() -> BodyPartNoun {return BodyPartNoun::belly;});
+            add("face", +[]() -> BodyPartNoun {return BodyPartNoun::face;});
+            add("back", +[]() -> BodyPartNoun {return BodyPartNoun::back;});
+            add("right_side", +[]() -> BodyPartNoun {return BodyPartNoun::right_side;});
+            add("left_side", +[]() -> BodyPartNoun {return BodyPartNoun::left_side;});
             // Objects
             add("ground(%s)", +[](MyInput x) -> OrientedObject {
                         return x.scene.ground;
