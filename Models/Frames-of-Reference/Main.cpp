@@ -194,20 +194,23 @@ int main(int argc, char** argv){
         // Initialize amount of data to sample for each iteration
         /* std::vector<int> data_amounts = generate_range(data_min, data_max, data_step); */
 
+        bool print_to_file = false;
         // Output file set up
-        // Save original buffer of std::cout
         std::streambuf *originalCoutBuffer = std::cout.rdbuf();
+        std::ofstream outFile;
 
-        // Create output file stream using date and time
-        auto now = std::chrono::system_clock::now();
-        std::time_t time = std::chrono::system_clock::to_time_t(now);
-        std::stringstream date_time_ss;
-        date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".txt";
-        std::string file_name = date_time_ss.str();
-        std::ofstream outFile(file_name);
+        if(print_to_file) {
+            // Create output file stream using date and time
+            auto now = std::chrono::system_clock::now();
+            std::time_t time = std::chrono::system_clock::to_time_t(now);
+            std::stringstream date_time_ss;
+            date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".txt";
+            std::string file_name = date_time_ss.str();
+            std::ofstream outFile(file_name);
 
-        // Redirect std::cout to file
-        std::cout.rdbuf(outFile.rdbuf());
+            // Redirect std::cout to file
+            std::cout.rdbuf(outFile.rdbuf());
+        }
 
         // Inference
         TopN<MyHypothesis> top;
@@ -252,8 +255,10 @@ int main(int argc, char** argv){
             top.print(str(num_samples));
         }
 
-        // Restore original buffer of std::cout
-        std::cout.rdbuf(originalCoutBuffer);
-        // Close output file stream
-        outFile.close();
+        if(print_to_file){
+            // Restore original buffer of std::cout
+            std::cout.rdbuf(originalCoutBuffer);
+            // Close output file stream
+            outFile.close();
+        }
 }
