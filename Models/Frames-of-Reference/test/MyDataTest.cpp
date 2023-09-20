@@ -3,14 +3,43 @@
 
 #include <set>
 #include <unordered_map>
+#include <functional>
 
 static const double alpha_t = 0.95;
 
 #include "../Scene.h"
 
+enum class BodyPartNoun {
+    none = 0,
+    head = 1,
+    belly = 2,
+    face = 3,
+    back = 4,
+    right_side = 5,
+    left_side = 6,
+    side = 7,
+    tail = 8
+};
+
+struct WordMeaning {
+    std::string target_formula;
+    BodyPartNoun body_part_noun;
+    std::function<Direction(OrientedObject&)> body_part_direction;
+
+    // No argument constructor
+    WordMeaning() : target_formula(""), body_part_noun(BodyPartNoun::none), body_part_direction([](const OrientedObject& a) -> Direction {return {0,0,0};}) {}
+
+    // Default body part direction is the zero vector
+    WordMeaning(std::string tf) : target_formula(tf), body_part_noun(BodyPartNoun::none), body_part_direction([](const OrientedObject& a) -> Direction {return {0,0,0};}) {}
+
+    WordMeaning(std::string tf, BodyPartNoun bpn, std::function<Direction(const OrientedObject&)> bpd) :
+        target_formula(tf), body_part_noun(bpn), body_part_direction(bpd) {}
+};
+
 struct MyInput {
     Scene scene;
     std::string word;
+    WordMeaning* meaning;
     bool true_description;
 };
 
