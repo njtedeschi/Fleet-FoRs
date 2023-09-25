@@ -73,6 +73,9 @@ struct MyInput {
 #include "Random.h"
 #include "Builtins.h"
 
+// Printing parameters
+bool check_best = false;
+
 // Data sampling parameters
 double p_direct = 0.2; // probability a scene is direct
 double p_listener_ground = 0.2; // probability that the ground of a nondirect scene is the listener
@@ -103,6 +106,8 @@ int main(int argc, char** argv){
 	
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
 	Fleet fleet("Frames of Reference");
+
+        fleet.add_option("--check_best", check_best, "Print true words for each scene according to top hypothesis.");
         fleet.add_option("--max_temp", max_temp, "Max temperature for parallel tempering");
 
         // p_axis
@@ -253,6 +258,27 @@ int main(int argc, char** argv){
 
             // Show the best we've found
             top.print(str(num_samples));
+
+            // Debugging (only checks horizontal, nondirect scenes right now)
+            if(check_best) {
+                MyHypothesis best = top.sorted()[0];
+                for(int i = 0; i< 16; i++){
+                    std::set<std::string> target_true_words;
+                    std::set<std::string> best_true_words;
+                    target_true_words = data_sampler.compute_true_words(target, nondirect_scenes[i]);
+                    best_true_words = data_sampler.compute_true_words(best, nondirect_scenes[i]);
+
+                    std::cout << "Scene " << i << "\n";
+                    for (auto& word : target_true_words) {
+                        std::cout << word << ' ';
+                    }
+                    std::cout << "\n";
+                    for (auto& word : best_true_words) {
+                        std::cout << word << ' ';
+                    }
+                    std::cout << "\n";
+                }
+            }
         }
 
         if(print_to_file){
