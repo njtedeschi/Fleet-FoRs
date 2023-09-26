@@ -261,23 +261,29 @@ int main(int argc, char** argv){
 
             // Debugging (only checks horizontal, nondirect scenes right now)
             if(check_best) {
-                MyHypothesis best = top.sorted()[0];
-                for(int i = 0; i< 16; i++){
-                    Scene scene = nondirect_scenes[i];
+                MyHypothesis best = top.best();
+                best.show();
+                for(int i = 0; i < num_samples; i++){
+                    Scene scene = data[i].scene;
+                    std::string description = data[i].word;
+
                     std::set<std::string> target_true_words;
                     std::set<std::string> best_true_words;
                     target_true_words = data_sampler.compute_true_words(target, scene);
                     best_true_words = data_sampler.compute_true_words(best, scene);
 
-                    if(target_true_words != best_true_words) {
-                        std::cout << "\n" << "Scene " << i << "\n";
+                    bool description_in_target = target_true_words.count(description);
+                    bool description_in_best = best_true_words.count(description);
+
+                    if(data[i].true_description && !(description_in_target && description_in_best)) {
+                        std::cout << "\n" << "Scene " << i << ": " << description << "(" << data[i].true_description << ")\n";
                         scene.print();
 
-                        std::cout << "Target: ";
+                        std::cout << "Target (" << description_in_target << "): ";
                         for (auto& word : target_true_words) {
                             std::cout << word << ' ';
                         }
-                        std::cout << "\n" << "Best: ";
+                        std::cout << "\n" << "Best (" << description_in_best << "): ";
                         for (auto& word : best_true_words) {
                             std::cout << word << ' ';
                         }
