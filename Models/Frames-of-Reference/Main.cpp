@@ -263,20 +263,26 @@ int main(int argc, char** argv){
             if(check_best) {
                 MyHypothesis best = top.sorted()[0];
                 for(int i = 0; i< 16; i++){
+                    Scene scene = nondirect_scenes[i];
                     std::set<std::string> target_true_words;
                     std::set<std::string> best_true_words;
-                    target_true_words = data_sampler.compute_true_words(target, nondirect_scenes[i]);
-                    best_true_words = data_sampler.compute_true_words(best, nondirect_scenes[i]);
+                    target_true_words = data_sampler.compute_true_words(target, scene);
+                    best_true_words = data_sampler.compute_true_words(best, scene);
 
-                    std::cout << "Scene " << i << "\n";
-                    for (auto& word : target_true_words) {
-                        std::cout << word << ' ';
+                    if(target_true_words != best_true_words) {
+                        std::cout << "\n" << "Scene " << i << "\n";
+                        scene.print();
+
+                        std::cout << "Target: ";
+                        for (auto& word : target_true_words) {
+                            std::cout << word << ' ';
+                        }
+                        std::cout << "\n" << "Best: ";
+                        for (auto& word : best_true_words) {
+                            std::cout << word << ' ';
+                        }
+                        std::cout << "\n";
                     }
-                    std::cout << "\n";
-                    for (auto& word : best_true_words) {
-                        std::cout << word << ' ';
-                    }
-                    std::cout << "\n";
                 }
             }
         }
