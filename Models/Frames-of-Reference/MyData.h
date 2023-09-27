@@ -208,35 +208,23 @@ struct MyData {
                 Scene nondirect = {nondirect_speaker, ground, figure};
                 return nondirect;
             }
-            }
+        }
 
     std::string sample_true_word(const WordProbs& word_probs, Scene scene) {
+        std::string sampled_word;
         std::set<std::string> candidate_words;
+
         // Sample from all true words
         if(word_probs.p_frame == 0 && word_probs.p_intrinsic == 0) {
             candidate_words = compute_true_words(target, scene);
         }
         // Sample from true words according to WordProbs
         else {
-            std::string word;
-            SpatialDescription description(scene);
-            bool uses_frame = flip(word_probs.p_frame);
-            bool is_intrinsic = flip(word_probs.p_intrinsic);
-            if(uses_frame) {
-                word = (is_intrinsic) ? description.intrinsic : description.relative;
-            }
-            else {
-                word = description.proximity;
-            }
-            candidate_words.insert(word);
-            // SpatialDescription doesn't encode side, so it mus be added manually
-            if(is_intrinsic && (word == "left" || word == "right")) {
-                candidate_words.insert("side");
-            }
+            candidate_words = compute_true_words_restricted(word_probs, scene);
         }
-        std::string sampled_word = *sample<std::string, decltype(candidate_words)>(candidate_words).first;
+        sampled_word = *sample<std::string, decltype(candidate_words)>(candidate_words).first;
         return sampled_word;
-        }
+    }
 
     // Compute all words that correctly describe a scene given a set of concepts for each word
     std::set<std::string> compute_true_words(MyHypothesis concepts, Scene scene){
@@ -250,6 +238,34 @@ struct MyData {
             }
         }
         return true_words;
+    }
+
+    std::set<std::string> compute_true_words_restricted(const WordProbs& word_probs, Scene scene) {
+        std::string word;
+        std::set<std::string> candidate_words;
+
+        SpatialDescription description(scene);
+
+        bool uses_frame = flip(word_probs.p_frame);
+        bool is_intrinsic = flip(word_probs.p_intrinsic);
+
+        if (uses_frame && !description.intrinsic.empty()) {
+            if (is_intrinsic || scene.ground.is_participant) {
+                word = description.intrinsic;
+            }
+            else {
+                word = description.relative;
+            }
+        }
+        else {
+            word = description.proximity;
+        }
+        candidate_words.insert(word);
+        // SpatialDescription doesn't encode side, so it must be added manually
+        // if(is_intrinsic && (word == "left" || word == "right")) {
+        //     candidate_words.insert("side");
+        // }
+        return candidate_words;
     }
 
     std::string sample_random_word() {
