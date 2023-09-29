@@ -115,7 +115,8 @@ int main(int argc, char** argv){
         fleet.add_option("--p_direct", p_direct, "Probability a generated scene is direct");
 
         // p_frame
-        fleet.add_option("--p_intrinsic", p_intrinsic, "Probability a description uses an intrinsic FoR");
+        fleet.add_option("--p_intrinsic", p_intrinsic, "Probability an angular description uses an intrinsic FoR");
+        fleet.add_option("--p_frame", p_frame, "Probability a description uses an FoR at all");
 
         fleet.add_option("--data_min", data_min, "Initial number of data points generated");
         fleet.add_option("--data_max", data_max, "Final number of data points generated");
