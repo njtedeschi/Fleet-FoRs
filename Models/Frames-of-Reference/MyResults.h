@@ -88,11 +88,11 @@ struct LexiconStats {
     }
 };
 
-struct Stats {
+struct TrialStats {
     TopN<MyHypothesis> top;
     std::vector<LexiconStats> top_stats;
 
-    Stats(TopN<MyHypothesis> t) : top(t) {}
+    TrialStats(TopN<MyHypothesis> t) : top(t) {}
 
     void set_counts(MyHypothesis target, std::vector<MyInput> test_data){
         for(auto lexicon : top.values()){
