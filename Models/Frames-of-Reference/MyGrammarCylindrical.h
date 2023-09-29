@@ -153,8 +153,8 @@ public:
             /*         }); */
             // Logical connectives
             add("and(%s,%s)", Builtins::And<MyGrammar>);
-            add("or(%s,%s)", Builtins::Or<MyGrammar>);
-            add("not(%s)", Builtins::Not<MyGrammar>);
+            /* add("or(%s,%s)", Builtins::Or<MyGrammar>); */
+            /* add("not(%s)", Builtins::Not<MyGrammar>); */
             // Input (x.scene.g_to_f) -> bool functions
             add("near(%s)", +[](MyInput x) -> bool {
                         return magnitude(x.scene.g_to_f) < 1;
@@ -163,7 +163,13 @@ public:
                         return magnitude(x.scene.g_to_f) > 1;
                     });
             add("parallel(%s,%s)", +[](MyInput x, Direction v) -> bool {
-                        return cosine_similarity(x.scene.g_to_f, v) == 1;
+                        double cs = cosine_similarity(x.scene.g_to_f, v);
+                        if (v.bidirectional) {
+                            return (cs == 1 || cs == -1);
+                        }
+                        else {
+                            return cs == 1;
+                        }
                     });
             // Directions
             add("UP", +[]() -> Direction {
@@ -190,23 +196,25 @@ public:
             add("leftward(%s)", +[](OrientedObject a) -> Direction {
                         return -a.rightward;
                     });
-            /* add("sideward(%s)", +[](OrientedObject a) -> Direction { */
-            /*             return a.; */
-            /*         }); */
+            add("sideward(%s)", +[](OrientedObject a) -> Direction {
+                        Direction sideward(a.rightward, true);
+                         return sideward;
+                     });
             /* Body Part Directions */
             add("normal(%s,%s)", +[](MyInput x, BodyPartNoun bpn) -> Direction {
                     WordMeaning meaning = *(x.meaning); // dereference pointer
                     if(meaning.body_part_noun != bpn){
-                        return {0,0,0};
+                        return Direction {0,0,0};
                     }
                     return meaning.body_part_direction(x.scene.ground);
                     });
-            add("head", +[]() -> BodyPartNoun {return BodyPartNoun::head;});
-            add("belly", +[]() -> BodyPartNoun {return BodyPartNoun::belly;});
-            add("face", +[]() -> BodyPartNoun {return BodyPartNoun::face;});
-            add("back", +[]() -> BodyPartNoun {return BodyPartNoun::back;});
-            add("right_side", +[]() -> BodyPartNoun {return BodyPartNoun::right_side;});
-            add("left_side", +[]() -> BodyPartNoun {return BodyPartNoun::left_side;});
+            add("head", +[]() -> BodyPartNoun {return BodyPartNoun::head;}, TERMINAL_WEIGHT);
+            add("belly", +[]() -> BodyPartNoun {return BodyPartNoun::belly;}, TERMINAL_WEIGHT);
+            add("face", +[]() -> BodyPartNoun {return BodyPartNoun::face;}, TERMINAL_WEIGHT);
+            add("back", +[]() -> BodyPartNoun {return BodyPartNoun::back;}, TERMINAL_WEIGHT);
+            add("side", +[]() -> BodyPartNoun {return BodyPartNoun::side;}, TERMINAL_WEIGHT);
+            // add("right_side", +[]() -> BodyPartNoun {return BodyPartNoun::right_side;});
+            // add("left_side", +[]() -> BodyPartNoun {return BodyPartNoun::left_side;});
             // Objects
             add("ground(%s)", +[](MyInput x) -> OrientedObject {
                         return x.scene.ground;
