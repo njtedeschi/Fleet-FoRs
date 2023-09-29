@@ -9,7 +9,26 @@
 
 using Vector = std::array<double,3>;
 struct Displacement : public Vector {};
-struct Direction : public Vector {};
+struct Direction : public Vector {
+    bool bidirectional = false;
+
+    Direction() = default;
+    Direction(const Vector& v) : Vector(v) {}
+    Direction(const Vector& v, bool bidirectional) : Vector(v), bidirectional(bidirectional) {}
+    Direction(std::initializer_list<double> init, bool bidirectional = false) {
+        std::copy(init.begin(), init.end(), this->begin());
+        this->bidirectional = bidirectional;
+    }
+
+    Direction& operator=(const Vector& v) {
+        static_cast<Vector&>(*this) = v;
+        return *this;
+    }
+    Direction& operator=(std::initializer_list<double> init) {
+        std::copy(init.begin(), init.end(), this->begin());
+        return *this;
+    }
+};
 struct Position : public Vector {};
 
 std::string to_string(const Vector& v) {
