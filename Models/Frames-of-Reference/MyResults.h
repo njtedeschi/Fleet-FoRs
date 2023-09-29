@@ -114,3 +114,24 @@ struct TrialStats {
         return weighted_sum / total_weight;
     }
 };
+
+struct TrainingStats {
+    MyHypothesis target;
+    std::unordered_map<std::string, int> description_counts;
+
+    TrainingStats(MyHypothesis t) : target(t) {
+        for(auto& [word, formula] : target.factors){
+            description_counts[word] = 0;
+        }
+    }
+
+    void set_counts(std::vector<MyInput> training_data){
+        for(auto& datum : training_data){
+            description_counts[datum.word]++;
+        }
+    } 
+
+    int get_count(std::string word){
+        return description_counts[word];
+    }
+};
