@@ -259,7 +259,7 @@ public:
             /*             }); */
             /*         }); */
             add("cs(%s,%s)", // Coordinate System
-                    +[](fBool fb, coordinateBool cb) ->  ft<bool,Frame>{
+                    +[](coordinateBool cb, fBool fb) ->  ft<bool,Frame>{
                         return fBool([=](Frame f){
                             return fb(f) && cb(f);
                         });
@@ -270,43 +270,43 @@ public:
             /*                 return rb(f) && tb(f) && zb(f); */
             /*             }); */
             /*         }); */
-            add("forward-f(%s)",
+            add("Y+(%s)",
                     +[](MyInput x) -> coordinateBool {
                         return coordinateBool([=](Frame f) {
                             return cosine_similarity(x.scene.g_to_f, f.forward) == 1;
                         });
                     });
-            add("backward-f(%s)",
+            add("Y-(%s)",
                     +[](MyInput x) -> coordinateBool {
                         return coordinateBool([=](Frame f) {
                             return cosine_similarity(x.scene.g_to_f, f.forward) == -1;
                         });
                     });
-            add("upward-f(%s)",
+            add("Z+(%s)",
                     +[](MyInput x) -> coordinateBool {
                         return coordinateBool([=](Frame f) {
                             return cosine_similarity(x.scene.g_to_f, f.upward) == 1;
                         });
                     });
-            add("downward-f(%s)",
+            add("Z-(%s)",
                     +[](MyInput x) -> coordinateBool {
                         return coordinateBool([=](Frame f) {
                             return cosine_similarity(x.scene.g_to_f, f.upward) == -1;
                         });
                     });
-            add("rightward-f(%s)",
+            add("X+(%s)",
                     +[](MyInput x) -> coordinateBool {
                         return coordinateBool([=](Frame f) {
                             return cosine_similarity(x.scene.g_to_f, f.rightward) == 1;
                         });
                     });
-            add("leftward-f(%s)",
+            add("X-(%s)",
                     +[](MyInput x) -> coordinateBool {
                         return coordinateBool([=](Frame f) {
                             return cosine_similarity(x.scene.g_to_f, f.rightward) == -1;
                         });
                     });
-            add("sideward-f(%s)",
+            add("X+-(%s)",
                     +[](MyInput x) -> coordinateBool {
                         return coordinateBool([=](Frame f) {
                             double cs = cosine_similarity(x.scene.g_to_f, f.rightward);
@@ -315,25 +315,25 @@ public:
                     });
             /* Frame Conditions */
             // Disjunction for frame conditions
-            add("or-f(%s,%s)",
+            add("or'(%s,%s)",
                     +[](fBool a, fBool b) -> fBool {
                         return fBool([=](Frame f) {
                             return a(f) || b(f);
                         });
                     });
-            add("f=ABS",
-                    +[]() -> fBool {
-                        return fBool([=](Frame f) {
-                            return (f.anchor == Anchor::environment);
-                        });
-                    });
-            add("f=frame(%s)",
+            // add("f=ABS",
+            //         +[]() -> fBool {
+            //             return fBool([=](Frame f) {
+            //                 return (f.anchor == Anchor::environment);
+            //             });
+            //         });
+            add("frame(%s)",
                     +[](Anchor a) -> fBool {
                         return fBool([=](Frame f) {
                             return (f.anchor == a) && (f.transformation == Transformation::none);
                         });
                     });
-            add("f=frame'(%s,%s)",
+            add("frame'(%s,%s)",
                     +[](Anchor a, Transformation t) -> fBool {
                         return fBool([=](Frame f) {
                             return (f.anchor == a) && (f.transformation == t);
@@ -347,10 +347,10 @@ public:
                     +[]() -> Anchor {
                         return Anchor::speaker;
                     }, TERMINAL_WEIGHT);
-            /* add("E", */
-            /*         +[]() -> Anchor { */
-            /*             return Anchor::environment; */
-            /*         }, TERMINAL_WEIGHT); */
+            add("E",
+                     +[]() -> Anchor {
+                         return Anchor::environment;
+                     }, TERMINAL_WEIGHT);
             add("T",
                     +[]() -> Transformation {
                         return Transformation::translated;
