@@ -153,8 +153,8 @@ public:
             /*         }); */
             // Logical connectives
             add("and(%s,%s)", Builtins::And<MyGrammar>);
-            /* add("or(%s,%s)", Builtins::Or<MyGrammar>); */
-            /* add("not(%s)", Builtins::Not<MyGrammar>); */
+            add("or(%s,%s)", Builtins::Or<MyGrammar>);
+            add("not(%s)", Builtins::Not<MyGrammar>);
             // Input (x.scene.g_to_f) -> bool functions
             add("near(%s)", +[](MyInput x) -> bool {
                         return magnitude(x.scene.g_to_f) < 1;
