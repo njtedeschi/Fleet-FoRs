@@ -362,7 +362,6 @@ int main(int argc, char** argv){
 
 #include <filesystem>
 #include <sys/resource.h> // just for setting priority defaulty 
-# include <sys/syslimits.h> // for PATH_MAX
 #include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -375,7 +374,7 @@ int main(int argc, char** argv){
 #endif
 
 
-const std::string FLEET_VERSION = "0.1.2";
+const std::string FLEET_VERSION = "0.1.3";
 
 #include "Random.h"
 #include "Timing.h"
@@ -391,7 +390,6 @@ unsigned long random_seed  = 0;
 
 // This is global that checks whether CTRL_C has been pressed
 // NOTE: this must be registered in main with signal(SIGINT, Fleet::fleet_interrupt_handler);
-// which happens in 
 volatile sig_atomic_t CTRL_C = false;
 
 // apparently some OSes don't define this
@@ -591,4 +589,3 @@ public:
 	}
 	
 };
-
