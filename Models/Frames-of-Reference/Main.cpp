@@ -43,12 +43,10 @@ struct WordMeaning {
         target_formula(tf), body_part_noun(bpn), body_part_direction(bpd) {}
 };
 
-// TODO: Possibly switch body_part_meaning to using a pointer
 struct MyInput {
     Scene scene;
     std::string word;
     WordMeaning* meaning;
-    /* std::function<Direction(OrientedObject&)> body_part_meaning; */
     bool true_description;
 };
 
@@ -58,11 +56,6 @@ struct MyInput {
 #include "MyData.h"
 
 #include "Concepts.h"
-
-// target stores mapping from the words to functions that compute them correctly
-/* MyHypothesis target; */
-/* MyHypothesis intrinsic; */
-/* MyHypothesis relative; */
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Main code
@@ -78,7 +71,6 @@ struct MyInput {
 #include "MyResults.h"
 
 // Printing parameters
-bool check_best = false;
 bool precision_recall = false;
 
 // Data sampling parameters
@@ -112,14 +104,12 @@ int main(int argc, char** argv){
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
 	Fleet fleet("Frames of Reference");
 
-        fleet.add_option("--check_best", check_best, "Print true words for each scene according to top hypothesis.");
         fleet.add_option("--max_temp", max_temp, "Max temperature for parallel tempering");
 
         // p_axis
         // p_near
         fleet.add_option("--p_direct", p_direct, "Probability a generated scene is direct");
 
-        // p_frame
         fleet.add_option("--p_intrinsic", p_intrinsic, "Probability an angular description uses an intrinsic FoR");
         fleet.add_option("--p_frame", p_frame, "Probability a description uses an FoR at all");
 
@@ -131,20 +121,6 @@ int main(int argc, char** argv){
 	fleet.initialize(argc, argv);
 
         generate_scenes(); // Generate scenes from Scenes.h before sampling 
-
-        // Set target concepts before sampling
-        /* std::unordered_map<std::string, std::string> target_formulas = { */
-        /*     {"above", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,upward(x))),pf(x))"}, */
-        /*     {"below", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,downward(x))),pf(x))"}, */
-        /*     {"front", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),forward(x),z=0(x))),pf(x))"}, */
-        /*     {"behind", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),backward(x),z=0(x))),pf(x))"}, */
-        /*     {"side", "exists(as(f=frame(G),cyl(r>0(x),sideward(x),z=0(x))),pf(x))"}, */
-        /*     {"left", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),leftward(x),z=0(x))),pf(x))"}, */
-        /*     {"right", "exists(as(or(f=frame(G),f=frame'(S,TR)),cyl(r>0(x),rightward(x),z=0(x))),pf(x))"}, */
-        /*     {"near", "exists(as(f=frame(G),cyl(r-near(x),tTRUE,zTRUE)),pf(x))"}, */
-        /*     {"far", "exists(as(f=frame(G),cyl(r-far(x),tTRUE,zTRUE)),pf(x))"}, */
-        /*     /1* {"in", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,z=0(x))),pf(x))"}, *1/ */
-        /* }; */
 
         std::unordered_map<std::string, WordMeaning> english = {
             {"above", WordMeaning("parallel(x,UP)")},
@@ -229,31 +205,11 @@ int main(int argc, char** argv){
         // Initialize sampler
         // MyData data_sampler(english);
         MyData data_sampler(english_w_body_parts);
-        /* data_sampler.set_intrinsic(intrinsic_formulas); */
-        /* data_sampler.set_relative(relative_formulas); */
 
         target = data_sampler.target;
 
         // Initialize amount of data to sample for each iteration
         /* std::vector<int> data_amounts = generate_range(data_min, data_max, data_step); */
-
-        bool print_to_file = false;
-        // Output file set up
-        std::streambuf *originalCoutBuffer = std::cout.rdbuf();
-        std::ofstream outFile;
-
-        if(print_to_file) {
-            // Create output file stream using date and time
-            auto now = std::chrono::system_clock::now();
-            std::time_t time = std::chrono::system_clock::to_time_t(now);
-            std::stringstream date_time_ss;
-            date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".txt";
-            std::string file_name = date_time_ss.str();
-            std::ofstream outFile(file_name);
-
-            // Redirect std::cout to file
-            std::cout.rdbuf(outFile.rdbuf());
-        }
 
         std::ofstream csvFile;
         std::string pr_file_name;
@@ -273,7 +229,6 @@ int main(int argc, char** argv){
 
         // Inference
         TopN<MyHypothesis> top;
-        for(int j = 0; j < 5; j++){
         for (int num_samples : data_amounts) {
             // Sample data
             SceneProbs scene_probs;
@@ -335,66 +290,11 @@ int main(int argc, char** argv){
                 TrialStats trial_stats(top, data_sampler);
                 trial_stats.set_counts(target, test_data);
 
-                // std::vector<std::string> statistics = {"precision", "recall", "accuracy"};
-                // for(auto& [word, formula] : target.factors){
-                //     int training_count = training_stats.get_count(word);
-                //     std::cout << "\n" << word << " (" << training_count << ")";
-                //     csvFile << word << "," << training_count;
-                //     for(std::string statistic : statistics){
-                //         double stat_value = trial_stats.posterior_weighted_statistic(word,statistic);
-                //         csvFile << "," << stat_value;
-                //         std::cout << "\n" << statistic << ": " << stat_value;
-                //     }
-                //     csvFile << std::endl;  // end the line for this word
-                // }
                 trial_stats.write_lexicon_stats(csvFile, training_stats);
             }
-
-            // Debugging (only checks horizontal, nondirect scenes right now)
-            if(check_best) {
-                target.show();
-                MyHypothesis best = top.best();
-                best.show();
-                for(int i = 0; i < num_samples; i++){
-                    Scene scene = data[i].scene;
-                    std::string description = data[i].word;
-
-                    std::set<std::string> target_true_words;
-                    std::set<std::string> best_true_words;
-                    target_true_words = data_sampler.compute_true_words(target, scene);
-                    best_true_words = data_sampler.compute_true_words(best, scene);
-
-                    bool description_in_target = target_true_words.count(description);
-                    bool description_in_best = best_true_words.count(description);
-
-                    if(data[i].true_description && !(description_in_target && description_in_best)) {
-                    // if(data[i].true_description && target_true_words != best_true_words) {
-                        std::cout << "\n" << "Scene " << i << ": " << description << "(" << data[i].true_description << ")\n";
-                        scene.print();
-
-                        std::cout << "Target (" << description_in_target << "): ";
-                        for (auto& word : target_true_words) {
-                            std::cout << word << ' ';
-                        }
-                        std::cout << "\n" << "Best (" << description_in_best << "): ";
-                        for (auto& word : best_true_words) {
-                            std::cout << word << ' ';
-                        }
-                        std::cout << "\n";
-                    }
-                }
-            }
-        }
-
-        if(print_to_file){
-            // Restore original buffer of std::cout
-            std::cout.rdbuf(originalCoutBuffer);
-            // Close output file stream
-            outFile.close();
-        }
 
         if(precision_recall){
             csvFile.close();
         }
-}
+    }
 }
