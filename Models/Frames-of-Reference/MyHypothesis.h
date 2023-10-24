@@ -156,9 +156,9 @@ public:
         /* print(this->string()); */
 	for(auto& [k, f] : factors) {
             // TODO: less hard coding, make trimming optional?
-            std::string full_formula = f.string();
-            std::string trimmed_formula = std::regex_replace(full_formula, trim_args, "").substr(4);
-            print(k, trimmed_formula);
+            /* std::string full_formula = f.string(); */
+            /* std::string trimmed_formula = std::regex_replace(full_formula, trim_args, "").substr(4); */
+            print(k, f.string(), f.get_weight_fromcache());
         }
     }
 };
