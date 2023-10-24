@@ -104,194 +104,194 @@ int main(int argc, char** argv){
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
 	Fleet fleet("Frames of Reference");
 
-        fleet.add_option("--max_temp", max_temp, "Max temperature for parallel tempering");
+    fleet.add_option("--max_temp", max_temp, "Max temperature for parallel tempering");
 
-        // p_axis
-        // p_near
-        fleet.add_option("--p_direct", p_direct, "Probability a generated scene is direct");
+    // p_axis
+    // p_near
+    fleet.add_option("--p_direct", p_direct, "Probability a generated scene is direct");
 
-        fleet.add_option("--p_intrinsic", p_intrinsic, "Probability an angular description uses an intrinsic FoR");
-        fleet.add_option("--p_frame", p_frame, "Probability a description uses an FoR at all");
+    fleet.add_option("--p_intrinsic", p_intrinsic, "Probability an angular description uses an intrinsic FoR");
+    fleet.add_option("--p_frame", p_frame, "Probability a description uses an FoR at all");
 
-        fleet.add_option("--data_min", data_min, "Initial number of data points generated");
-        fleet.add_option("--data_max", data_max, "Final number of data points generated");
-        fleet.add_option("--data_step", data_step, "Number of data points added in each iteration");
-        // Shouldn't be used with data_min, data_max, and data_step flags
-        fleet.add_option("--data_amounts", data_amounts, "Space separated list of numbers of data points to iterate over");
-	fleet.initialize(argc, argv);
+    fleet.add_option("--data_min", data_min, "Initial number of data points generated");
+    fleet.add_option("--data_max", data_max, "Final number of data points generated");
+    fleet.add_option("--data_step", data_step, "Number of data points added in each iteration");
+    // Shouldn't be used with data_min, data_max, and data_step flags
+    fleet.add_option("--data_amounts", data_amounts, "Space separated list of numbers of data points to iterate over");
+fleet.initialize(argc, argv);
 
-        generate_scenes(); // Generate scenes from Scenes.h before sampling 
+    generate_scenes(); // Generate scenes from Scenes.h before sampling 
 
-        std::unordered_map<std::string, WordMeaning> english = {
-            {"above", WordMeaning("parallel(x,UP)")},
-            {"below", WordMeaning("parallel(x,DOWN)")},
-            {"front", WordMeaning("exists(cs(Y+(x),or'(frame(G),frame'(S,TR))),pf(x))")},
-            {"behind", WordMeaning("exists(cs(Y-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
-            {"left", WordMeaning("exists(cs(X-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
-            {"right", WordMeaning("exists(cs(X+(x),or'(frame(G),frame'(S,TR))),pf(x))")},
-            {"side", WordMeaning("parallel(x,sideward(ground(x)))")},
-            {"near", WordMeaning("near(x)")},
-            {"far", WordMeaning("far(x)")},
-        };
+    std::unordered_map<std::string, WordMeaning> english = {
+        {"above", WordMeaning("parallel(x,UP)")},
+        {"below", WordMeaning("parallel(x,DOWN)")},
+        {"front", WordMeaning("exists(cs(Y+(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+        {"behind", WordMeaning("exists(cs(Y-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+        {"left", WordMeaning("exists(cs(X-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+        {"right", WordMeaning("exists(cs(X+(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+        {"side", WordMeaning("parallel(x,sideward(ground(x)))")},
+        {"near", WordMeaning("near(x)")},
+        {"far", WordMeaning("far(x)")},
+    };
 
-        std::unordered_map<std::string, WordMeaning> english_w_body_parts = {
-            {"above", WordMeaning(
-                    "parallel(x,UP)",
-                    BodyPartNoun::head,
-                    [](const OrientedObject& a) -> Direction {return a.upward;})},
-            {"below", WordMeaning(
-                    "parallel(x,DOWN)",
-                    BodyPartNoun::belly,
-                    [](const OrientedObject& a) -> Direction {return -a.upward;})},
-            {"front", WordMeaning(
-                    "exists(cs(Y+(x),or'(frame(G),frame'(S,TR))),pf(x))",
-                    BodyPartNoun::face,
-                    [](const OrientedObject& a) -> Direction {return a.forward;})},
-            {"behind", WordMeaning(
-                    /* "parallel(x,back(x))", */
-                    "exists(cs(Y-(x),or'(frame(G),frame'(S,TR))),pf(x))",
-                    BodyPartNoun::back,
-                    [](const OrientedObject& a) -> Direction {return -a.forward;})},
-            {"right", WordMeaning(
-                    "exists(cs(X+(x),or'(frame(G),frame'(S,TR))),pf(x))")},
-            {"left", WordMeaning(
-                    "exists(cs(X-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
-            {"side", WordMeaning(
-                    "parallel(x,sideward(ground(x)))",
-                    BodyPartNoun::side,
-                    [](const OrientedObject& a) -> Direction {Direction sideward(a.rightward, true); return sideward;})},
-            {"near", WordMeaning("near(x)")},
-            {"far", WordMeaning("far(x)")},
-        };
+    std::unordered_map<std::string, WordMeaning> english_w_body_parts = {
+        {"above", WordMeaning(
+                "parallel(x,UP)",
+                BodyPartNoun::head,
+                [](const OrientedObject& a) -> Direction {return a.upward;})},
+        {"below", WordMeaning(
+                "parallel(x,DOWN)",
+                BodyPartNoun::belly,
+                [](const OrientedObject& a) -> Direction {return -a.upward;})},
+        {"front", WordMeaning(
+                "exists(cs(Y+(x),or'(frame(G),frame'(S,TR))),pf(x))",
+                BodyPartNoun::face,
+                [](const OrientedObject& a) -> Direction {return a.forward;})},
+        {"behind", WordMeaning(
+                /* "parallel(x,back(x))", */
+                "exists(cs(Y-(x),or'(frame(G),frame'(S,TR))),pf(x))",
+                BodyPartNoun::back,
+                [](const OrientedObject& a) -> Direction {return -a.forward;})},
+        {"right", WordMeaning(
+                "exists(cs(X+(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+        {"left", WordMeaning(
+                "exists(cs(X-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+        {"side", WordMeaning(
+                "parallel(x,sideward(ground(x)))",
+                BodyPartNoun::side,
+                [](const OrientedObject& a) -> Direction {Direction sideward(a.rightward, true); return sideward;})},
+        {"near", WordMeaning("near(x)")},
+        {"far", WordMeaning("far(x)")},
+    };
 
-        /* std::unordered_map<std::string, WordMeaning> mixtec_words = { */
-        /*     {"head", WordMeaning( */
-        /*             "parallel(x,UP)", */
-        /*             BodyPartNoun::head, */
-        /*             [](const OrientedObject& a) -> Direction { */
-        /*             switch(a.body_type) { */
-        /*                 case BodyType::human: */
-        /*                     return a.upward; */
-        /*                 case BodyType::quadruped: */
-        /*                     return {0,0,0}; */
-        /*             } */
-        /*             })}, */
-        /*     {"belly", WordMeaning( */
-        /*             "parallel(x,DOWN)", */
-        /*             BodyPartNoun::belly, */
-        /*             [](const OrientedObject& a) -> Direction {return -a.upward;})}, */
-        /*     {"face", WordMeaning( */
-        /*             "parallel(x,forward(ground(x)))", */
-        /*             BodyPartNoun::face, */
-        /*             [](const OrientedObject& a) -> Direction {return a.forward;})}, */
-        /*     {"back", WordMeaning( */
-        /*             /1* "parallel(x,back(x))", *1/ */
-        /*             "parallel(x,backward(ground(x)))", */
-        /*             BodyPartNoun::back, */
-        /*             [](const OrientedObject& a) -> Direction { */
-        /*             switch(a.body_type) { */
-        /*                 case BodyType::human: */
-        /*                     return -a.forward; */
-        /*                 case BodyType::quadruped: */
-        /*                     return a.upward; */
-        /*             } */
-        /*             })}, */
-        /*     {"right", WordMeaning("parallel(x,rightward(ground(x)))")}, */
-        /*     {"left", WordMeaning("parallel(x,leftward(ground(x)))")}, */
-        /*     {"near", WordMeaning("near(x)")}, */
-        /*     {"far", WordMeaning("far(x)")}, */
-        /* }; */
+    /* std::unordered_map<std::string, WordMeaning> mixtec_words = { */
+    /*     {"head", WordMeaning( */
+    /*             "parallel(x,UP)", */
+    /*             BodyPartNoun::head, */
+    /*             [](const OrientedObject& a) -> Direction { */
+    /*             switch(a.body_type) { */
+    /*                 case BodyType::human: */
+    /*                     return a.upward; */
+    /*                 case BodyType::quadruped: */
+    /*                     return {0,0,0}; */
+    /*             } */
+    /*             })}, */
+    /*     {"belly", WordMeaning( */
+    /*             "parallel(x,DOWN)", */
+    /*             BodyPartNoun::belly, */
+    /*             [](const OrientedObject& a) -> Direction {return -a.upward;})}, */
+    /*     {"face", WordMeaning( */
+    /*             "parallel(x,forward(ground(x)))", */
+    /*             BodyPartNoun::face, */
+    /*             [](const OrientedObject& a) -> Direction {return a.forward;})}, */
+    /*     {"back", WordMeaning( */
+    /*             /1* "parallel(x,back(x))", *1/ */
+    /*             "parallel(x,backward(ground(x)))", */
+    /*             BodyPartNoun::back, */
+    /*             [](const OrientedObject& a) -> Direction { */
+    /*             switch(a.body_type) { */
+    /*                 case BodyType::human: */
+    /*                     return -a.forward; */
+    /*                 case BodyType::quadruped: */
+    /*                     return a.upward; */
+    /*             } */
+    /*             })}, */
+    /*     {"right", WordMeaning("parallel(x,rightward(ground(x)))")}, */
+    /*     {"left", WordMeaning("parallel(x,leftward(ground(x)))")}, */
+    /*     {"near", WordMeaning("near(x)")}, */
+    /*     {"far", WordMeaning("far(x)")}, */
+    /* }; */
 
-        // Initialize sampler
-        // MyData data_sampler(english);
-        MyData data_sampler(english_w_body_parts);
+    // Initialize sampler
+    // MyData data_sampler(english);
+    MyData data_sampler(english_w_body_parts);
 
-        target = data_sampler.target;
+    target = data_sampler.target;
 
-        // Initialize amount of data to sample for each iteration
-        /* std::vector<int> data_amounts = generate_range(data_min, data_max, data_step); */
+    // Initialize amount of data to sample for each iteration
+    /* std::vector<int> data_amounts = generate_range(data_min, data_max, data_step); */
 
-        std::ofstream csvFile;
-        std::string pr_file_name;
-        if(precision_recall){
-            // Open a file stream to write to a .csv file
-                auto now = std::chrono::system_clock::now();
-                std::time_t time = std::chrono::system_clock::to_time_t(now);
-                std::stringstream date_time_ss;
-                date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".csv";
-                pr_file_name = date_time_ss.str();
-                std::ofstream csvFile(pr_file_name);
-                
-                // Write the header line to the csv file
-                // csvFile << "Word,TrainingCount,Precision,Recall,Accuracy" << std::endl;
-                csvFile << "UID,TrainingSize,Posterior,Rank,Word,TrainingCount,TP,TN,FP,FN" << std::endl;
+    std::ofstream csvFile;
+    std::string pr_file_name;
+    if(precision_recall){
+        // Open a file stream to write to a .csv file
+            auto now = std::chrono::system_clock::now();
+            std::time_t time = std::chrono::system_clock::to_time_t(now);
+            std::stringstream date_time_ss;
+            date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".csv";
+            pr_file_name = date_time_ss.str();
+            std::ofstream csvFile(pr_file_name);
+            
+            // Write the header line to the csv file
+            // csvFile << "Word,TrainingCount,Precision,Recall,Accuracy" << std::endl;
+            csvFile << "UID,TrainingSize,Posterior,Rank,Word,TrainingCount,TP,TN,FP,FN" << std::endl;
+    }
+
+    // Inference
+    TopN<MyHypothesis> top;
+    for (int num_samples : data_amounts) {
+        // Sample data
+        SceneProbs scene_probs;
+        scene_probs.p_direct = p_direct;
+        /* scene_probs.p_listener_ground = p_listener_ground; */
+        scene_probs.p_near = 0.5;
+        scene_probs.p_axis = 0.9;
+        // scene_probs.p_axis = 1.0;
+
+        WordProbs word_probs;
+        word_probs.p_intrinsic = p_intrinsic;
+        word_probs.p_frame = p_frame;
+
+        Probabilities probs = {alpha_t, scene_probs, word_probs};
+
+        std::vector<MyInput> data = data_sampler.sample_data(num_samples, probs);
+
+        // Refer to target hypothesis and sampled data
+        TopN<MyHypothesis> newtop;
+        for(auto h : top.values()) {
+            h.clear_cache();
+            h.compute_posterior(data);
+            newtop << h;
+        }
+        top = newtop;
+
+        target.clear_cache();
+        target.compute_posterior(data);
+
+        // Inference steps
+        auto h0 = MyHypothesis::sample(data_sampler.words);
+        /* MCMCChain samp(h0, &mydata); */
+        //ChainPool samp(h0, &mydata, FleetArgs::nchains);
+        ParallelTempering samp(h0, &data, FleetArgs::nchains, max_temp);
+        for(auto& h : samp.run(Control()) | printer(FleetArgs::print) | top) {
+                UNUSED(h);
         }
 
-        // Inference
-        TopN<MyHypothesis> top;
-        for (int num_samples : data_amounts) {
-            // Sample data
-            SceneProbs scene_probs;
-            scene_probs.p_direct = p_direct;
-            /* scene_probs.p_listener_ground = p_listener_ground; */
-            scene_probs.p_near = 0.5;
-            scene_probs.p_axis = 0.9;
-            // scene_probs.p_axis = 1.0;
+        // Show the best we've found
+        top.print(str(num_samples));
 
-            WordProbs word_probs;
-            word_probs.p_intrinsic = p_intrinsic;
-            word_probs.p_frame = p_frame;
-
-            Probabilities probs = {alpha_t, scene_probs, word_probs};
-
-            std::vector<MyInput> data = data_sampler.sample_data(num_samples, probs);
-
-            // Refer to target hypothesis and sampled data
-            TopN<MyHypothesis> newtop;
-            for(auto h : top.values()) {
-                h.clear_cache();
-                h.compute_posterior(data);
-                newtop << h;
-            }
-            top = newtop;
-
-            target.clear_cache();
-            target.compute_posterior(data);
-
-            // Inference steps
-            auto h0 = MyHypothesis::sample(data_sampler.words);
-            /* MCMCChain samp(h0, &mydata); */
-            //ChainPool samp(h0, &mydata, FleetArgs::nchains);
-            ParallelTempering samp(h0, &data, FleetArgs::nchains, max_temp);
-            for(auto& h : samp.run(Control()) | printer(FleetArgs::print) | top) {
-                    UNUSED(h);
-            }
-
-            // Show the best we've found
-            top.print(str(num_samples));
-
-            if(precision_recall){
-                // Reopen file if necessary
+        if(precision_recall){
+            // Reopen file if necessary
+            if (!csvFile.is_open()) {
+                csvFile.open(pr_file_name, std::ios::app);  // Open in append mode
                 if (!csvFile.is_open()) {
-                    csvFile.open(pr_file_name, std::ios::app);  // Open in append mode
-                    if (!csvFile.is_open()) {
-                        std::cerr << "Failed to open or re-open file " << pr_file_name << std::endl;
-                        return 0;
-                    }
+                    std::cerr << "Failed to open or re-open file " << pr_file_name << std::endl;
+                    return 0;
                 }
-                // Training data
-                TrainingStats training_stats(target);
-                training_stats.set_counts(data);
-
-                // Testing data
-                Probabilities test_probs = {1.0, scene_probs, word_probs};
-                std::vector<MyInput> test_data = data_sampler.sample_data(256, test_probs);
-
-                TrialStats trial_stats(top, data_sampler);
-                trial_stats.set_counts(target, test_data);
-
-                trial_stats.write_lexicon_stats(csvFile, training_stats);
             }
+            // Training data
+            TrainingStats training_stats(target);
+            training_stats.set_counts(data);
+
+            // Testing data
+            Probabilities test_probs = {1.0, scene_probs, word_probs};
+            std::vector<MyInput> test_data = data_sampler.sample_data(256, test_probs);
+
+            TrialStats trial_stats(top, data_sampler);
+            trial_stats.set_counts(target, test_data);
+
+            trial_stats.write_lexicon_stats(csvFile, training_stats);
+        }
 
         if(precision_recall){
             csvFile.close();
