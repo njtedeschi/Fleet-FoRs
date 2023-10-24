@@ -1,4 +1,5 @@
 #include <cmath>
+#include <algorithm>
 #include <array>
 #include <vector>
 #include <set>
@@ -73,8 +74,12 @@ struct MyInput {
 #include "Random.h"
 #include "Builtins.h"
 
+
+#include "MyResults.h"
+
 // Printing parameters
 bool check_best = false;
+bool precision_recall = false;
 
 // Data sampling parameters
 double p_direct = 0.2; // probability a scene is direct
@@ -141,57 +146,89 @@ int main(int argc, char** argv){
         /*     /1* {"in", "exists(as(f=frame(G),cyl(r=0(x),tTRUE,z=0(x))),pf(x))"}, *1/ */
         /* }; */
 
-        std::unordered_map<std::string, WordMeaning> english_words = {
+        std::unordered_map<std::string, WordMeaning> english = {
             {"above", WordMeaning("parallel(x,UP)")},
             {"below", WordMeaning("parallel(x,DOWN)")},
-            {"front", WordMeaning("exists(cs(or(f=frame(G),f=frame'(S,TR)),forward-f(x)),pf(x))")},
-            {"behind", WordMeaning("exists(cs(or(f=frame(G),f=frame'(S,TR)),backward-f(x)),pf(x))")},
-            {"left", WordMeaning("exists(cs(or(f=frame(G),f=frame'(S,TR)),leftward-f(x)),pf(x))")},
-            {"right", WordMeaning("exists(cs(or(f=frame(G),f=frame'(S,TR)),rightward-f(x)),pf(x))")},
+            {"front", WordMeaning("exists(cs(Y+(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+            {"behind", WordMeaning("exists(cs(Y-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+            {"left", WordMeaning("exists(cs(X-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+            {"right", WordMeaning("exists(cs(X+(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+            {"side", WordMeaning("parallel(x,sideward(ground(x)))")},
             {"near", WordMeaning("near(x)")},
             {"far", WordMeaning("far(x)")},
         };
 
-        std::unordered_map<std::string, WordMeaning> mixtec_words = {
-            {"head", WordMeaning(
+        std::unordered_map<std::string, WordMeaning> english_w_body_parts = {
+            {"above", WordMeaning(
                     "parallel(x,UP)",
                     BodyPartNoun::head,
-                    [](const OrientedObject& a) -> Direction {
-                    switch(a.body_type) {
-                        case BodyType::human:
-                            return a.upward;
-                        case BodyType::quadruped:
-                            return {0,0,0};
-                    }
-                    })},
-            {"belly", WordMeaning(
+                    [](const OrientedObject& a) -> Direction {return a.upward;})},
+            {"below", WordMeaning(
                     "parallel(x,DOWN)",
                     BodyPartNoun::belly,
                     [](const OrientedObject& a) -> Direction {return -a.upward;})},
-            {"face", WordMeaning(
-                    "parallel(x,forward(ground(x)))",
+            {"front", WordMeaning(
+                    "exists(cs(Y+(x),or'(frame(G),frame'(S,TR))),pf(x))",
                     BodyPartNoun::face,
                     [](const OrientedObject& a) -> Direction {return a.forward;})},
-            {"back", WordMeaning(
+            {"behind", WordMeaning(
                     /* "parallel(x,back(x))", */
-                    "parallel(x,backward(ground(x)))",
+                    "exists(cs(Y-(x),or'(frame(G),frame'(S,TR))),pf(x))",
                     BodyPartNoun::back,
-                    [](const OrientedObject& a) -> Direction {
-                    switch(a.body_type) {
-                        case BodyType::human:
-                            return -a.forward;
-                        case BodyType::quadruped:
-                            return a.upward;
-                    }
-                    })},
-            {"right", WordMeaning("parallel(x,rightward(ground(x)))")},
-            {"left", WordMeaning("parallel(x,leftward(ground(x)))")},
+                    [](const OrientedObject& a) -> Direction {return -a.forward;})},
+            {"right", WordMeaning(
+                    "exists(cs(X+(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+            {"left", WordMeaning(
+                    "exists(cs(X-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
+            {"side", WordMeaning(
+                    "parallel(x,sideward(ground(x)))",
+                    BodyPartNoun::side,
+                    [](const OrientedObject& a) -> Direction {Direction sideward(a.rightward, true); return sideward;})},
             {"near", WordMeaning("near(x)")},
             {"far", WordMeaning("far(x)")},
         };
 
+        /* std::unordered_map<std::string, WordMeaning> mixtec_words = { */
+        /*     {"head", WordMeaning( */
+        /*             "parallel(x,UP)", */
+        /*             BodyPartNoun::head, */
+        /*             [](const OrientedObject& a) -> Direction { */
+        /*             switch(a.body_type) { */
+        /*                 case BodyType::human: */
+        /*                     return a.upward; */
+        /*                 case BodyType::quadruped: */
+        /*                     return {0,0,0}; */
+        /*             } */
+        /*             })}, */
+        /*     {"belly", WordMeaning( */
+        /*             "parallel(x,DOWN)", */
+        /*             BodyPartNoun::belly, */
+        /*             [](const OrientedObject& a) -> Direction {return -a.upward;})}, */
+        /*     {"face", WordMeaning( */
+        /*             "parallel(x,forward(ground(x)))", */
+        /*             BodyPartNoun::face, */
+        /*             [](const OrientedObject& a) -> Direction {return a.forward;})}, */
+        /*     {"back", WordMeaning( */
+        /*             /1* "parallel(x,back(x))", *1/ */
+        /*             "parallel(x,backward(ground(x)))", */
+        /*             BodyPartNoun::back, */
+        /*             [](const OrientedObject& a) -> Direction { */
+        /*             switch(a.body_type) { */
+        /*                 case BodyType::human: */
+        /*                     return -a.forward; */
+        /*                 case BodyType::quadruped: */
+        /*                     return a.upward; */
+        /*             } */
+        /*             })}, */
+        /*     {"right", WordMeaning("parallel(x,rightward(ground(x)))")}, */
+        /*     {"left", WordMeaning("parallel(x,leftward(ground(x)))")}, */
+        /*     {"near", WordMeaning("near(x)")}, */
+        /*     {"far", WordMeaning("far(x)")}, */
+        /* }; */
+
         // Initialize sampler
-        MyData data_sampler(mixtec_words);
+        // MyData data_sampler(english);
+        MyData data_sampler(english_w_body_parts);
         /* data_sampler.set_intrinsic(intrinsic_formulas); */
         /* data_sampler.set_relative(relative_formulas); */
 
@@ -218,21 +255,39 @@ int main(int argc, char** argv){
             std::cout.rdbuf(outFile.rdbuf());
         }
 
+        std::ofstream csvFile;
+        std::string pr_file_name;
+        if(precision_recall){
+            // Open a file stream to write to a .csv file
+                auto now = std::chrono::system_clock::now();
+                std::time_t time = std::chrono::system_clock::to_time_t(now);
+                std::stringstream date_time_ss;
+                date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".csv";
+                pr_file_name = date_time_ss.str();
+                std::ofstream csvFile(pr_file_name);
+                
+                // Write the header line to the csv file
+                // csvFile << "Word,TrainingCount,Precision,Recall,Accuracy" << std::endl;
+                csvFile << "UID,TrainingSize,Posterior,Rank,Word,TrainingCount,TP,TN,FP,FN" << std::endl;
+        }
+
         // Inference
         TopN<MyHypothesis> top;
+        for(int j = 0; j < 5; j++){
         for (int num_samples : data_amounts) {
             // Sample data
             SceneProbs scene_probs;
             scene_probs.p_direct = p_direct;
             /* scene_probs.p_listener_ground = p_listener_ground; */
             scene_probs.p_near = 0.5;
-            scene_probs.p_axis = 0.8;
+            scene_probs.p_axis = 0.9;
+            // scene_probs.p_axis = 1.0;
 
             WordProbs word_probs;
             word_probs.p_intrinsic = p_intrinsic;
             word_probs.p_frame = p_frame;
 
-            Probabilities probs = {scene_probs, word_probs};
+            Probabilities probs = {alpha_t, scene_probs, word_probs};
 
             std::vector<MyInput> data = data_sampler.sample_data(num_samples, probs);
 
@@ -260,8 +315,44 @@ int main(int argc, char** argv){
             // Show the best we've found
             top.print(str(num_samples));
 
+            if(precision_recall){
+                // Reopen file if necessary
+                if (!csvFile.is_open()) {
+                    csvFile.open(pr_file_name, std::ios::app);  // Open in append mode
+                    if (!csvFile.is_open()) {
+                        std::cerr << "Failed to open or re-open file " << pr_file_name << std::endl;
+                        return 0;
+                    }
+                }
+                // Training data
+                TrainingStats training_stats(target);
+                training_stats.set_counts(data);
+
+                // Testing data
+                Probabilities test_probs = {1.0, scene_probs, word_probs};
+                std::vector<MyInput> test_data = data_sampler.sample_data(256, test_probs);
+
+                TrialStats trial_stats(top, data_sampler);
+                trial_stats.set_counts(target, test_data);
+
+                // std::vector<std::string> statistics = {"precision", "recall", "accuracy"};
+                // for(auto& [word, formula] : target.factors){
+                //     int training_count = training_stats.get_count(word);
+                //     std::cout << "\n" << word << " (" << training_count << ")";
+                //     csvFile << word << "," << training_count;
+                //     for(std::string statistic : statistics){
+                //         double stat_value = trial_stats.posterior_weighted_statistic(word,statistic);
+                //         csvFile << "," << stat_value;
+                //         std::cout << "\n" << statistic << ": " << stat_value;
+                //     }
+                //     csvFile << std::endl;  // end the line for this word
+                // }
+                trial_stats.write_lexicon_stats(csvFile, training_stats);
+            }
+
             // Debugging (only checks horizontal, nondirect scenes right now)
             if(check_best) {
+                target.show();
                 MyHypothesis best = top.best();
                 best.show();
                 for(int i = 0; i < num_samples; i++){
@@ -277,6 +368,7 @@ int main(int argc, char** argv){
                     bool description_in_best = best_true_words.count(description);
 
                     if(data[i].true_description && !(description_in_target && description_in_best)) {
+                    // if(data[i].true_description && target_true_words != best_true_words) {
                         std::cout << "\n" << "Scene " << i << ": " << description << "(" << data[i].true_description << ")\n";
                         scene.print();
 
@@ -300,4 +392,9 @@ int main(int argc, char** argv){
             // Close output file stream
             outFile.close();
         }
+
+        if(precision_recall){
+            csvFile.close();
+        }
+}
 }
