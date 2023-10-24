@@ -80,18 +80,8 @@ double p_listener_ground = 0.2; // probability that the ground of a nondirect sc
 double p_frame = 0.0; // probability that a description uses an FoR if one applies
 double p_intrinsic = 0.0; // probability that a description is intrinsic
 
-// Data amounts
-int data_min = 0;
-int data_max = 250;
-int data_step = 10;
-std::vector<int> generate_range(int start, int stop, int step) {
-    std::vector<int> result;
-    for(int i = start; i <= stop; i+= step) {
-        result.push_back(i);
-    }
-    return result;
-}
-std::vector<int> data_amounts;
+std::vector<int> train_sizes;
+int test_size = 256;
 
 // Hypothesis sampling parameters
 double max_temp = 10.0; // maximum temperature for parallel tempering
@@ -113,11 +103,7 @@ int main(int argc, char** argv){
     fleet.add_option("--p_intrinsic", p_intrinsic, "Probability an angular description uses an intrinsic FoR");
     fleet.add_option("--p_frame", p_frame, "Probability a description uses an FoR at all");
 
-    fleet.add_option("--data_min", data_min, "Initial number of data points generated");
-    fleet.add_option("--data_max", data_max, "Final number of data points generated");
-    fleet.add_option("--data_step", data_step, "Number of data points added in each iteration");
-    // Shouldn't be used with data_min, data_max, and data_step flags
-    fleet.add_option("--data_amounts", data_amounts, "Space separated list of numbers of data points to iterate over");
+    fleet.add_option("--train_sizes", train_sizes, "Space separated list of numbers of data points to iterate over");
 fleet.initialize(argc, argv);
 
     generate_scenes(); // Generate scenes from Scenes.h before sampling 
@@ -229,7 +215,7 @@ fleet.initialize(argc, argv);
 
     // Inference
     TopN<MyHypothesis> top;
-    for (int num_samples : data_amounts) {
+    for (int train_size : train_sizes) {
         // Sample data
         SceneProbs scene_probs;
         scene_probs.p_direct = p_direct;
@@ -244,31 +230,31 @@ fleet.initialize(argc, argv);
 
         Probabilities probs = {alpha_t, scene_probs, word_probs};
 
-        std::vector<MyInput> data = data_sampler.sample_data(num_samples, probs);
+        std::vector<MyInput> train_data = data_sampler.sample_data(train_size, probs);
 
         // Refer to target hypothesis and sampled data
         TopN<MyHypothesis> newtop;
         for(auto h : top.values()) {
             h.clear_cache();
-            h.compute_posterior(data);
+            h.compute_posterior(train_data);
             newtop << h;
         }
         top = newtop;
 
         target.clear_cache();
-        target.compute_posterior(data);
+        target.compute_posterior(train_data);
 
         // Inference steps
         auto h0 = MyHypothesis::sample(data_sampler.words);
         /* MCMCChain samp(h0, &mydata); */
         //ChainPool samp(h0, &mydata, FleetArgs::nchains);
-        ParallelTempering samp(h0, &data, FleetArgs::nchains, max_temp);
+        ParallelTempering samp(h0, &train_data, FleetArgs::nchains, max_temp);
         for(auto& h : samp.run(Control()) | printer(FleetArgs::print) | top) {
                 UNUSED(h);
         }
 
         // Show the best we've found
-        top.print(str(num_samples));
+        top.print(str(train_size));
 
         if(precision_recall){
             // Reopen file if necessary
@@ -281,11 +267,11 @@ fleet.initialize(argc, argv);
             }
             // Training data
             TrainingStats training_stats(target);
-            training_stats.set_counts(data);
+            training_stats.set_counts(train_data);
 
             // Testing data
             Probabilities test_probs = {1.0, scene_probs, word_probs};
-            std::vector<MyInput> test_data = data_sampler.sample_data(256, test_probs);
+            std::vector<MyInput> test_data = data_sampler.sample_data(test_size, test_probs);
 
             TrialStats trial_stats(top, data_sampler);
             trial_stats.set_counts(target, test_data);
