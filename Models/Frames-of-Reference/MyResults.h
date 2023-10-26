@@ -2,10 +2,11 @@
 
 struct TrainingStats {
     MyHypothesis target;
+    int training_round;
     int training_size = 0;
     std::unordered_map<std::string, int> description_counts;
 
-    TrainingStats(MyHypothesis t) : target(t) {
+    TrainingStats(MyHypothesis t, int r) : target(t), training_round(r) {
         for(auto& [word, formula] : target.factors){
             description_counts[word] = 0;
         }
@@ -180,8 +181,9 @@ struct TrialStats {
     }
 
     void write_lexicon_stats(std::ofstream& csvFile, TrainingStats& training_stats) {
-        std::string datetime = current_datetime();
+        // std::string datetime = current_datetime();
         int training_size = training_stats.training_size;
+        int round = training_stats.training_round;
         int n = top.size();
 
         for(auto& lexicon : top_stats) {
@@ -190,9 +192,9 @@ struct TrialStats {
             for(auto& [word, word_stats] : lexicon.lexicon_stats) {
                 int word_training_count = training_stats.get_count(word);
                 // Trial
-                csvFile << datetime << "," << training_size;
+                csvFile << training_size << "," << round;
                 // Lexicon
-                csvFile << "," << posterior << "," << n;
+                csvFile << "," << n << "," << posterior;
                 // Word
                 csvFile << "," << word << "," << word_training_count;
                 csvFile << "," << word_stats.true_positives;
