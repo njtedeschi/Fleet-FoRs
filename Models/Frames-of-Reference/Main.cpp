@@ -71,7 +71,8 @@ struct MyInput {
 #include "MyResults.h"
 
 // Printing parameters
-bool precision_recall = false;
+bool precision_recall = true;
+std::string output_dir = "results/";
 
 // Data sampling parameters
 double p_direct = 0.2; // probability a scene is direct
@@ -98,6 +99,8 @@ int main(int argc, char** argv){
 	
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
 	Fleet fleet("Frames of Reference");
+
+    fleet.add_option("--output_dir", output_dir, "Directory to save output files in");
 
     fleet.add_option("--max_temp", max_temp, "Max temperature for parallel tempering");
 
@@ -237,7 +240,8 @@ fleet.initialize(argc, argv);
             auto now = std::chrono::system_clock::now();
             std::time_t time = std::chrono::system_clock::to_time_t(now);
             std::stringstream date_time_ss;
-            date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".csv";
+            // date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".csv";
+            date_time_ss << output_dir << "/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".csv";
             pr_file_name = date_time_ss.str();
             std::ofstream csvFile(pr_file_name);
             
