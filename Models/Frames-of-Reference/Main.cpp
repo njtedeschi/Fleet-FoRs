@@ -80,7 +80,8 @@ double p_listener_ground = 0.2; // probability that the ground of a nondirect sc
 double p_frame = 0.0; // probability that a description uses an FoR if one applies
 double p_intrinsic = 0.0; // probability that a description is intrinsic
 
-std::vector<int> train_sizes;
+int train_size = 10;
+int repetitions = 1;
 int test_size = 256;
 
 // Hypothesis sampling parameters
@@ -110,7 +111,9 @@ int main(int argc, char** argv){
     fleet.add_option("--p_intrinsic", p_intrinsic, "Probability an angular description uses an intrinsic FoR");
     fleet.add_option("--p_frame", p_frame, "Probability a description uses an FoR at all");
 
-    fleet.add_option("--train_sizes", train_sizes, "Space separated list of numbers of data points to iterate over");
+    fleet.add_option("--train_size", train_size, "Numbers of training data points");
+    fleet.add_option("--repetitions", repetitions, "Numbers of times to repeat training");
+
 fleet.initialize(argc, argv);
 
     generate_scenes(); // Generate scenes from Scenes.h before sampling 
@@ -245,7 +248,7 @@ fleet.initialize(argc, argv);
 
     // Inference
     TopN<MyHypothesis> top;
-    for (int train_size : train_sizes) {
+    for (int i = 0; i < repetitions; i++) {
         // Sample data
         SceneProbs scene_probs;
         scene_probs.p_direct = p_direct;
