@@ -86,6 +86,10 @@ int test_size = 256;
 // Hypothesis sampling parameters
 double max_temp = 10.0; // maximum temperature for parallel tempering
 
+
+// Language to sample training data from
+std::string language_name = "english";
+
 // Declare here so MyHypothesis class can reference the specific target instantiated in main
 MyHypothesis target;
 
@@ -95,6 +99,9 @@ int main(int argc, char** argv){
 	Fleet fleet("Frames of Reference");
 
     fleet.add_option("--max_temp", max_temp, "Max temperature for parallel tempering");
+
+    // Choose language
+    fleet.add_option("--language", language_name, "Target language");
 
     // p_axis
     // p_near
@@ -200,10 +207,21 @@ fleet.initialize(argc, argv);
     /*     {"far", WordMeaning("far(x)")}, */
     /* }; */
 
-    // Initialize sampler
-    // MyData data_sampler(english);
-    MyData data_sampler(english_w_body_parts);
+    // Set language
+    std::unordered_map<std::string, WordMeaning> language;
+    if (language_name == "english"){
+        language = english;
+    } else if (language_name == "english_int_only") {
+        language = english_int_only;
+    } else if (language_name == "english_w_body_parts"){
+        language = english_w_body_parts;
+    } else {
+        std::cerr << "Invalid language name provided." << std::endl;
+        return 1;
+    }
 
+    // Initialize sampler
+    MyData data_sampler(language);
     target = data_sampler.target;
 
     // Initialize amount of data to sample for each iteration
