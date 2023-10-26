@@ -108,6 +108,18 @@ fleet.initialize(argc, argv);
 
     generate_scenes(); // Generate scenes from Scenes.h before sampling 
 
+    std::unordered_map<std::string, WordMeaning> english_int_only = {
+        {"above", WordMeaning("parallel(x,UP)")},
+        {"below", WordMeaning("parallel(x,DOWN)")},
+        {"front", WordMeaning("parallel(x,forward(ground(x)))")},
+        {"behind", WordMeaning("parallel(x,backward(ground(x)))")},
+        {"left", WordMeaning("parallel(x,leftward(ground(x)))")},
+        {"right", WordMeaning("parallel(x,rightward(ground(x)))")},
+        {"side", WordMeaning("parallel(x,sideward(ground(x)))")},
+        {"near", WordMeaning("near(x)")},
+        {"far", WordMeaning("far(x)")},
+    };
+
     std::unordered_map<std::string, WordMeaning> english = {
         {"above", WordMeaning("parallel(x,UP)")},
         {"below", WordMeaning("parallel(x,DOWN)")},
@@ -115,7 +127,7 @@ fleet.initialize(argc, argv);
         {"behind", WordMeaning("exists(cs(Y-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
         {"left", WordMeaning("exists(cs(X-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
         {"right", WordMeaning("exists(cs(X+(x),or'(frame(G),frame'(S,TR))),pf(x))")},
-        {"side", WordMeaning("parallel(x,sideward(ground(x)))")},
+        {"side", WordMeaning("exists(cs(X+-(x),or'(frame(G),frame'(S,TR))),pf(x))")},
         {"near", WordMeaning("near(x)")},
         {"far", WordMeaning("far(x)")},
     };
