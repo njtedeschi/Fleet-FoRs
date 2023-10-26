@@ -242,8 +242,7 @@ fleet.initialize(argc, argv);
             std::ofstream csvFile(pr_file_name);
             
             // Write the header line to the csv file
-            // csvFile << "Word,TrainingCount,Precision,Recall,Accuracy" << std::endl;
-            csvFile << "UID,TrainingSize,Posterior,Rank,Word,TrainingCount,TP,TN,FP,FN" << std::endl;
+            csvFile << "TrainingSize,Round,Rank,Posterior,Word,TrainingCount,TP,TN,FP,FN" << std::endl;
     }
 
     // Inference
@@ -299,7 +298,7 @@ fleet.initialize(argc, argv);
                 }
             }
             // Training data
-            TrainingStats training_stats(target);
+            TrainingStats training_stats(target, i);
             training_stats.set_counts(train_data);
 
             // Testing data
