@@ -156,6 +156,9 @@ public:
             add("or(%s,%s)", Builtins::Or<MyGrammar>);
             add("not(%s)", Builtins::Not<MyGrammar>);
             // Input (x.scene.g_to_f) -> bool functions
+            add("g_not_sap(%s)", +[](MyInput x) -> bool {
+                        return !x.scene.ground.is_participant;
+                    });
             add("near(%s)", +[](MyInput x) -> bool {
                         return magnitude(x.scene.g_to_f) < 1;
                     });
