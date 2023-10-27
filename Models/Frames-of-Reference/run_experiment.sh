@@ -9,7 +9,7 @@ mkdir -p "$root_dir"
 
 # Declare arrays for train_size and repetitions pairs
 train_sizes=(8 16 32 64 128 256 512)
-repetitions=(16 8 4 2 1 1 1)
+repetitions=(5 5 5 5 5 5 5)
 
 # Declare arrays for p_direct and p_intrinsic values
 p_direct_values=(0 0.2)
@@ -36,7 +36,7 @@ for p_direct in "${p_direct_values[@]}"; do
             # Run the main executable with the specified arguments
             ./main --chains=20 \
                    --threads=20 \
-                   --steps=500000 \
+                   --steps=1000000 \
                    --p_frame=0.9 \
                    --p_intrinsic="$p_intrinsic" \
                    --p_direct="$p_direct" \
