@@ -133,6 +133,18 @@ fleet.initialize(argc, argv);
         {"far", WordMeaning("far(x)")},
     };
 
+    std::unordered_map<std::string, WordMeaning> english_rel_only = {
+        {"above", WordMeaning("parallel(x,UP)")},
+        {"below", WordMeaning("parallel(x,DOWN)")},
+        {"front", WordMeaning("or(and(parallel(x,forward(speaker(x))),not(g_not_sap(x))),and(parallel(x,backward(speaker(x))),g_not_sap(x)))")},
+        {"behind", WordMeaning("or(and(parallel(x,backward(speaker(x))),not(g_not_sap(x))),and(parallel(x,forward(speaker(x))),g_not_sap(x)))")},
+        {"left", WordMeaning("parallel(x,leftward(speaker(x)))")},
+        {"right", WordMeaning("parallel(x,rightward(speaker(x)))")},
+        {"side", WordMeaning("parallel(x,sideward(speaker(x)))")},
+        {"near", WordMeaning("near(x)")},
+        {"far", WordMeaning("far(x)")},
+    };
+
     std::unordered_map<std::string, WordMeaning> english = {
         {"above", WordMeaning("parallel(x,UP)")},
         {"below", WordMeaning("parallel(x,DOWN)")},
@@ -219,6 +231,8 @@ fleet.initialize(argc, argv);
         language = english;
     } else if (language_name == "english_int_only") {
         language = english_int_only;
+    } else if (language_name == "english_rel_only") {
+        language = english_rel_only;
     } else if (language_name == "english_w_body_parts"){
         language = english_w_body_parts;
     } else {
