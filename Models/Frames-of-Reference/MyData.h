@@ -263,7 +263,8 @@ struct MyData {
         }
         candidate_words.insert(word);
         // SpatialDescription doesn't encode side, so it must be added manually
-        if(is_intrinsic && (word == "left" || word == "right")) {
+        // if(is_intrinsic && (word == "left" || word == "right")) { // if "side" is intrinsic-only
+        if(word == "left" || word == "right") {
             candidate_words.insert("side");
         }
         return candidate_words;
