@@ -136,8 +136,8 @@ fleet.initialize(argc, argv);
     std::unordered_map<std::string, WordMeaning> english_rel_only = {
         {"above", WordMeaning("parallel(x,UP)")},
         {"below", WordMeaning("parallel(x,DOWN)")},
-        {"front", WordMeaning("or(and(parallel(x,forward(speaker(x))),not(g_not_sap(x))),and(parallel(x,backward(speaker(x))),g_not_sap(x)))")},
-        {"behind", WordMeaning("or(and(parallel(x,backward(speaker(x))),not(g_not_sap(x))),and(parallel(x,forward(speaker(x))),g_not_sap(x)))")},
+        {"front", WordMeaning("if(g_sap(x),parallel(x,forward(speaker(x))),parallel(x,backward(speaker(x))))")},
+        {"behind", WordMeaning("if(g_sap(x),parallel(x,backward(speaker(x))),parallel(x,forward(speaker(x))))")},
         {"left", WordMeaning("parallel(x,leftward(speaker(x)))")},
         {"right", WordMeaning("parallel(x,rightward(speaker(x)))")},
         {"side", WordMeaning("parallel(x,sideward(speaker(x)))")},
