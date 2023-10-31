@@ -9,7 +9,7 @@ mkdir -p "$root_dir"
 
 # Declare arrays for train_size and repetitions pairs
 train_sizes=(8 16 32 64 128 256 512)
-repetitions=(5 5 5 5 5 5 5)
+repetitions=(20 20 20 20 20 20 20)
 
 # Declare arrays for p_direct and p_intrinsic values
 p_direct_values=(0 0.2)
