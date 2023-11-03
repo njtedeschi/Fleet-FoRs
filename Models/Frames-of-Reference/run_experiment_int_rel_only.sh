@@ -8,8 +8,35 @@ root_dir="results/$datetime"
 mkdir -p "$root_dir"
 
 # Declare arrays for train_size and repetitions pairs
-train_sizes=(8 16 32 64 128 256 512)
-repetitions=(20 20 20 20 20 20 20)
+#!/bin/bash
+
+# Check if a command line argument is given (non-empty)
+if [[ -z "$1" ]]; then
+    echo "Usage: $0 path_to_csv_file"
+    exit 1
+fi
+
+# Get the CSV file path from the command line argument
+csv_file="$1"
+
+# Check if the CSV file exists
+if [[ ! -f "$csv_file" ]]; then
+    echo "CSV file not found: $csv_file"
+    exit 1
+fi
+
+# Read training sizes and repetitions from the CSV file
+IFS=, # set comma as internal field separator for the read command
+train_sizes=() # Initialize empty array for training sizes
+repetitions=() # Initialize empty array for repetitions
+while read -r train_size repetition; do
+    if [[ $train_size != "TrainSize" ]]; then # skip the header line
+        train_sizes+=($train_size)
+        repetitions+=($repetition)
+    fi
+done < "$csv_file"
+
+# The rest of the original script follows, we will not modify this part.
 
 # Declare arrays for p_direct and p_intrinsic values
 p_direct_values=(0 0.2)
