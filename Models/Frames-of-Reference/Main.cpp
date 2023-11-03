@@ -116,6 +116,8 @@ int main(int argc, char** argv){
 
     fleet.add_option("--train_size", train_size, "Numbers of training data points");
     fleet.add_option("--repetitions", repetitions, "Numbers of times to repeat training");
+    
+    fleet.add_option("--test_size", test_size, "Numbers of stimuli to use for precision/recall calculations");
 
 fleet.initialize(argc, argv);
 
