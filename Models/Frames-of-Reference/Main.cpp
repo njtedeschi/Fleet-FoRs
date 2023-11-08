@@ -71,8 +71,33 @@ struct MyInput {
 #include "MyResults.h"
 
 // Printing parameters
-bool precision_recall = true;
+bool save_results = true;
 std::string output_dir = "results/";
+
+std::string get_current_datetime() {
+    auto now = std::chrono::system_clock::now();
+    std::time_t time = std::chrono::system_clock::to_time_t(now);
+    std::stringstream date_time_ss;
+    date_time_ss << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S");
+    return date_time_ss.str();
+}
+
+std::string create_file_name(const std::string& dir, const std::string& datetime, const std::string& suffix){
+    std::stringstream file_name_ss;
+    file_name_ss << dir << "/" << datetime << "_" << suffix << ".csv";
+    return file_name_ss.str();
+}
+
+void create_csv(const std::string& file_name, const std::string& header){
+    std::ofstream file(file_name);
+    if(file.is_open()) {
+        // Write the header line to the csv file
+        file << header << std::endl;
+    } else {
+        // Handle the error case where the file couldn't be opened
+        std::cerr << "Unable to open file: " << file_name << std::endl;
+    }
+}
 
 // Data sampling parameters
 double p_direct = 0.2; // probability a scene is direct
@@ -264,20 +289,21 @@ int main(int argc, char** argv){
     // Initialize amount of data to sample for each iteration
     /* std::vector<int> data_amounts = generate_range(data_min, data_max, data_step); */
 
-    std::ofstream csvFile;
     std::string pr_file_name;
-    if(precision_recall){
-        // Open a file stream to write to a .csv file
-            auto now = std::chrono::system_clock::now();
-            std::time_t time = std::chrono::system_clock::to_time_t(now);
-            std::stringstream date_time_ss;
-            // date_time_ss << "results/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".csv";
-            date_time_ss << output_dir << "/" << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S") << ".csv";
-            pr_file_name = date_time_ss.str();
-            std::ofstream csvFile(pr_file_name);
-            
-            // Write the header line to the csv file
-            csvFile << "TrainingSize,Rank,Posterior,Word,TrainingCount,TP,TN,FP,FN" << std::endl;
+    std::string train_file_name;
+
+    if(save_results){
+        std::string datetime = get_current_datetime();
+
+        // Set up precision recall results
+        pr_file_name = create_file_name(output_dir, datetime, "pr");
+        std::string pr_header = "TrainingSize,Rank,Posterior,Word,TP,TN,FP,FN";
+        create_csv(pr_file_name, pr_header);
+
+        // Set up training data records
+        train_file_name = create_file_name(output_dir, datetime, "train");
+        std::string train_header = "TrainingSize,Word,TrueDescription,FigurePosition,GroundPosition,GroundOrientation,SpeakerPosition,SpeakerOrientation";
+        create_csv(train_file_name, train_header);
     }
 
     // Inference
@@ -285,7 +311,7 @@ int main(int argc, char** argv){
     std::vector<int> train_sizes = set_train_sizes(train_min, train_max, train_spacing);
     // for (int i = 0; i < repetitions; i++) {
     for (int train_size : train_sizes) {
-        // Sample data
+        // Sample training data
         SceneProbs scene_probs;
         scene_probs.p_direct = p_direct;
         /* scene_probs.p_listener_ground = p_listener_ground; */
@@ -325,31 +351,19 @@ int main(int argc, char** argv){
         // Show the best we've found
         top.print(str(train_size));
 
-        if(precision_recall){
-            // Reopen file if necessary
-            if (!csvFile.is_open()) {
-                csvFile.open(pr_file_name, std::ios::app);  // Open in append mode
-                if (!csvFile.is_open()) {
-                    std::cerr << "Failed to open or re-open file " << pr_file_name << std::endl;
-                    return 0;
-                }
-            }
-            // Training data
-            TrainingStats training_stats(target);
-            training_stats.set_counts(train_data);
+        if(save_results){
+            // Write training data
+            TrainingStats training_stats(train_data);
+            training_stats.write_training_data(train_file_name);
 
-            // Testing data
+            // Sample test data
             Probabilities test_probs = {1.0, scene_probs, word_probs};
             std::vector<MyInput> test_data = data_sampler.sample_data(test_size, test_probs);
 
-            TrialStats trial_stats(top, data_sampler);
+            // Write test results
+            TrialStats trial_stats(top, data_sampler, train_size);
             trial_stats.set_counts(target, test_data);
-
-            trial_stats.write_lexicon_stats(csvFile, training_stats);
-        }
-
-        if(precision_recall){
-            csvFile.close();
+            trial_stats.write_lexicon_stats(pr_file_name);
         }
     }
 }

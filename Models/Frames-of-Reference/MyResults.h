@@ -1,26 +1,48 @@
 #pragma once
 
 struct TrainingStats {
-    MyHypothesis target;
-    int training_size = 0;
-    std::unordered_map<std::string, int> description_counts;
+    std::vector<MyInput> train_data;
+    int train_size;
 
-    TrainingStats(MyHypothesis t) : target(t) {
-        for(auto& [word, formula] : target.factors){
-            description_counts[word] = 0;
+    TrainingStats(std::vector<MyInput> td) : train_data(td) {
+        train_size = train_data.size();
+    }
+
+    std::string vector_to_string(const Vector& v) {
+        std::ostringstream oss;
+        oss << "[" << v[0] << ";" << v[1] << ";" << v[2] << "]";
+        return oss.str();
+    }
+
+    void write_training_data(std::string train_file_name) {
+        // Open output file in append mode
+        std::ofstream train_file;
+        train_file.open(train_file_name, std::ios_base::app);
+        if (!train_file.is_open()) {
+            std::cerr << "Failed to open or re-open file " << train_file_name << std::endl;
+            return;
+        }
+
+        for(auto& input : train_data) {
+            // Convert each Vector to string
+            std::string figure_position = vector_to_string(input.scene.figure.position);
+            std::string ground_position = vector_to_string(input.scene.ground.position);
+            std::string ground_forward = vector_to_string(input.scene.ground.forward);
+            std::string speaker_position = vector_to_string(input.scene.speaker.position);
+            std::string speaker_forward = vector_to_string(input.scene.speaker.forward);
+
+            // Write the data
+            train_file << train_size << ","
+                << input.word << ","
+                << (input.true_description ? 1 : 0) << ","
+                << figure_position << ","
+                << ground_position << ","
+                << ground_forward << ","
+                << speaker_position << ","
+                << speaker_forward << std::endl;
         }
     }
 
-    void set_counts(std::vector<MyInput> training_data){
-        for(auto& datum : training_data){
-            description_counts[datum.word]++;
-            training_size++;
-        }
-    } 
-
-    int get_count(std::string word){
-        return description_counts[word];
-    }
 };
 
 struct WordStats {
@@ -144,10 +166,12 @@ struct LexiconStats {
 
 struct TrialStats {
     TopN<MyHypothesis> top;
-    std::vector<LexiconStats> top_stats;
-    MyData data_sampler;
+    MyData data_sampler; // Necessary for computing true words
+    int train_size;
 
-    TrialStats(TopN<MyHypothesis> t, MyData d) : top(t), data_sampler(d) {}
+    std::vector<LexiconStats> top_stats;
+
+    TrialStats(TopN<MyHypothesis> t, MyData d, int ts) : top(t), data_sampler(d), train_size(ts) {}
 
     void set_counts(MyHypothesis target, std::vector<MyInput> test_data){
         for(auto lexicon : top.sorted()){
@@ -155,18 +179,6 @@ struct TrialStats {
             lexicon_stats.set_counts(target, test_data);
             top_stats.push_back(lexicon_stats);
         }
-    }
-
-    // TODO: update to work with log probabilities
-    double posterior_weighted_statistic(std::string word, std::string statistic){
-        double weighted_sum = 0;
-        double total_weight = 0;
-        for(auto lexicon : top_stats){
-            double posterior = std::exp(lexicon.posterior);
-            weighted_sum += posterior * lexicon.get_statistic(word, statistic);
-            total_weight += posterior;
-        }
-        return weighted_sum / total_weight;
     }
 
     std::string current_datetime() {
@@ -179,27 +191,34 @@ struct TrialStats {
         return datetime;
     }
 
-    void write_lexicon_stats(std::ofstream& csvFile, TrainingStats& training_stats) {
+    void write_lexicon_stats(std::string pr_file_name) {
         // std::string datetime = current_datetime();
-        int training_size = training_stats.training_size;
+
+        // Open output file in append mode
+        std::ofstream pr_file;
+        pr_file.open(pr_file_name, std::ios_base::app);
+        if (!pr_file.is_open()) {
+            std::cerr << "Failed to open or re-open file " << pr_file_name << std::endl;
+            return;
+        }
+
         int n = top.size();
 
         for(auto& lexicon : top_stats) {
             double posterior = lexicon.posterior;
 
             for(auto& [word, word_stats] : lexicon.lexicon_stats) {
-                int word_training_count = training_stats.get_count(word);
                 // Trial
-                csvFile << training_size;
+                pr_file << train_size;
                 // Lexicon
-                csvFile << "," << n << "," << posterior;
+                pr_file << "," << n << "," << posterior;
                 // Word
-                csvFile << "," << word << "," << word_training_count;
-                csvFile << "," << word_stats.true_positives;
-                csvFile << "," << word_stats.true_negatives;
-                csvFile << "," << word_stats.false_positives;
-                csvFile << "," << word_stats.false_negatives;
-                csvFile << std::endl; // end the line for this lexicon's word
+                pr_file << "," << word;
+                pr_file << "," << word_stats.true_positives;
+                pr_file << "," << word_stats.true_negatives;
+                pr_file << "," << word_stats.false_positives;
+                pr_file << "," << word_stats.false_negatives;
+                pr_file << std::endl; // end the line for this lexicon's word
             }
             n--;
         }
