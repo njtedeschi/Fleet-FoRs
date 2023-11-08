@@ -131,6 +131,9 @@ std::string language_name = "english";
 
 // Declare here so MyHypothesis class can reference the specific target instantiated in main
 MyHypothesis target;
+// Declare intrinsic and relative only hypotheses for testing
+MyHypothesis intrinsic;
+MyHypothesis relative;
 
 int main(int argc, char** argv){ 
 	
@@ -293,11 +296,20 @@ int main(int argc, char** argv){
     std::string train_file_name;
 
     if(save_results){
+        // Set up intrinsic and relative only hypotheses
+        for (const auto& [word, meaning] : english_int_only) {
+            intrinsic[word] = InnerHypothesis(grammar.simple_parse(meaning.target_formula));
+        }
+        for (const auto& [word, meaning] : english_rel_only) {
+            relative[word] = InnerHypothesis(grammar.simple_parse(meaning.target_formula));
+        }
+
+        // Get datetime for use in file names
         std::string datetime = get_current_datetime();
 
         // Set up precision recall results
         pr_file_name = create_file_name(output_dir, datetime, "pr");
-        std::string pr_header = "TrainingSize,Rank,Posterior,Word,TP,TN,FP,FN";
+        std::string pr_header = "TrainingSize,Rank,Posterior,Word,TP,TN,FP,FN,I-TP,I-TN,I-FP,I-FN,R-TP,R-TN,R-FP,R-FN";
         create_csv(pr_file_name, pr_header);
 
         // Set up training data records
@@ -362,7 +374,7 @@ int main(int argc, char** argv){
 
             // Write test results
             TrialStats trial_stats(top, data_sampler, train_size);
-            trial_stats.set_counts(target, test_data);
+            trial_stats.set_counts(test_data, target, intrinsic, relative);
             trial_stats.write_lexicon_stats(pr_file_name);
         }
     }
