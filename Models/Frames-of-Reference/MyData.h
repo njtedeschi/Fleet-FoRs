@@ -114,7 +114,7 @@ struct WordProbs {
 };
 
 struct Probabilities {
-    double alpha_t;
+    double data_reliability;
     SceneProbs scene_probs;
     WordProbs word_probs;
 };
@@ -150,7 +150,7 @@ struct MyData {
 
         //Sample word
         std::string word;
-        bool true_description = flip(probs.alpha_t);
+        bool true_description = flip(probs.data_reliability);
         if (!true_description) {
             word = sample_random_word();
         }

@@ -11,7 +11,8 @@
 #include <fstream>
 #include <chrono>
 
-static const double alpha_t = 0.95; // probability of true description
+static const double data_reliability = 0.9; // probability of generating true description in training data
+static const double alpha_t = 0.9; // model's reliability parameter
 /* static const size_t MAX_NODES = 10; */
 
 #include "Scene.h"
@@ -335,7 +336,7 @@ int main(int argc, char** argv){
         word_probs.p_intrinsic = p_intrinsic;
         word_probs.p_frame = p_frame;
 
-        Probabilities probs = {alpha_t, scene_probs, word_probs};
+        Probabilities probs = {data_reliability, scene_probs, word_probs};
 
         std::vector<MyInput> train_data = data_sampler.sample_data(train_size, probs);
 
