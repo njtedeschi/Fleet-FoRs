@@ -4,17 +4,16 @@
 p_direct_values=(0 0.2)
 
 # Intrinsic description probabilities
-# odds_values=(1/16 1/8 1/4 1/2 1 2 4 8 16)
-# Pitts
-# odds_values=(1/16 1/8 1/4)
-# Montague
-# odds_values=(1/2 1 2)
-# Wittgenstein
-# odds_values=(4 8 16)
+# odds_values: 1/16 1/8 1/4 1/2 1 2 4 8 16
+# Pitts: 1/16 1/8 1/4
+# Montague: 1/2 1 2
+# Wittgenstein 4 8 16
+# Accept odds_values from command-line arguments
+odds_values=("$@")
 
-# Check if odds_values is defined
+# Check if odds_values is provided
 if [ ${#odds_values[@]} -eq 0 ]; then
-  echo "Error: odds_values is not defined. Uncomment the appropriate odds_values line."
+  echo "Error: No odds values provided. Please pass odds values as command-line arguments."
   exit 1
 fi
 
