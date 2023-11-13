@@ -4,10 +4,6 @@
 p_direct_values=(0 0.2)
 
 # Intrinsic description probabilities
-# odds_values: 1/16 1/8 1/4 1/2 1 2 4 8 16
-# Pitts: 1/16 1/8 1/4
-# Montague: 1/2 1 2
-# Wittgenstein 4 8 16
 # Accept odds_values from command-line arguments
 odds_values=("$@")
 
@@ -38,42 +34,39 @@ datetime=$(date +"%Y-%m-%d_%H-%M-%S")
 root_dir="results/$datetime"
 mkdir -p "$root_dir"
 
-# Loop over p_direct values
-for p_direct in "${p_direct_values[@]}"; do
-    # Calculate percentage and format it to two digits
-    p_direct_percent=$(printf "%02d" $(echo "$p_direct * 100 / 1" | bc))
+# Loop all conditions the specified number of times
+for n in {0..9}; do
+    # Loop over p_direct values
+    for p_direct in "${p_direct_values[@]}"; do
+        # Calculate percentage and format it to two digits
+        p_direct_percent=$(printf "%02d" $(echo "$p_direct * 100 / 1" | bc))
 
-    # Loop over p_intrinsic values
-    for idx in "${!p_intrinsic_values[@]}"; do
-        p_intrinsic=${p_intrinsic_values[idx]}
-        odds=${odds_values[idx]}
-        
-        # Determine file name suffix based on whether odds is greater or less than 1
-        if [[ "$odds" == */* ]]; then
-            # Odds is a fraction, so use the format "1_x"
-            log_file_suffix=$(echo $odds | tr '/' '_')
-        else
-            # Odds is a whole number, so use the format "x_1"
-            log_file_suffix="${odds}_1"
-        fi
+        # Loop over p_intrinsic values
+        for idx in "${!p_intrinsic_values[@]}"; do
+            p_intrinsic=${p_intrinsic_values[idx]}
 
-        log_file="$root_dir/dir_${p_direct_percent}-int_${log_file_suffix}.log"
+            # Calculate percentage for p_intrinsic and format it to two digits
+            p_intrinsic_percent=$(printf "%02d" $(echo "$p_intrinsic * 100 / 1" | bc))
 
-        # Run the main executable with the specified arguments
-        ./main --chains=20 \
-               --threads=20 \
-               --steps=1000000 \
-               --p_frame=0.9 \
-               --p_intrinsic="$p_intrinsic" \
-               --p_direct="$p_direct" \
-               --train_min=10 \
-               --train_max=1000 \
-               --train_spacing=10 \
-               --top=1000 \
-               --language="english" \
-               --output_dir="$root_dir" 2>&1 | tee "$log_file"
+            # Define log file using the formatted percentages
+            log_file="$root_dir/${n}-dir_${p_direct_percent}-int_${p_intrinsic_percent}.log"
 
-        # Sleep for 1 second to avoid potential issues with identical timestamps
-        sleep 1
+            # Run the main executable with the specified arguments
+            ./main --chains=20 \
+                --threads=20 \
+                --steps=1000000 \
+                --p_frame=0.9 \
+                --p_intrinsic="$p_intrinsic" \
+                --p_direct="$p_direct" \
+                --train_min=25 \
+                --train_max=1000 \
+                --train_spacing=25 \
+                --top=1 \
+                --language="english" \
+                --output_dir="$root_dir" 2>&1 | tee "$log_file"
+
+            # Sleep for 1 second to avoid potential issues with identical timestamps
+            sleep 1
+        done
     done
 done
