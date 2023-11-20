@@ -61,7 +61,7 @@ for n in {0..9}; do
                 --train_min=25 \
                 --train_max=1000 \
                 --train_spacing=25 \
-                --top=1 \
+                --top=1000 \
                 --language="english" \
                 --output_dir="$root_dir" 2>&1 | tee "$log_file"
 
