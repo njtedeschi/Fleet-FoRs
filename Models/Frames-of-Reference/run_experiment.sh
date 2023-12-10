@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Direct context probabilities
-p_direct_values=(0 0.2)
+# Language options
+language_values=("english" "english_w_body_parts")
 
 # Intrinsic description probabilities
 # Accept odds_values from command-line arguments
@@ -36,11 +36,8 @@ mkdir -p "$root_dir"
 
 # Loop all conditions the specified number of times
 for n in {0..9}; do
-    # Loop over p_direct values
-    for p_direct in "${p_direct_values[@]}"; do
-        # Calculate percentage and format it to two digits
-        p_direct_percent=$(printf "%02d" $(echo "$p_direct * 100 / 1" | bc))
-
+    # Loop over language values
+    for language in "${language_values[@]}"; do
         # Loop over p_intrinsic values
         for idx in "${!p_intrinsic_values[@]}"; do
             p_intrinsic=${p_intrinsic_values[idx]}
@@ -48,8 +45,8 @@ for n in {0..9}; do
             # Calculate percentage for p_intrinsic and format it to two digits
             p_intrinsic_percent=$(printf "%02d" $(echo "$p_intrinsic * 100 / 1" | bc))
 
-            # Define log file using the formatted percentages
-            log_file="$root_dir/${n}-dir_${p_direct_percent}-int_${p_intrinsic_percent}.log"
+            # Define log file using the language and formatted intrinsic percentage
+            log_file="$root_dir/${n}-${language}-int_${p_intrinsic_percent}.log"
 
             # Run the main executable with the specified arguments
             ./main --chains=20 \
@@ -57,12 +54,12 @@ for n in {0..9}; do
                 --steps=1000000 \
                 --p_frame=0.9 \
                 --p_intrinsic="$p_intrinsic" \
-                --p_direct="$p_direct" \
+                --p_direct=0.2 \
                 --train_min=25 \
                 --train_max=1000 \
                 --train_spacing=25 \
                 --top=1000 \
-                --language="english" \
+                --language="$language" \
                 --output_dir="$root_dir" 2>&1 | tee "$log_file"
 
             # Sleep for 1 second to avoid potential issues with identical timestamps
