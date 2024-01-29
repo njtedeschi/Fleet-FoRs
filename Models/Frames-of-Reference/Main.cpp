@@ -239,7 +239,7 @@ int main(int argc, char** argv){
     /*             BodyPartNoun::head, */
     /*             [](const OrientedObject& a) -> Direction { */
     /*             switch(a.body_type) { */
-    /*                 case BodyType::human: */
+    /*                 case BodyType::biped: */
     /*                     return a.upward; */
     /*                 case BodyType::quadruped: */
     /*                     return {0,0,0}; */
@@ -259,7 +259,7 @@ int main(int argc, char** argv){
     /*             BodyPartNoun::back, */
     /*             [](const OrientedObject& a) -> Direction { */
     /*             switch(a.body_type) { */
-    /*                 case BodyType::human: */
+    /*                 case BodyType::biped: */
     /*                     return -a.forward; */
     /*                 case BodyType::quadruped: */
     /*                     return a.upward; */

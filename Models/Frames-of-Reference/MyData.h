@@ -102,6 +102,7 @@ struct SpatialDescription {
 
 struct SceneProbs {
     double p_direct;
+    double p_biped;
     /* double p_listener_ground; */
     double p_near;
     double p_axis;
@@ -202,7 +203,7 @@ struct MyData {
             else {
                 OrientedObject nondirect_speaker = {Space::nondirect_speaker_spot, Space::east, Space::up, true};
 
-                BodyType body_type = (flip(0.5)) ? BodyType::human : BodyType::quadruped;
+                BodyType body_type = (flip(scene_probs.p_biped)) ? BodyType::biped : BodyType::quadruped;
                 OrientedObject ground = {Space::origin, ground_direction, Space::up, false, body_type};
                 BaseObject figure = {figure_position};
 
