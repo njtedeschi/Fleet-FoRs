@@ -34,20 +34,42 @@ while IFS=: read -r id subdirectory language; do
             # Create a temporary directory for extraction
             tmp_dir=$(mktemp -d)
 
+            # Create the output subdirectory if it doesn't exist
+            output_subdir="$root_dir/trained_models/$subdirectory"
+            mkdir -p "$output_subdir"
+
             # Extract the zip file
             unzip "$zip_file" -d "$tmp_dir"
 
             # Loop over all json files in the extracted directory
             for input_file in "$tmp_dir/$subdirectory"/*.json; do
                 if [ -f "$input_file" ]; then  # Check if it's a file
-                    output_file="$root_dir/trained_models/$subdirectory/${input_file##*/}"
+                    output_file="$output_subdir/${input_file##*/}"
                     output_file="${output_file%.json}.txt"
 
                     # Run the C++ executable
-                    # ./train --chains="$chains" --threads="$threads" --steps="$steps" --top="$top" --language="$language" --input_file="$input_file" --output_file="$output_file"
-                    echo "./train --chains=\"$chains\" --threads=\"$threads\" --steps=\"$steps\" --top=\"$top\" --language=\"$language\" --input_file=\"$input_file\" --output_file=\"$output_file\""
+                    ./train --chains="$chains" --threads="$threads" --steps="$steps" --top="$top" --language="$language" --input_path="$input_file" --output_path="$output_file"
+                    # echo "./train --chains=\"$chains\" --threads=\"$threads\" --steps=\"$steps\" --top=\"$top\" --language=\"$language\" --input_path=\"$input_file\" --output_path=\"$output_file\""
                 fi
             done
+
+            # Zip the processed subdirectory
+            processed_zip="${subdirectory}.zip"
+            pushd "$root_dir/trained_models" > /dev/null
+            zip -r "$processed_zip" "$subdirectory"
+            popd > /dev/null
+
+            # Check if the zip operation was successful and delete the original subdirectory
+            if [ $? -eq 0 ]; then
+                processed_zip_path="$root_dir/trained_models/$processed_zip"
+                if [ -f "$processed_zip_path" ]; then
+                    rm -rf "$output_subdir"
+                else
+                    echo "Failed to create zip: $processed_zip_path"
+                fi
+            else
+                echo "Failed to create zip: $processed_zip"
+            fi
 
             # Clean up the temporary directory
             rm -rf "$tmp_dir"
