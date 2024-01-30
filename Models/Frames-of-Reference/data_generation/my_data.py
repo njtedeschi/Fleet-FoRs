@@ -52,7 +52,7 @@ class DataGenerator:
             "is_biped": hyper.p_biped,
             # Word probabilities
             "uses_frame": hyper.p_frame,
-            "is_intrinsic": hyper.p_frame
+            "is_intrinsic": hyper.p_intrinsic
         }
         return probs
 
