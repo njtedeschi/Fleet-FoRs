@@ -26,17 +26,33 @@ top=$(grep 'top' $config_file | cut -d ':' -f2 | xargs)
 while IFS=: read -r id subdirectory language; do
     # Check if the current id is in the list of IDs to process
     if [[ ${id_map[$id]} ]]; then
-        # Loop over all json files in the current subdirectory
-        for input_file in "$root_dir/training_data/$subdirectory"/*.json; do
-            if [ -f "$input_file" ]; then  # Check if it's a file
-                # Correct the output file path
-                output_file="$root_dir/trained_models/$subdirectory/${input_file##*/}"
-                output_file="${output_file%.json}.txt"
+        # Define the path to the zipped file
+        zip_file="$root_dir/training_data/${subdirectory}.zip"
 
-                # Run the C++ executable
-                ./train --chains="$chains" --threads="$threads" --steps="$steps" --top="$top" --language="$language" --input_file="$input_file" --output_file="$output_file"
-                # echo "./train --chains=\"$chains\" --threads=\"$threads\" --steps=\"$steps\" --top=\"$top\" --language=\"$language\" --input_file=\"$input_file\" --output_file=\"$output_file\""
-            fi
-        done
+        # Check if the zip file exists
+        if [ -f "$zip_file" ]; then
+            # Create a temporary directory for extraction
+            tmp_dir=$(mktemp -d)
+
+            # Extract the zip file
+            unzip "$zip_file" -d "$tmp_dir"
+
+            # Loop over all json files in the extracted directory
+            for input_file in "$tmp_dir/$subdirectory"/*.json; do
+                if [ -f "$input_file" ]; then  # Check if it's a file
+                    output_file="$root_dir/trained_models/$subdirectory/${input_file##*/}"
+                    output_file="${output_file%.json}.txt"
+
+                    # Run the C++ executable
+                    # ./train --chains="$chains" --threads="$threads" --steps="$steps" --top="$top" --language="$language" --input_file="$input_file" --output_file="$output_file"
+                    echo "./train --chains=\"$chains\" --threads=\"$threads\" --steps=\"$steps\" --top=\"$top\" --language=\"$language\" --input_file=\"$input_file\" --output_file=\"$output_file\""
+                fi
+            done
+
+            # Clean up the temporary directory
+            rm -rf "$tmp_dir"
+        else
+            echo "Zip file not found: $zip_file"
+        fi
     fi
 done < "$config_file"
