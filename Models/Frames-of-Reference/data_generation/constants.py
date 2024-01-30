@@ -57,8 +57,8 @@ ABOVE = AbstractDirection("upward", 1)
 BELOW = AbstractDirection("upward", -1)
 FRONT = AbstractDirection("forward", 1, reflected_relatively=True)
 BEHIND = AbstractDirection("forward", -1, reflected_relatively=True)
-LEFT = AbstractDirection("rightward", 1)
-RIGHT = AbstractDirection("rightward", -1)
+RIGHT = AbstractDirection("rightward", 1)
+LEFT = AbstractDirection("rightward", -1)
 SIDE = AbstractDirection("rightward", 0)
 
 # Body part locatives
