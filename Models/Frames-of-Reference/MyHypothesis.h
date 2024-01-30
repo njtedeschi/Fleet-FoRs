@@ -3,9 +3,6 @@
 #include "DeterministicLOTHypothesis.h"
 #include "CachedCallHypothesis.h"
 
-#include <regex>
-std::regex trim_args("\\(x\\)");
-
 class InnerHypothesis : public DeterministicLOTHypothesis<InnerHypothesis,MyInput,bool,MyGrammar,&grammar>,
                         public CachedCallHypothesis<InnerHypothesis,MyInput,bool>  {
 public:
@@ -149,16 +146,10 @@ public:
 
     // Printing functions: string and show
     virtual void show(std::string prefix="") override {
-        extern MyHypothesis target;
-
-        print(":", prefix, this->posterior, this->prior, this->likelihood, target.likelihood);
-        /* print(":", prefix, this->posterior, this->prior, this->likelihood, target.posterior, target.prior, target.likelihood); */
-        /* print(this->string()); */
+        print(":", prefix, this->posterior, this->prior, this->likelihood);
 	for(auto& [k, f] : factors) {
-            // TODO: less hard coding, make trimming optional?
-            /* std::string full_formula = f.string(); */
-            /* std::string trimmed_formula = std::regex_replace(full_formula, trim_args, "").substr(4); */
-            print(k, f.string(), f.get_weight_fromcache());
+            // print(k, f.string(), f.get_weight_fromcache());
+            print(k, f.string());
         }
     }
 };
