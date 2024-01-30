@@ -9,16 +9,15 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('config_path', help="Path to the configuration YAML file")
     parser.add_argument('output_root', help="Path to the output root directory")
-    parser.add_argument('--seed', required=False, help="Random seed for reproducibility")
+    parser.add_argument('--seed', type=int, default=None, help="Random seed for reproducibility")
+    parser.add_argument('--verbose', action='store_true', help="Adds recording of flip results to data")
     args = parser.parse_args()
 
     config_path = args.config_path
     output_root = args.output_root
-    # The --seed argument is optional and can be used as follows
-    if args.seed is not None:
-        seed = int(args.seed)
-    else:
-        seed = None
+    # Optional arguments
+    seed = args.seed
+    verbose = args.verbose
 
     file_manager = FileManager(config_path, output_root)
 
@@ -35,7 +34,7 @@ def main():
     # Produce and save data
     with tqdm(total=total_objects, desc="Overall Progress", unit="object") as pbar:
         for experimental_condition in experimental_conditions:
-            data_generator = DataGenerator(experimental_condition, seed)
+            data_generator = DataGenerator(experimental_condition, seed, verbose)
             for train_size in train_sizes:
                 for repetition in range(repetitions):
                     train_data = data_generator.sample_data(train_size)
