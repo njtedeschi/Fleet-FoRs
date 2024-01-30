@@ -39,8 +39,8 @@ struct AbstractFrame {
 struct Frame : AbstractFrame {
     Position origin;
     Direction upward;
-    Direction rightward;
     Direction forward;
+    Direction rightward;
 
     // Constructor from vectors directly
     Frame(Position o, Direction u, Direction f, Direction r, Anchor a, Transformation t)
@@ -206,7 +206,7 @@ public:
                      });
             /* Body Part Directions */
             add("normal(%s,%s)", +[](MyInput x, BodyPartNoun bpn) -> Direction {
-                    WordMeaning meaning = *(x.meaning); // dereference pointer
+                    BodyPartMeaning meaning = *(x.meaning); // dereference pointer
                     if(meaning.body_part_noun != bpn){
                         return Direction {0,0,0};
                     }
@@ -216,7 +216,7 @@ public:
             add("belly", +[]() -> BodyPartNoun {return BodyPartNoun::belly;}, TERMINAL_WEIGHT);
             add("face", +[]() -> BodyPartNoun {return BodyPartNoun::face;}, TERMINAL_WEIGHT);
             add("back", +[]() -> BodyPartNoun {return BodyPartNoun::back;}, TERMINAL_WEIGHT);
-            add("side", +[]() -> BodyPartNoun {return BodyPartNoun::side;}, TERMINAL_WEIGHT);
+            add("side", +[]() -> BodyPartNoun {return BodyPartNoun::flank;}, TERMINAL_WEIGHT);
             // add("right_side", +[]() -> BodyPartNoun {return BodyPartNoun::right_side;});
             // add("left_side", +[]() -> BodyPartNoun {return BodyPartNoun::left_side;});
             // Objects

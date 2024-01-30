@@ -129,13 +129,13 @@ public:
                                     weight_true += weights[k];
                                 }
 				
-				if(input.word == k) {
+				if(input.description == k) {
 					word_is_true   = (tv == true);
 				}
 			}
 			
 			// Size principle calculation with weights
-			double weight_word = weights.at(input.word);
+			double weight_word = weights.at(input.description);
 			double p = (word_is_true ? alpha_t*weight_word/weight_true : 0)  + 
 					   (1.0-alpha_t)*weight_word/weight_total;				
 			likelihood += log(p);

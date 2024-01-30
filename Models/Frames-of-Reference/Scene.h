@@ -14,10 +14,10 @@ struct Direction : public Vector {
 
     Direction() = default;
     Direction(const Vector& v) : Vector(v) {}
-    Direction(const Vector& v, bool bidirectional) : Vector(v), bidirectional(bidirectional) {}
-    Direction(std::initializer_list<double> init, bool bidirectional = false) {
+    Direction(const Vector& v, bool bd) : Vector(v), bidirectional(bd) {}
+    Direction(std::initializer_list<double> init, bool bd = false) {
         std::copy(init.begin(), init.end(), this->begin());
-        this->bidirectional = bidirectional;
+        this->bidirectional = bd;
     }
 
     Direction& operator=(const Vector& v) {
@@ -73,7 +73,7 @@ Position operator+(const Position& v1, const Position& v2) {
 
 double dot_product(const Vector &a, const Vector &b){
     double result = 0.0;
-    for(int i = 0; i < a.size(); i++){
+    for(int i = 0; i < 3; i++){
         result += a[i] * b[i];
     }
     return result;
@@ -81,7 +81,7 @@ double dot_product(const Vector &a, const Vector &b){
 
 double magnitude(const Vector &a){
     double result = 0.0;
-    for (int i = 0; i < a.size(); i++){
+    for (int i = 0; i < 3; i++){
         result += a[i] * a[i];
     }
     return sqrt(result);
@@ -89,10 +89,6 @@ double magnitude(const Vector &a){
 
 double cosine_similarity(const Vector &a, const Vector &b){
     return dot_product(a, b)/(magnitude(a) * magnitude(b));
-}
-
-double angle_between(){
-    // TODO: implement
 }
 
 Direction cross_product(const Direction &a, const Direction &b){
@@ -132,10 +128,8 @@ struct OrientedObject : public BaseObject {
     OrientedObject() : BaseObject(), forward({0, 0, 0}), upward({0, 0, 0}), rightward({0, 0, 0}), is_participant(false), body_type(BodyType::biped) {}
 
     // Calculate rightward from forward and upward
-    OrientedObject(const Position& p, const Direction& f, const Direction& u = {0, 0, 1}, bool is_p = false, BodyType bt = BodyType::biped)
-    : BaseObject(p), forward(f), upward(u), is_participant(is_p), body_type(bt) {
-        rightward = cross_product(forward, upward);
-    }
+    OrientedObject(const Position& p, const Direction& f, const Direction& u, const Direction& r, bool is_p = false, BodyType bt = BodyType::biped)
+    : BaseObject(p), forward(f), upward(u), rightward(r), is_participant(is_p), body_type(bt) {}
 };
 
 struct Scene {
@@ -148,8 +142,8 @@ struct Scene {
         Scene() : speaker(), ground(), figure() {
             g_to_f = figure.position - ground.position;
         }
-        Scene(const OrientedObject& speaker, const OrientedObject& ground, const BaseObject& figure)
-            : speaker(speaker), ground(ground), figure(figure) {
+        Scene(const OrientedObject& s, const OrientedObject& g, const BaseObject& f)
+            : speaker(s), ground(g), figure(f) {
                 g_to_f = figure.position - ground.position;
             }
 
@@ -171,12 +165,6 @@ namespace Space {
     Position south_spot = {0,-1,0};
     Position up_spot = {0,0,1};
     Position down_spot = {0,0,-1};
-    Position nondirect_speaker_spot = {-2,0,0};
-    std::vector<Position> figure_positions_axis = {east_spot, west_spot, north_spot, south_spot, up_spot, down_spot};
-
-    // Corner positions
-    std::vector<Position> figure_positions_off_axis;
-    // TODO: figure out where to keep generating loop (currently in generate_scenes)
 
     Direction null_vector = {0,0,0};
     Direction east = {1,0,0};
@@ -185,67 +173,4 @@ namespace Space {
     Direction south = {0,-1,0};
     Direction up = {0,0,1};
     Direction down = {0,0,-1};
-    /* std::vector<Direction> ground_directions = {east, west, north, south, up, down}; */
-    std::vector<Direction> ground_directions = {east, west, north, south};
-
-    // Possible speakers
-    OrientedObject direct_speaker = {origin, east, up, true};
-    OrientedObject nondirect_speaker = {nondirect_speaker_spot, east, up, true};
-
-    // Possible figures
-    BaseObject east_figure = {east_spot};
-    BaseObject west_figure = {west_spot};
-    BaseObject north_figure = {north_spot};
-    BaseObject south_figure = {south_spot};
-    BaseObject up_figure = {up_spot};
-    BaseObject down_figure = {down_spot};
-    std::vector<BaseObject> figures = {east_figure, west_figure, north_figure, south_figure, up_figure, down_figure};
-    /* std::vector<BaseObject> figures = {east_figure, west_figure, north_figure, south_figure}; */
-
-    // Possible grounds
-    OrientedObject east_facing_ground = {origin, east};
-    OrientedObject west_facing_ground = {origin, west};
-    OrientedObject north_facing_ground = {origin, north};
-    OrientedObject south_facing_ground = {origin, south};
-    std::vector<OrientedObject> grounds = {east_facing_ground, west_facing_ground, north_facing_ground, south_facing_ground};
-
-    // Possible grounds (listener)
-    /* OrientedObject listener_east_facing_ground = {origin, east, true}; */
-    /* OrientedObject listener_west_facing_ground = {origin, west, true}; */
-    /* OrientedObject listener_north_facing_ground = {origin, north, true}; */
-    /* OrientedObject listener_south_facing_ground = {origin, south, true}; */
-    /* std::vector<OrientedObject> listener_grounds = {listener_east_facing_ground, listener_west_facing_ground, listener_north_facing_ground, listener_south_facing_ground}; */
-}
-
-    // Possible direct and nondirect scenes
-std::vector<Scene> direct_scenes;
-std::vector<Scene> nondirect_scenes;
-/* std::vector<Scene> listener_nondirect_scenes; */
-
-void generate_scenes(){
-    for (const auto& figure : Space::figures) {
-        Scene direct = {Space::direct_speaker, Space::direct_speaker, figure};
-        direct_scenes.push_back(direct);
-        for (const auto& ground : Space::grounds) {
-            Scene nondirect = {Space::nondirect_speaker, ground, figure};
-            nondirect_scenes.push_back(nondirect);
-        }
-        /* for (const auto& ground : Space::listener_grounds) { */
-        /*     Scene listener_nondirect = {Space::nondirect_speaker, ground, figure}; */
-        /*     listener_nondirect_scenes.push_back(listener_nondirect); */
-        /* } */
-    }
-
-    // Create off-axis positions
-    float sqrt_val = sqrt(2)/2;
-    for(int i = 0; i < 3; i++) {
-        for (int sign1 = -1; sign1 <= 1; sign1 += 2) {
-            for (int sign2 = -1; sign2 <= 1; sign2 += 2) {
-                Position p = {0,0,0};
-                p[(i+1) % 3] = sign1 * sqrt_val;
-                p[(i+2) % 3] = sign2 * sqrt_val;
-                Space::figure_positions_off_axis.push_back(p);
-            }
-        }
-    }
 }
