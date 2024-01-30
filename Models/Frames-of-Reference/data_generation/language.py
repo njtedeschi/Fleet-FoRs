@@ -13,15 +13,15 @@ class AbstractDirection:
     reflected_relatively: bool = False
 
     def applies(self, g_to_f, anchor, relative=False):
-        cosine_distance = cosine(g_to_f,
+        cosine_similarity = 1-cosine(g_to_f,
                                  getattr(anchor, self.axis))
         if self.sign:
             if relative and self.reflected_relatively:
-                return (cosine_distance == -self.sign) # e.g. relative "front", "behind"
+                return (cosine_similarity == -self.sign) # e.g. relative "front", "behind"
             else:
-                return (cosine_distance == self.sign)
+                return (cosine_similarity == self.sign)
         else:
-            return (abs(cosine_distance) == 1) # e.g. "side"
+            return (abs(cosine_similarity) == 1) # e.g. "side"
 
 @dataclass
 class Language:
