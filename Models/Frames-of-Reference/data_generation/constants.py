@@ -72,11 +72,11 @@ BELLY = {
 }
 FACE = {
     "biped": AbstractDirection("forward", 1, reflected_relatively=True),
-    "quadruped": AbstractDirection("forward", 1, reflected_relatively=True)
+    "quadruped": AbstractDirection("forward", 1)
 }
 BACK = {
     "biped": AbstractDirection("forward", -1, reflected_relatively=True),
-    "quadruped": AbstractDirection("forward", -1, reflected_relatively=True)
+    "quadruped": AbstractDirection("upward", 1)
 }
 FLANK = {
     "biped": AbstractDirection("rightward", 0),
