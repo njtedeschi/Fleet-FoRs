@@ -7,19 +7,17 @@ from file_management import FileManager
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('config_path', help="Path to the configuration YAML file")
-    parser.add_argument('output_root', help="Path to the output root directory")
+    parser.add_argument('root', help="Path to the output root directory") # e.g. results/DATE/
     parser.add_argument('--seed', type=int, default=None, help="Random seed for reproducibility")
     parser.add_argument('--verbose', action='store_true', help="Adds recording of flip results to data")
     args = parser.parse_args()
 
-    config_path = args.config_path
-    output_root = args.output_root
+    root = args.root
     # Optional arguments
     seed = args.seed
     verbose = args.verbose
 
-    file_manager = FileManager(config_path, output_root)
+    file_manager = FileManager(root)
 
     # Get loop parameters
     train_min = file_manager.train_min

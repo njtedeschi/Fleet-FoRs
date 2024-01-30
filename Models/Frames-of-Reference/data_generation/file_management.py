@@ -12,23 +12,32 @@ class FileManager:
     # Processes the input yaml
     # Saves output files
 
-    def __init__(self, config_path, output_root):
-        self.config = self.load_config(config_path)
+    def __init__(self, root):
+        self.root = root
+        self.config = self.load_config()
         # self.validate_config()
+        self.experimental_conditions = self.determine_experimental_conditions()
+        self.create_output_directories()
 
         experiment = self.config["experiment"]
         self.train_min = experiment["train_min"]
         self.train_max = experiment["train_max"]
         self.train_step = experiment["train_step"]
         self.repetitions = experiment["repetitions"]
-        self.experimental_conditions = self.determine_experimental_conditions()
 
-        self.root = output_root
-        self.create_output_directories()
+    def load_config(self):
+        try:
+            # Construct the path to the config.yaml file
+            config_path = os.path.join(self.root, 'training_data', 'config.yaml')
+            with open(config_path, 'r') as file:
+                return yaml.safe_load(file)
+        except FileNotFoundError:
+            print(f"Error: The file {config_path} was not found.")
+            return None
+        except yaml.YAMLError as exc:
+            print(f"Error parsing the YAML file: {exc}")
+            return None
 
-    def load_config(self, config_path):
-        with open(config_path, 'r') as file:
-            return yaml.safe_load(file)
 
     # # Check that hyperparameters are consistent between Python and YAML
     # def validate_config(self):
@@ -107,8 +116,8 @@ class FileManager:
         condition_str = "_".join(sorted(experimental_condition.name))
         output_directory = os.path.join(
             self.root,
+            "training_data",
             condition_str,
-            "training_data"
         )
         return output_directory
 
