@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from constants import ORIGIN
+from world import ORIGIN
 
 @dataclass
 class BaseObject:
@@ -20,7 +20,14 @@ class OrientedObject(BaseObject):
         self.rightward = np.cross(self.forward, self.upward)
 
     @classmethod
-    def speaker(cls, position, forward, upward):
+    def speaker(cls, forward, upward, specified_position=None):
+        # Could be handled with a default argument of ORIGIN, but I want things to be more explicit
+        if specified_position is not None:
+            position = specified_position
+        else:
+            # Speaker is direct if specified_position=None
+            position = ORIGIN
+
         speaker = cls(
             position=position,
             forward=forward,
@@ -29,7 +36,7 @@ class OrientedObject(BaseObject):
             body_type="biped"
         )
         return speaker
-    
+
     @classmethod
     def ground(cls, forward, upward, body_type):
         ground = cls(

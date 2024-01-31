@@ -6,6 +6,7 @@ import numpy as np
 
 from scene import BaseObject, OrientedObject, Scene
 import constants as const
+import world
 
 # Specific combination of hyperparameters
 # YAML config must match attribute names
@@ -20,13 +21,13 @@ class ExperimentalCondition:
     p_figure_is_on_axis: float
     p_figure_is_near: float
     p_speaker_is_canonical: float
-    p_speaker_is_upside_down: float # requires noncanonical speaker
-    p_ground_is_biped: float # requires nondirect scene
-    p_ground_is_canonical: float # requires nondirect scene
-    p_ground_is_upside_down: float # requires noncanonical ground
+    p_speaker_is_upside_down: float # given noncanonical speaker
+    p_ground_is_biped: float # given nondirect scene
+    p_ground_is_canonical: float # given nondirect scene
+    p_ground_is_upside_down: float # given noncanonical ground
     ## Description probabilities
     p_description_is_angular: float
-    p_description_is_intrinsic: float # requires angular description
+    p_description_is_intrinsic: float # given angular description
     # Name
     name: List[str]
 
@@ -89,59 +90,49 @@ class DataGenerator:
     ## Direct Scene
     def sample_direct_scene(self, figure, speaker_is_canonical=True):
         if speaker_is_canonical:
-            speaker = const.DIRECT_SPEAKER
+            speaker = const.CANONICAL_DIRECT_SPEAKER
         else:
-            speaker = self.sample_noncanonical_speaker(const.ORIGIN)
+            # Speaker is direct if specified_position=None
+            speaker = self.sample_noncanonical_speaker()
         scene = Scene.direct_scene(speaker, figure)
         return scene
 
     ## Nondirect Scene
     def sample_nondirect_scene(self, figure, speaker_is_canonical=True):
         if speaker_is_canonical:
-            speaker = const.NONDIRECT_SPEAKER
+            speaker = const.CANONICAL_NONDIRECT_SPEAKER
         else:
-            speaker = self.sample_noncanonical_speaker(const.NONDIRECT_SPEAKER_POSITION)
+            speaker = self.sample_noncanonical_speaker(specified_position=const.NONDIRECT_SPEAKER_POSITION)
         ground = self.sample_ground()
         scene = Scene(speaker, ground, figure)
         return scene
-
-    ### Figure
-    def sample_figure(self):
-        is_on_axis = self.flip("figure_is_on_axis")
-        if is_on_axis:
-            direction = self.rng.choice(const.CARDINAL_DIRECTIONS_6)
-        else:
-            direction = self.rng.choice(const.OFF_AXIS_DIRECTIONS)
-        distance = const.NEAR if self.flip("figure_is_near") else const.FAR
-        position = distance * direction
-        figure = BaseObject(position)
-        return figure
 
     ### Speaker
     # No sampling for canonical speakers due to EAST facing restriction
 
     # Possibilities directions restricted in line with canonical direct and nondirect speakers
     # Either forward or upward must face EAST
-    def sample_noncanonical_speaker(self, position):
+    def sample_noncanonical_speaker(self, specified_position=None):
+        
         upside_down = self.flip("speaker_is_upside_down")
         if upside_down:
-            speaker = OrientedObject.speaker(position, const.EAST, const.DOWN)
+            speaker = OrientedObject.speaker(const.CANONICAL_SPEAKER_FORWARD, world.DOWN, specified_position)
         else:
-            speaker = self.sample_lying_speaker(position)
+            speaker = self.sample_lying_speaker(specified_position)
         return speaker
 
     # Lying down, not fibbing
-    def sample_lying_speaker(self, position):
+    def sample_lying_speaker(self, specified_position):
         possibile_orientations = [
             # (forward, upward)
-            (const.EAST, const.NORTH), # lying on left
-            (const.EAST, const.SOUTH), # lying on right
-            (const.UP, const.EAST), # lying face up
-            (const.DOWN, const.EAST) # lying face down
+            (const.CANONICAL_SPEAKER_FORWARD, const.CANONICAL_SPEAKER_LEFTWARD), # lying on left
+            (const.CANONICAL_SPEAKER_FORWARD, const.CANONICAL_SPEAKER_RIGHTWARD), # lying on right
+            (world.UP, const.CANONICAL_SPEAKER_FORWARD), # lying face up
+            (world.DOWN, const.CANONICAL_SPEAKER_FORWARD) # lying face down
         ]
         index = self.rng.choice(len(possibile_orientations))
         forward, upward = possibile_orientations[index]
-        speaker = OrientedObject.speaker(position, forward, upward)
+        speaker = OrientedObject.speaker(forward, upward, specified_position)
         return speaker
 
     ### Ground
@@ -193,8 +184,20 @@ class DataGenerator:
             horizontal = [const.EAST, const.WEST]
         return vertical + horizontal
 
+    ### Figure
+    def sample_figure(self):
+        is_on_axis = self.flip("figure_is_on_axis")
+        if is_on_axis:
+            direction = self.rng.choice(const.CARDINAL_DIRECTIONS_6)
+        else:
+            direction = self.rng.choice(const.OFF_AXIS_DIRECTIONS)
+        distance = const.NEAR if self.flip("figure_is_near") else const.FAR
+        position = distance * direction
+        figure = BaseObject(position)
+        return figure
+
     # Description sampling
-    def sample_description_true_description(self, scene):
+    def sample_true_description(self, scene):
         is_angular = self.flip("description_is_angular")
 
         description = None

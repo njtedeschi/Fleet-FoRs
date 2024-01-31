@@ -1,19 +1,14 @@
 import numpy as np
 
-from scene import BaseObject, OrientedObject, Scene
+from world import NORTH, SOUTH, EAST, WEST, UP, DOWN
+from scene import OrientedObject
 from language import AbstractDirection, Language
 
-### Vectors
-ORIGIN = np.array([0,0,0])
-EAST = np.array([1,0,0])
-WEST = np.array([-1,0,0])
-NORTH = np.array([0,1,0])
-SOUTH = np.array([0,-1,0])
-UP = np.array([0,0,1])
-DOWN = np.array([0,0,-1])
-
+# On axis directions
 CARDINAL_DIRECTIONS_6 = [EAST, WEST, NORTH, SOUTH, UP, DOWN]
 CARDINAL_DIRECTIONS_4 = [EAST, WEST, NORTH, SOUTH]
+
+# Off axis directions
 # Compute unit directions in diagonal directions
 def _compute_off_axis_directions():
     sqrt_val = np.sqrt(2) / 2
@@ -32,24 +27,15 @@ OFF_AXIS_DIRECTIONS = _compute_off_axis_directions()
 NEAR = 0.5
 FAR = 1.5
 
-### Speakers
+### Objects
+CANONICAL_SPEAKER_FORWARD = EAST # Arbitrary convention
+CANONICAL_SPEAKER_LEFTWARD = NORTH # Consequence of forward
+CANONICAL_SPEAKER_RIGHTWARD = SOUTH # Consequence of forward
 # Direct
-DIRECT_SPEAKER = OrientedObject(
-    position=ORIGIN,
-    forward=EAST,
-    upward=UP,
-    is_participant=True,
-    body_type="biped"
-)
+CANONICAL_DIRECT_SPEAKER = OrientedObject.speaker(forward=CANONICAL_SPEAKER_FORWARD, upward=UP)
 # Nondirect
 NONDIRECT_SPEAKER_POSITION = np.array([-2,0,0])
-NONDIRECT_SPEAKER = OrientedObject(
-    position=NONDIRECT_SPEAKER_POSITION,
-    forward=EAST,
-    upward=UP,
-    is_participant=True,
-    body_type="biped"
-)
+CANONICAL_NONDIRECT_SPEAKER = OrientedObject.speaker(forward=CANONICAL_SPEAKER_FORWARD, upward=UP, specified_position=NONDIRECT_SPEAKER_POSITION)
 
 ### Concepts
 # Symmetry locatives
