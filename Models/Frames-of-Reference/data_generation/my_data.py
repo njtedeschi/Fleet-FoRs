@@ -20,8 +20,8 @@ class ExperimentalCondition:
     p_biped: float
     p_near: float
     p_axis: float
-    # p_canonical_s: float
-    # p_canonical_g: float
+    p_canonical_s: float
+    p_canonical_g: float
     ## Word probabilities
     p_frame: float
     p_intrinsic: float
