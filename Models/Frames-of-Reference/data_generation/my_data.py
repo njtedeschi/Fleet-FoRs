@@ -87,14 +87,12 @@ class DataGenerator:
         figure = self.sample_figure()
         speaker_is_canonical = self.flip("speaker_is_canonical")
 
-        # Speaker-Ground relationship
         scene_is_direct = self.flip("scene_is_direct")
         if scene_is_direct:
-            return self.sample_direct_scene(figure,
-                                            speaker_is_canonical)
+            scene = self.sample_direct_scene(figure, speaker_is_canonical)
         else:
-            return self.sample_nondirect_scene(figure,
-                                               speaker_is_canonical) 
+            scene = self.sample_nondirect_scene(figure, speaker_is_canonical)
+        return scene
 
     ## Direct Scene
     def sample_direct_scene(self, figure, speaker_is_canonical=True):
@@ -102,11 +100,7 @@ class DataGenerator:
             speaker = const.DIRECT_SPEAKER
         else:
             speaker = self.sample_noncanonical_speaker(const.ORIGIN)
-        scene = Scene(
-            speaker=speaker,
-            ground=speaker,
-            figure=figure
-        )
+        scene = Scene.direct_scene(speaker, figure)
         return scene
 
     ## Nondirect Scene
@@ -116,11 +110,7 @@ class DataGenerator:
         else:
             speaker = self.sample_noncanonical_speaker(const.NONDIRECT_SPEAKER_POSITION)
         ground = self.sample_ground()
-        scene = Scene(
-            speaker=speaker,
-            ground=ground,
-            figure=figure
-        )
+        scene = Scene(speaker, ground, figure)
         return scene
 
     ### Speaker
@@ -139,13 +129,7 @@ class DataGenerator:
 
     def sample_canonical_ground(self, body_type):
         forward_int = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
-        ground = OrientedObject(
-            position=const.ORIGIN,
-            forward=forward_int,
-            upward=const.UP,
-            is_participant=False,
-            body_type=body_type
-        )
+        ground = OrientedObject.ground(forward_int, const.UP, body_type)
         return ground
 
     def sample_noncanonical_ground(self, body_type):
@@ -158,13 +142,7 @@ class DataGenerator:
 
     def sample_upside_down_ground(self, body_type):
         forward_int = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
-        ground = OrientedObject(
-            position=const.ORIGIN,
-            forward=forward_int,
-            upward=const.DOWN,
-            is_participant=False,
-            body_type=body_type
-        )
+        ground = OrientedObject.ground(forward_int, const.DOWN, body_type)
         return ground
 
     # TODO: Check combinatorics
@@ -172,14 +150,8 @@ class DataGenerator:
     def sample_lying_ground(self, body_type):
         upward_int = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
         forward_int = self.rng.choice(const.CARDINAL_DIRECTIONS_6)
-        ground = OrientedObject(
-            position=const.ORIGIN,
-            forward=forward_int,
-            upward=upward_int,
-            body_type=body_type
-        )
+        ground = OrientedObject.ground(forward_int, upward_int, body_type)
         return ground
-
 
     ### Figure
     def sample_figure(self):
