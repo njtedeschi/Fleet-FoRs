@@ -3,7 +3,6 @@ from typing import List, Dict
 from contextlib import contextmanager
 
 import numpy as np
-from scipy.spatial.distance import cosine
 
 from scene import BaseObject, OrientedObject, Scene
 import constants as const
