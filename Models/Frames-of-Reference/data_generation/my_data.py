@@ -3,10 +3,10 @@ from typing import List, Dict
 from contextlib import contextmanager
 
 import numpy as np
+from scipy.spatial.distance import cosine
 
 from scene import BaseObject, OrientedObject, Scene
 import constants as const
-import language
 
 # Specific combination of hyperparameters
 @dataclass
@@ -35,7 +35,7 @@ class ExperimentalCondition:
 class MyInput:
     scene: Scene
     description: str
-    flip_results: Dict[str, bool]
+    flip_results: Dict[str, bool] # Set to None if DataGenerator.verbose=False
 
 class DataGenerator:
 
@@ -128,8 +128,8 @@ class DataGenerator:
         return ground
 
     def sample_canonical_ground(self, body_type):
-        forward_int = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
-        ground = OrientedObject.ground(forward_int, const.UP, body_type)
+        forward = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
+        ground = OrientedObject.ground(forward, const.UP, body_type)
         return ground
 
     def sample_noncanonical_ground(self, body_type):
@@ -141,17 +141,30 @@ class DataGenerator:
         return ground
 
     def sample_upside_down_ground(self, body_type):
-        forward_int = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
-        ground = OrientedObject.ground(forward_int, const.DOWN, body_type)
+        forward = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
+        ground = OrientedObject.ground(forward, const.DOWN, body_type)
         return ground
 
     # TODO: Check combinatorics
     # ground lying on its face, back, or side
     def sample_lying_ground(self, body_type):
-        upward_int = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
-        forward_int = self.rng.choice(const.CARDINAL_DIRECTIONS_6)
-        ground = OrientedObject.ground(forward_int, upward_int, body_type)
+        upward = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
+        forward_possibilities = self._forward_possibilities(upward)
+        forward = self.rng.choice(forward_possibilities)
+        ground = OrientedObject.ground(forward, upward, body_type)
         return ground
+
+    # Assuming upward is along horizontal axis
+    def _forward_possibilities(self, upward):
+        # forward can always be in the z-direction
+        # (i.e. object lying face up or face down)
+        vertical = [const.UP, const.DOWN]
+        # forward can also be along the horizontal axis orthogonal to upward
+        if np.dot(upward, const.NORTH) == 0:
+            horizontal = [const.NORTH, const.SOUTH]
+        else:
+            horizontal = [const.EAST, const.WEST]
+        return vertical + horizontal
 
     ### Figure
     def sample_figure(self):

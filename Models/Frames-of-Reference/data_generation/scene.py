@@ -15,6 +15,7 @@ class OrientedObject(BaseObject):
     is_participant: bool
     body_type: str
 
+    # Note: forward and upward should be orthogonal
     def __post_init__(self):
         self.rightward = np.cross(self.forward, self.upward)
 
