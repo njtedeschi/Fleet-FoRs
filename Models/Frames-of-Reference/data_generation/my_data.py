@@ -46,17 +46,17 @@ class DataGenerator:
 
     def set_probabilities(self, hyper):
         probs = {
-            "is_reliable": hyper.data_reliability,
+            "description_is_reliable": hyper.data_reliability,
             # Scene probabilities
-            "is_direct": hyper.p_direct,
-            "is_near": hyper.p_near,
-            "on_axis": hyper.p_axis,
-            "is_biped": hyper.p_biped,
-            # "speaker_is_canonical": hyper.p_canonical_s,
-            # "ground_is_canonical": hyper.p_canonical_g
+            "scene_is_direct": hyper.p_direct,
+            "figure_is_near": hyper.p_near,
+            "figure_on_axis": hyper.p_axis,
+            "ground_is_biped": hyper.p_biped,
+            "speaker_is_canonical": hyper.p_canonical_s,
+            "ground_is_canonical": hyper.p_canonical_g,
             # Word probabilities
-            "uses_frame": hyper.p_frame,
-            "is_intrinsic": hyper.p_intrinsic
+            "description_uses_frame": hyper.p_frame,
+            "description_is_intrinsic": hyper.p_intrinsic
         }
         return probs
 
@@ -70,7 +70,7 @@ class DataGenerator:
         else:
             yield None
 
-    def flip(self, p_label, flip_results=None):
+    def flip(self, p_label):
         result = self.rng.random() < self.probs[p_label]
         # Logging flip results
         if self.verbose:
@@ -79,43 +79,64 @@ class DataGenerator:
 
     # Scene sampling
     def sample_scene(self):
-        # Figure
+        # Sample values that are same for all scene types
         figure = self.sample_figure()
+        speaker_is_canonical = self.flip("speaker_is_canonical")
 
         # Speaker-Ground relationship
-        is_direct = self.flip("is_direct")
-        if is_direct:
-            direct_speaker = const.DIRECT_SPEAKER
-            direct_scene = Scene(
-                speaker=direct_speaker,
-                ground=direct_speaker,
-                figure=figure
-            )
-            return direct_scene
+        scene_is_direct = self.flip("scene_is_direct")
+        if scene_is_direct:
+            return self.sample_direct_scene(figure,
+                                            speaker_is_canonical)
         else:
-            nondirect_speaker = const.NONDIRECT_SPEAKER
-            ground = self.sample_ground()
-            nondirect_scene = Scene(
-                speaker=nondirect_speaker,
-                ground=ground,
-                figure=figure
-            )
-            return nondirect_scene
+            return self.sample_nondirect_scene(figure,
+                                               speaker_is_canonical) 
 
-    def sample_figure(self):
-        on_axis = self.flip("on_axis")
-        if on_axis:
-            direction = self.rng.choice(const.CARDINAL_DIRECTIONS_6)
+    ## Direct Scene
+    def sample_direct_scene(self, figure, speaker_is_canonical=True):
+        if speaker_is_canonical:
+            speaker = const.DIRECT_SPEAKER
         else:
-            direction = self.rng.choice(const.OFF_AXIS_DIRECTIONS)
-        distance = const.NEAR if self.flip("is_near") else const.FAR
-        position = distance * direction
-        figure = BaseObject(position)
-        return figure
+            speaker = self.sample_noncanonical_speaker(const.ORIGIN)
+        scene = Scene(
+            speaker=speaker,
+            ground=speaker,
+            figure=figure
+        )
+        return scene
 
+
+    ## Nondirect Scene
+    def sample_nondirect_scene(self, figure, speaker_is_canonical=True):
+        if speaker_is_canonical:
+            speaker = const.NONDIRECT_SPEAKER
+        else:
+            speaker = self.sample_noncanonical_speaker(const.NONDIRECT_SPEAKER_POSITION)
+        ground = self.sample_ground()
+        scene = Scene(
+            speaker=speaker,
+            ground=ground,
+            figure=figure
+        )
+        return scene
+
+    ### Speaker
+
+    def sample_noncanonical_speaker(speaker, position):
+        pass
+
+    ### Ground
     def sample_ground(self):
+        body_type = "biped" if self.flip("ground_is_biped") else "quadruped"
+        is_canonical = self.flip("ground_is_canonical")
+        if is_canonical:
+            ground = self.sample_canonical_ground(body_type)
+        else:
+            ground = self.sample_noncanonical_ground(body_type)
+        return ground
+
+    def sample_canonical_ground(self, body_type):
         direction = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
-        body_type = "biped" if self.flip("is_biped") else "quadruped"
         ground = OrientedObject(
             position=const.ORIGIN,
             forward=direction,
@@ -125,13 +146,29 @@ class DataGenerator:
         )
         return ground
 
+    def sample_noncanonical_ground(self, body_type):
+        pass
+
+    ### Figure
+    def sample_figure(self):
+        on_axis = self.flip("figure_on_axis")
+        if on_axis:
+            direction = self.rng.choice(const.CARDINAL_DIRECTIONS_6)
+        else:
+            direction = self.rng.choice(const.OFF_AXIS_DIRECTIONS)
+        distance = const.NEAR if self.flip("figure_is_near") else const.FAR
+        position = distance * direction
+        figure = BaseObject(position)
+        return figure
+
+
     # Word sampling
     def sample_word_by_probs(self, scene):
-        uses_frame = self.flip("uses_frame")
+        uses_frame = self.flip("description_uses_frame")
 
         word = None
         if (uses_frame):
-            is_intrinsic = self.flip("is_intrinsic")
+            is_intrinsic = self.flip("description_is_intrinsic")
             if is_intrinsic or scene.ground.is_participant:
                 word = self.sample_angular_description(scene, relative=False)
             else:
@@ -156,8 +193,8 @@ class DataGenerator:
     def sample_datum(self):
         with self.flip_results_manager() as flip_results:
             scene = self.sample_scene()
-            is_reliable = self.flip("is_reliable")
-            if is_reliable:
+            description_is_reliable = self.flip("description_is_reliable")
+            if description_is_reliable:
                 description = self.sample_word_by_probs(scene)
             else:
                 description = self.sample_word_randomly()
