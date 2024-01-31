@@ -8,24 +8,25 @@ from scene import BaseObject, OrientedObject, Scene
 import constants as const
 
 # Specific combination of hyperparameters
+# YAML config must match attribute names
 @dataclass
 class ExperimentalCondition:
     # Language
     language: str
     # Probabilities
-    data_reliability: float
+    p_datum_is_reliable: float
     ## Scene probabilities
-    p_direct: float
-    p_biped: float # conditional
-    p_near: float
-    p_axis: float
-    p_canonical_s: float
-    p_upside_down_s: float # conditional
-    p_canonical_g: float # conditional
-    p_upside_down_g: float # conditional
-    ## Word probabilities
-    p_frame: float
-    p_intrinsic: float # conditional
+    p_scene_is_direct: float
+    p_figure_is_on_axis: float
+    p_figure_is_near: float
+    p_speaker_is_canonical: float
+    p_speaker_is_upside_down: float # requires noncanonical speaker
+    p_ground_is_biped: float # requires nondirect scene
+    p_ground_is_canonical: float # requires nondirect scene
+    p_ground_is_upside_down: float # requires noncanonical ground
+    ## Description probabilities
+    p_description_is_angular: float
+    p_description_is_intrinsic: float # requires angular description
     # Name
     name: List[str]
 
@@ -42,26 +43,18 @@ class DataGenerator:
         self.rng = np.random.default_rng(seed)
         # Language
         self.language = const.LANGUAGES[experimental_condition.language]
-        self.probs = self.set_probabilities(experimental_condition)
+        self.probs = self.set_probs(experimental_condition)
         self.verbose = verbose # Used for logging flip values
 
-    def set_probabilities(self, hyper):
-        probs = {
-            "description_is_reliable": hyper.data_reliability,
-            # Scene probabilities
-            "scene_is_direct": hyper.p_direct,
-            "figure_is_near": hyper.p_near,
-            "figure_on_axis": hyper.p_axis,
-            "ground_is_biped": hyper.p_biped, # requires nondirect scene
-            "speaker_is_canonical": hyper.p_canonical_s,
-            "speaker_is_upside_down": hyper.p_upside_down_s, # requires noncanonical speaker
-            "ground_is_canonical": hyper.p_canonical_g, # requires nondirect scene
-            "ground_is_upside_down": hyper.p_upside_down_g, # requires noncanonical ground
-            # Word probabilities
-            "description_uses_frame": hyper.p_frame,
-            "description_is_intrinsic": hyper.p_intrinsic # requires FoR description
-        }
-        return probs
+    def set_probs(self, experimental_condition):
+        probs_dict = {}
+        for attr in dir(experimental_condition):
+            value = getattr(experimental_condition, attr)
+            if attr.startswith("p_") and isinstance(value, float):
+                # Remove the "p_" prefix and use the rest as a dictionary key
+                key = attr[2:]
+                probs_dict[key] = value
+        return probs_dict
 
     # Keep track of flip results if self.verbose
     @contextmanager
@@ -112,7 +105,21 @@ class DataGenerator:
         scene = Scene(speaker, ground, figure)
         return scene
 
+    ### Figure
+    def sample_figure(self):
+        is_on_axis = self.flip("figure_is_on_axis")
+        if is_on_axis:
+            direction = self.rng.choice(const.CARDINAL_DIRECTIONS_6)
+        else:
+            direction = self.rng.choice(const.OFF_AXIS_DIRECTIONS)
+        distance = const.NEAR if self.flip("figure_is_near") else const.FAR
+        position = distance * direction
+        figure = BaseObject(position)
+        return figure
+
     ### Speaker
+    # No sampling for canonical speakers due to EAST facing restriction
+
     # Possibilities directions restricted in line with canonical direct and nondirect speakers
     # Either forward or upward must face EAST
     def sample_noncanonical_speaker(self, position):
@@ -186,34 +193,21 @@ class DataGenerator:
             horizontal = [const.EAST, const.WEST]
         return vertical + horizontal
 
-    ### Figure
-    def sample_figure(self):
-        on_axis = self.flip("figure_on_axis")
-        if on_axis:
-            direction = self.rng.choice(const.CARDINAL_DIRECTIONS_6)
-        else:
-            direction = self.rng.choice(const.OFF_AXIS_DIRECTIONS)
-        distance = const.NEAR if self.flip("figure_is_near") else const.FAR
-        position = distance * direction
-        figure = BaseObject(position)
-        return figure
+    # Description sampling
+    def sample_description_true_description(self, scene):
+        is_angular = self.flip("description_is_angular")
 
-
-    # Word sampling
-    def sample_word_by_probs(self, scene):
-        uses_frame = self.flip("description_uses_frame")
-
-        word = None
-        if (uses_frame):
+        description = None
+        if (is_angular):
             is_intrinsic = self.flip("description_is_intrinsic")
             if is_intrinsic or scene.ground.is_participant:
-                word = self.sample_angular_description(scene, relative=False)
+                description = self.sample_angular_description(scene, relative=False)
             else:
-                word = self.sample_angular_description(scene, relative=True)
+                description = self.sample_angular_description(scene, relative=True)
         # If uses_frame is false or sample_angular_description returns None
-        if not word:
-            word = self.language.proximity_description(scene)
-        return word
+        if not description:
+            description = self.language.proximity_description(scene)
+        return description
 
     def sample_angular_description(self, scene, relative=False):
         angular_descriptions = self.language.angular_descriptions(scene, relative=relative)
@@ -230,9 +224,9 @@ class DataGenerator:
     def sample_datum(self):
         with self.flip_results_manager() as flip_results:
             scene = self.sample_scene()
-            description_is_reliable = self.flip("description_is_reliable")
-            if description_is_reliable:
-                description = self.sample_word_by_probs(scene)
+            datum_is_reliable = self.flip("datum_is_reliable")
+            if datum_is_reliable:
+                description = self.sample_true_description(scene)
             else:
                 description = self.sample_word_randomly()
             datum = MyInput(scene, description, flip_results)
