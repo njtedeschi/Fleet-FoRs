@@ -8,6 +8,7 @@ from file_management import FileManager
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('root', help="Path to the output root directory") # e.g. results/DATE/
+    parser.add_argument('config', type=str, help="Name of config file in root") # e.g. data.yaml
     parser.add_argument('--seed', type=int, default=None, help="Random seed for reproducibility")
     parser.add_argument('--verbose', action='store_true', help="Adds recording of flip results to data")
     args = parser.parse_args()
