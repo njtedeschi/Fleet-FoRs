@@ -124,10 +124,10 @@ class DataGenerator:
     # Word sampling
     def sample_word_by_probs(self, scene):
         uses_frame = self.flip("uses_frame")
-        is_intrinsic = self.flip("is_intrinsic")
 
         word = None
         if (uses_frame):
+            is_intrinsic = self.flip("is_intrinsic")
             if is_intrinsic or scene.ground.is_participant:
                 word = self.sample_angular_description(scene, relative=False)
             else:
