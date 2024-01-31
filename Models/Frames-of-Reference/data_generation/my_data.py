@@ -113,8 +113,29 @@ class DataGenerator:
         return scene
 
     ### Speaker
-    def sample_noncanonical_speaker(speaker, position):
-        pass
+    # Possibilities directions restricted in line with canonical direct and nondirect speakers
+    # Either forward or upward must face EAST
+    def sample_noncanonical_speaker(self, position):
+        upside_down = self.flip("speaker_is_upside_down")
+        if upside_down:
+            speaker = OrientedObject.speaker(position, const.EAST, const.DOWN)
+        else:
+            speaker = self.sample_lying_speaker(position)
+        return speaker
+
+    # Lying down, not fibbing
+    def sample_lying_speaker(self, position):
+        possibile_orientations = [
+            # (forward, upward)
+            (const.EAST, const.NORTH), # lying on left
+            (const.EAST, const.SOUTH), # lying on right
+            (const.UP, const.EAST), # lying face up
+            (const.DOWN, const.EAST) # lying face down
+        ]
+        index = self.rng.choice(len(possibile_orientations))
+        forward, upward = possibile_orientations[index]
+        speaker = OrientedObject.speaker(position, forward, upward)
+        return speaker
 
     ### Ground
     def sample_ground(self):
