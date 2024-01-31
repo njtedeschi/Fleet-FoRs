@@ -20,6 +20,8 @@ class ExperimentalCondition:
     p_biped: float
     p_near: float
     p_axis: float
+    # p_canonical_s: float
+    # p_canonical_g: float
     ## Word probabilities
     p_frame: float
     p_intrinsic: float
@@ -50,6 +52,8 @@ class DataGenerator:
             "is_near": hyper.p_near,
             "on_axis": hyper.p_axis,
             "is_biped": hyper.p_biped,
+            # "speaker_is_canonical": hyper.p_canonical_s,
+            # "ground_is_canonical": hyper.p_canonical_g
             # Word probabilities
             "uses_frame": hyper.p_frame,
             "is_intrinsic": hyper.p_intrinsic
