@@ -15,7 +15,7 @@ class FileManager:
     def __init__(self, root):
         self.root = root
         self.config = self.load_config()
-        # self.validate_config()
+        self.validate_config()
         self.experimental_conditions = self.determine_experimental_conditions()
         self.create_output_directories()
 
@@ -38,32 +38,22 @@ class FileManager:
             print(f"Error parsing the YAML file: {exc}")
             return None
 
+    def validate_config(self):
+            # Extracting the hyperparameters section from the config
+            hyperparameters_config = self.config.get('hyperparameters', {})
 
-    # # Check that hyperparameters are consistent between Python and YAML
-    # def validate_config(self):
-    #     # Validate SceneProbs vs. YAML 'scene_probabilities'
-    #     yaml_scene = self.config["hyperparameters"]["Probabilities"]["SceneProbs"]
-    #     self._class_matches_yaml(SceneProbs, yaml_scene, "SceneProbs")
-    #     # Validate WordProbs vs. YAML 'word_probabilities'
-    #     yaml_word = self.config["hyperparameters"]["Probabilities"]["WordProbs"]
-    #     self._class_matches_yaml(WordProbs, yaml_word, "WordProbs")
+            # Getting all the fields from ExperimentalCondition that start with 'p_'
+            experimental_condition_fields = [f.name for f in fields(ExperimentalCondition) if f.name.startswith('p_')]
 
-    # def _class_matches_yaml(self, dataclass, yaml_dict, dict_name):
-    #     # Get field names from the dataclass
-    #     dataclass_fields = set(f.name for f in fields(dataclass))
+            # Check if all required fields are in the config
+            missing_in_config = [field for field in experimental_condition_fields if field not in hyperparameters_config]
+            if missing_in_config:
+                raise ValueError(f"Missing fields in config: {missing_in_config}")
 
-    #     # Get keys from the dictionary
-    #     dict_keys = set(yaml_dict.keys())
-
-    #     # Check for missing fields in the dictionary
-    #     missing_in_dict = dataclass_fields - dict_keys
-    #     if missing_in_dict:
-    #         raise ValueError(f"Missing keys in '{dict_name}': {missing_in_dict}")
-
-    #     # Check for extra keys in the dictionary
-    #     extra_in_dict = dict_keys - dataclass_fields
-    #     if extra_in_dict:
-    #         raise ValueError(f"Extra keys in '{dict_name}': {extra_in_dict}")
+            # Check if there are extra fields in the config that are not in ExperimentalCondition
+            extra_in_config = [key for key in hyperparameters_config if key.startswith('p_') and key not in experimental_condition_fields]
+            if extra_in_config:
+                raise ValueError(f"Extra fields in config not in ExperimentalCondition: {extra_in_config}")
 
     # Get all combinations of hyperparameters
     def determine_experimental_conditions(self):
