@@ -1,10 +1,8 @@
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 from scipy.spatial.distance import cosine
-
-from scene import *
 
 @dataclass
 class AbstractDirection:
@@ -22,6 +20,17 @@ class AbstractDirection:
                 return (cosine_similarity == self.sign)
         else:
             return (abs(cosine_similarity) == 1) # e.g. "side"
+
+@dataclass
+class PossibleDescriptions:
+    proximity: str
+    intrinsic: List[str]
+    relative: List[str]
+
+@dataclass
+class TruthValue:
+    intrinsic: bool
+    relative: bool
 
 @dataclass
 class Language:
@@ -61,3 +70,27 @@ class Language:
             if direction and direction.applies(g_to_f, anchor, relative=relative):
                 words.append(word)
         return words
+
+    # TODO: improve efficiency
+    def all_descriptions(self, scene):
+        proximity = self.proximity_description(scene)
+        intrinsic = self.angular_descriptions(scene, relative=False)
+        relative = self.angular_descriptions(scene, relative=True)
+        return PossibleDescriptions(proximity, intrinsic, relative)
+
+    def truth_values_by_word(self, scene):
+        possible_descriptions = self.all_descriptions(scene)
+        truth_values = {word : self.truth_value(word, possible_descriptions) for word in self.vocabulary}
+        return truth_values
+
+    def truth_value(self, word, possible_descriptions):
+        intrinsic = False
+        relative = False
+        if word in possible_descriptions.proximity:
+            intrinsic = True
+            relative = True
+        if word in possible_descriptions.intrinsic:
+            intrinsic = True
+        if word in possible_descriptions.relative:
+            relative = True
+        return TruthValue(intrinsic, relative)

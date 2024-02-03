@@ -6,29 +6,28 @@ import os
 import numpy as np
 import yaml
 
-from my_data import ExperimentalCondition
+from .structures.experiment import ExperimentalCondition
 
 class FileManager:
     # Processes the input yaml
     # Saves output files
 
-    def __init__(self, root):
+    def __init__(self, root, training=True):
         self.root = root
         self.config = self.load_config()
         self.validate_config()
         self.experimental_conditions = self.determine_experimental_conditions()
-        self.create_output_directories()
 
-        experiment = self.config["experiment"]
-        self.train_min = experiment["train_min"]
-        self.train_max = experiment["train_max"]
-        self.train_step = experiment["train_step"]
-        self.repetitions = experiment["repetitions"]
+        if training:
+            self.create_training_output_directories()
+
+    def get_from_config(self, param):
+        return self.config["experiment"][param]
 
     def load_config(self):
         try:
             # Construct the path to the config.yaml file
-            config_path = os.path.join(self.root, 'training_data', 'config.yaml')
+            config_path = os.path.join(self.root, 'config_data.yaml')
             with open(config_path, 'r') as file:
                 return yaml.safe_load(file)
         except FileNotFoundError:
@@ -77,23 +76,23 @@ class FileManager:
         for combo in combinations:
             # Merge fixed and variable hyperparameters, using values for attributes
             combined_hyperparams = {**fixed_hyperparams}
-            condition_name = []
+            labels = []
 
             for key, variable_key in combo.items():
                 combined_hyperparams[key] = variable_hyperparams[key][variable_key]  # Use the value for the attribute
-                condition_name.append(variable_key)  # Use the variable key for the name
+                labels.append(variable_key)  # Use the variable key as label used in naming condition
 
             # Instantiate ExperimentalCondition
             experimental_condition = ExperimentalCondition(
-                **combined_hyperparams, name=condition_name
+                **combined_hyperparams, labels=labels
             )
             experimental_conditions.append(experimental_condition)
 
         return experimental_conditions
 
-    def create_output_directories(self):
+    def create_training_output_directories(self):
         for experimental_condition in self.experimental_conditions:
-            output_directory = self.set_output_directory(experimental_condition)
+            output_directory = self.set_training_output_directory(experimental_condition)
             # Check if the directory already exists
             if not os.path.exists(output_directory):
                 # If it doesn't exist, create it including any necessary parent directories
@@ -102,22 +101,6 @@ class FileManager:
                 print(f"Directory '{output_directory}' already exists.")
 
     ### Non init
-    def set_output_directory(self, experimental_condition):
-        condition_str = "_".join(sorted(experimental_condition.name))
-        output_directory = os.path.join(
-            self.root,
-            "training_data",
-            condition_str,
-        )
-        return output_directory
-
-    def set_filepath(self, output_directory, train_size, repetition):
-        train_str = str(train_size).zfill(4)
-        rep_str = str(repetition).zfill(2)
-        filename = train_str + "_" + rep_str + ".json"
-        filepath = os.path.join(output_directory, filename)
-        return filepath
-
     def serialize_to_json(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist() # np arrays turned to just list of floats
@@ -127,10 +110,49 @@ class FileManager:
         else:
             return obj
 
-    def save_data(self, data, experimental_condition, train_size, repetition):
+    # Training
+    def set_training_output_directory(self, experimental_condition):
+        output_directory = os.path.join(
+            self.root,
+            "training",
+            "training_data",
+            experimental_condition.name,
+        )
+        return output_directory
+
+    def set_training_filepath(self, output_directory, train_size, repetition):
+        train_str = str(train_size).zfill(4)
+        rep_str = str(repetition).zfill(2)
+        filename = train_str + "_" + rep_str + ".json"
+        filepath = os.path.join(output_directory, filename)
+        return filepath
+
+    def save_training_data(self, data, experimental_condition, train_size, repetition):
         json_data = json.dumps(data, default=self.serialize_to_json)
-        output_directory = self.set_output_directory(experimental_condition)
-        filepath = self.set_filepath(output_directory, train_size, repetition)
+        output_directory = self.set_training_output_directory(experimental_condition)
+        filepath = self.set_training_filepath(output_directory, train_size, repetition)
+
+        with open(filepath, 'w') as file:
+            file.write(json_data)
+
+    # Testing
+    def set_testing_output_directory(self):
+        output_directory = os.path.join(
+            self.root,
+            "testing",
+            "testing_data"
+        )
+        return output_directory
+
+    def set_testing_filepath(self, output_directory, experimental_condition):
+        filename = experimental_condition.name + ".json"
+        filepath = os.path.join(output_directory, filename)
+        return filepath
+
+    def save_testing_data(self, data, experimental_condition):
+        json_data = json.dumps(data, default=self.serialize_to_json)
+        output_directory = self.set_testing_output_directory()
+        filepath = self.set_testing_filepath(output_directory, experimental_condition)
 
         with open(filepath, 'w') as file:
             file.write(json_data)

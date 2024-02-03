@@ -4,9 +4,10 @@ from contextlib import contextmanager
 
 import numpy as np
 
-from scene import BaseObject, OrientedObject, Scene
-import constants as const
-import world
+from .structures.language import TruthValue
+from .structures.world import BaseObject, OrientedObject, Scene
+from .constants import space, objects
+from .constants.languages import LANGUAGES
 
 # Specific combination of hyperparameters
 # YAML config must match attribute names
@@ -29,21 +30,31 @@ class ExperimentalCondition:
     p_description_is_angular: float
     p_description_is_intrinsic: float # given angular description
     # Name
-    name: List[str]
+    labels: List[str]
 
-# Datum
+    def __post_init__(self):
+        self.name = self.condition_name_from_hyperparameter_values(self.labels)
+
+    def condition_name_from_hyperparameter_values(self, labels):
+        return "_".join(sorted(labels))
+
 @dataclass
-class MyInput:
+class Datum:
     scene: Scene
     description: str
-    flip_results: Dict[str, bool] # Set to None if DataGenerator.verbose=False
+    flip_results: Dict[str, bool] = None
+
+@dataclass
+class TestItem:
+    datum: Datum
+    label: TruthValue
 
 class DataGenerator:
 
     def __init__(self, experimental_condition, seed=None, verbose=False):
         self.rng = np.random.default_rng(seed)
         # Language
-        self.language = const.LANGUAGES[experimental_condition.language]
+        self.language = LANGUAGES[experimental_condition.language]
         self.probs = self.set_probs(experimental_condition)
         self.verbose = verbose # Used for logging flip values
 
@@ -90,7 +101,7 @@ class DataGenerator:
     ## Direct Scene
     def sample_direct_scene(self, figure, speaker_is_canonical=True):
         if speaker_is_canonical:
-            speaker = const.CANONICAL_DIRECT_SPEAKER
+            speaker = objects.CANONICAL_DIRECT_SPEAKER
         else:
             # Speaker is direct if specified_position=None
             speaker = self.sample_noncanonical_speaker()
@@ -100,9 +111,9 @@ class DataGenerator:
     ## Nondirect Scene
     def sample_nondirect_scene(self, figure, speaker_is_canonical=True):
         if speaker_is_canonical:
-            speaker = const.CANONICAL_NONDIRECT_SPEAKER
+            speaker = objects.CANONICAL_NONDIRECT_SPEAKER
         else:
-            speaker = self.sample_noncanonical_speaker(specified_position=const.NONDIRECT_SPEAKER_POSITION)
+            speaker = self.sample_noncanonical_speaker(specified_position=objects.NONDIRECT_SPEAKER_POSITION)
         ground = self.sample_ground()
         scene = Scene(speaker, ground, figure)
         return scene
@@ -116,7 +127,7 @@ class DataGenerator:
         
         upside_down = self.flip("speaker_is_upside_down")
         if upside_down:
-            speaker = OrientedObject.speaker(const.CANONICAL_SPEAKER_FORWARD, world.DOWN, specified_position)
+            speaker = OrientedObject.speaker(objects.CANONICAL_SPEAKER_FORWARD, space.DOWN, specified_position)
         else:
             speaker = self.sample_lying_speaker(specified_position)
         return speaker
@@ -125,10 +136,10 @@ class DataGenerator:
     def sample_lying_speaker(self, specified_position):
         possibile_orientations = [
             # (forward, upward)
-            (const.CANONICAL_SPEAKER_FORWARD, const.CANONICAL_SPEAKER_LEFTWARD), # lying on left
-            (const.CANONICAL_SPEAKER_FORWARD, const.CANONICAL_SPEAKER_RIGHTWARD), # lying on right
-            (world.UP, const.CANONICAL_SPEAKER_FORWARD), # lying face up
-            (world.DOWN, const.CANONICAL_SPEAKER_FORWARD) # lying face down
+            (objects.CANONICAL_SPEAKER_FORWARD, objects.CANONICAL_SPEAKER_LEFTWARD), # lying on left
+            (objects.CANONICAL_SPEAKER_FORWARD, objects.CANONICAL_SPEAKER_RIGHTWARD), # lying on right
+            (space.UP, objects.CANONICAL_SPEAKER_FORWARD), # lying face up
+            (space.DOWN, objects.CANONICAL_SPEAKER_FORWARD) # lying face down
         ]
         index = self.rng.choice(len(possibile_orientations))
         forward, upward = possibile_orientations[index]
@@ -146,8 +157,8 @@ class DataGenerator:
         return ground
 
     def sample_canonical_ground(self, body_type):
-        forward = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
-        ground = OrientedObject.ground(forward, const.UP, body_type)
+        forward = self.rng.choice(space.CARDINAL_DIRECTIONS_4)
+        ground = OrientedObject.ground(forward, space.UP, body_type)
         return ground
 
     def sample_noncanonical_ground(self, body_type):
@@ -159,14 +170,14 @@ class DataGenerator:
         return ground
 
     def sample_upside_down_ground(self, body_type):
-        forward = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
-        ground = OrientedObject.ground(forward, const.DOWN, body_type)
+        forward = self.rng.choice(space.CARDINAL_DIRECTIONS_4)
+        ground = OrientedObject.ground(forward, space.DOWN, body_type)
         return ground
 
     # TODO: Check combinatorics
     # ground lying on its face, back, or side
     def sample_lying_ground(self, body_type):
-        upward = self.rng.choice(const.CARDINAL_DIRECTIONS_4)
+        upward = self.rng.choice(space.CARDINAL_DIRECTIONS_4)
         forward_possibilities = self._forward_possibilities(upward)
         forward = self.rng.choice(forward_possibilities)
         ground = OrientedObject.ground(forward, upward, body_type)
@@ -176,22 +187,22 @@ class DataGenerator:
     def _forward_possibilities(self, upward):
         # forward can always be in the z-direction
         # (i.e. object lying face up or face down)
-        vertical = [const.UP, const.DOWN]
+        vertical = [space.UP, space.DOWN]
         # forward can also be along the horizontal axis orthogonal to upward
-        if np.dot(upward, const.NORTH) == 0:
-            horizontal = [const.NORTH, const.SOUTH]
+        if np.dot(upward, space.NORTH) == 0:
+            horizontal = [space.NORTH, space.SOUTH]
         else:
-            horizontal = [const.EAST, const.WEST]
+            horizontal = [space.EAST, space.WEST]
         return vertical + horizontal
 
     ### Figure
     def sample_figure(self):
         is_on_axis = self.flip("figure_is_on_axis")
         if is_on_axis:
-            direction = self.rng.choice(const.CARDINAL_DIRECTIONS_6)
+            direction = self.rng.choice(space.CARDINAL_DIRECTIONS_6)
         else:
-            direction = self.rng.choice(const.OFF_AXIS_DIRECTIONS)
-        distance = const.NEAR if self.flip("figure_is_near") else const.FAR
+            direction = self.rng.choice(objects.OFF_AXIS_DIRECTIONS)
+        distance = objects.NEAR if self.flip("figure_is_near") else objects.FAR
         position = distance * direction
         figure = BaseObject(position)
         return figure
@@ -224,7 +235,8 @@ class DataGenerator:
         return word
 
     # Data sampling
-    def sample_datum(self):
+    ## Training
+    def sample_training_datum(self):
         with self.flip_results_manager() as flip_results:
             scene = self.sample_scene()
             datum_is_reliable = self.flip("datum_is_reliable")
@@ -232,12 +244,34 @@ class DataGenerator:
                 description = self.sample_true_description(scene)
             else:
                 description = self.sample_word_randomly()
-            datum = MyInput(scene, description, flip_results)
+            datum = Datum(scene, description, flip_results)
             return datum
 
-    def sample_data(self, num_samples):
+    # Returns list of MyInput
+    def sample_training_data(self, num_samples):
         data = []
         for _ in range(num_samples):
-            datum = self.sample_datum()
+            datum = self.sample_training_datum()
             data.append(datum)
+        return data
+
+    ## Testing
+
+    def create_test_items(self, scene):
+        truth_values = self.language.truth_values_by_word(scene)
+        test_items = [] 
+        for word, truth_value in truth_values.items():
+            datum = Datum(scene, word)
+            test_item = TestItem(datum, label=truth_value)
+            test_items.append(test_item)
+        return test_items
+
+    # Don't call with --verbose
+    # Returns list of TestItem
+    def sample_testing_data(self, num_scenes):
+        data = []
+        for _ in range(num_scenes):
+            scene = self.sample_scene()
+            test_items = self.create_test_items(scene)
+            data.extend(test_items)
         return data

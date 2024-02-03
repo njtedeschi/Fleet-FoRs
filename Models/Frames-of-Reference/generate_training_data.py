@@ -2,13 +2,12 @@ import argparse
 
 from tqdm import tqdm
 
-from my_data import DataGenerator
-from file_management import FileManager
+from datageneration.data_generator import DataGenerator
+from datageneration.file_manager import FileManager
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('root', help="Path to the output root directory") # e.g. results/DATE/
-    parser.add_argument('config', type=str, help="Name of config file in root") # e.g. data.yaml
     parser.add_argument('--seed', type=int, default=None, help="Random seed for reproducibility")
     parser.add_argument('--verbose', action='store_true', help="Adds recording of flip results to data")
     args = parser.parse_args()
@@ -18,14 +17,14 @@ def main():
     seed = args.seed
     verbose = args.verbose
 
-    file_manager = FileManager(root)
+    file_manager = FileManager(root, training=True)
 
     # Get loop parameters
-    train_min = file_manager.train_min
-    train_max = file_manager.train_max
-    train_step = file_manager.train_step
+    train_min = file_manager.get_from_config("train_min")
+    train_max = file_manager.get_from_config("train_max")
+    train_step = file_manager.get_from_config("train_step")
     train_sizes = range(train_min, train_max+1, train_step)
-    repetitions = file_manager.repetitions
+    repetitions = file_manager.get_from_config("repetitions")
     experimental_conditions = file_manager.experimental_conditions
 
     # Calculate total number of items created for estimating progress
@@ -36,8 +35,8 @@ def main():
             data_generator = DataGenerator(experimental_condition, seed, verbose)
             for train_size in train_sizes:
                 for repetition in range(repetitions):
-                    train_data = data_generator.sample_data(train_size)
-                    file_manager.save_data(train_data,
+                    train_data = data_generator.sample_training_data(train_size)
+                    file_manager.save_training_data(train_data,
                                         experimental_condition, # Subdirectory
                                         train_size, # File name part 1
                                         repetition) # File name part 2
