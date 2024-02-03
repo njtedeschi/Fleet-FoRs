@@ -15,7 +15,9 @@ english_symmetry_locatives = {
 english_body_part_locatives = dict()
 ENGLISH = Language(
     symmetry_locatives=english_symmetry_locatives,
-    body_part_locatives=english_body_part_locatives
+    body_part_locatives=english_body_part_locatives,
+    absolute_above="above",
+    absolute_below="below"
 )
 
 # Mixtec
@@ -32,7 +34,9 @@ mixtec_body_part_locatives = {
 }
 MIXTEC = Language(
     symmetry_locatives=mixtec_symmetry_locatives,
-    body_part_locatives=mixtec_body_part_locatives
+    body_part_locatives=mixtec_body_part_locatives,
+    absolute_above="head",
+    absolute_below="belly"
 )
 
 # All languages
