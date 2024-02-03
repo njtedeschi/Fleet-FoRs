@@ -70,3 +70,13 @@ class Scene:
     def ground_figure_distance(self):
         g_to_f = self.ground_figure_displacement()
         return np.linalg.norm(g_to_f)
+
+    def figure_is_on_axis(self, axis=None):
+        displacement = self.ground_figure_displacement()
+        on_an_axis = (np.count_nonzero(displacement) == 1)
+        if axis:
+            # Return True if figure on specified axis
+            return (on_an_axis and displacement[axis] != 0)
+        else:
+            # If axis is None, return True if figure on any axis
+            return on_an_axis
