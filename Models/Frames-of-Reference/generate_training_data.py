@@ -35,7 +35,7 @@ def main():
             data_generator = DataGenerator(experimental_condition, seed, verbose)
             for train_size in train_sizes:
                 for repetition in range(repetitions):
-                    train_data = data_generator.sample_training_data(train_size)
+                    train_data = data_generator.sample_data(train_size, for_training=True)
                     file_manager.save_training_data(train_data,
                                         experimental_condition, # Subdirectory
                                         train_size, # File name part 1

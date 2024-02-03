@@ -23,7 +23,7 @@ def main():
 
     for experimental_condition in experimental_conditions:
         data_generator = DataGenerator(experimental_condition, seed, verbose)
-        test_data = data_generator.sample_testing_data(test_size)
+        test_data = data_generator.sample_data(test_size, for_training=False)
         file_manager.save_testing_data(test_data, experimental_condition)
 
 if __name__ == "__main__":

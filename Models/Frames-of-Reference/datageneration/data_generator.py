@@ -4,50 +4,10 @@ from contextlib import contextmanager
 
 import numpy as np
 
-from .structures.language import TruthValue
 from .structures.world import BaseObject, OrientedObject, Scene
+from .structures.experiment import TrainingDatum, TestingDatum
 from .constants import space, objects
 from .constants.languages import LANGUAGES
-
-# Specific combination of hyperparameters
-# YAML config must match attribute names
-@dataclass
-class ExperimentalCondition:
-    # Language
-    language: str
-    # Probabilities
-    p_datum_is_reliable: float
-    ## Scene probabilities
-    p_scene_is_direct: float
-    p_figure_is_on_axis: float
-    p_figure_is_near: float
-    p_speaker_is_canonical: float
-    p_speaker_is_upside_down: float # given noncanonical speaker
-    p_ground_is_biped: float # given nondirect scene
-    p_ground_is_canonical: float # given nondirect scene
-    p_ground_is_upside_down: float # given noncanonical ground
-    ## Description probabilities
-    p_description_is_angular: float
-    p_description_is_intrinsic: float # given angular description
-    # Name
-    labels: List[str]
-
-    def __post_init__(self):
-        self.name = self.condition_name_from_hyperparameter_values(self.labels)
-
-    def condition_name_from_hyperparameter_values(self, labels):
-        return "_".join(sorted(labels))
-
-@dataclass
-class Datum:
-    scene: Scene
-    description: str
-    flip_results: Dict[str, bool] = None
-
-@dataclass
-class TestItem:
-    datum: Datum
-    label: TruthValue
 
 class DataGenerator:
 
@@ -91,8 +51,7 @@ class DataGenerator:
         figure = self.sample_figure()
         speaker_is_canonical = self.flip("speaker_is_canonical")
 
-        scene_is_direct = self.flip("scene_is_direct")
-        if scene_is_direct:
+        if self.flip("scene_is_direct"):
             scene = self.sample_direct_scene(figure, speaker_is_canonical)
         else:
             scene = self.sample_nondirect_scene(figure, speaker_is_canonical)
@@ -125,8 +84,7 @@ class DataGenerator:
     # Either forward or upward must face EAST
     def sample_noncanonical_speaker(self, specified_position=None):
         
-        upside_down = self.flip("speaker_is_upside_down")
-        if upside_down:
+        if self.flip("speaker_is_upside_down"):
             speaker = OrientedObject.speaker(objects.CANONICAL_SPEAKER_FORWARD, space.DOWN, specified_position)
         else:
             speaker = self.sample_lying_speaker(specified_position)
@@ -162,8 +120,7 @@ class DataGenerator:
         return ground
 
     def sample_noncanonical_ground(self, body_type):
-        upside_down = self.flip("ground_is_upside_down")
-        if upside_down:
+        if self.flip("ground_is_upside_down"):
             ground = self.sample_upside_down_ground(body_type)
         else:
             ground = self.sample_lying_ground(body_type)
@@ -197,8 +154,7 @@ class DataGenerator:
 
     ### Figure
     def sample_figure(self):
-        is_on_axis = self.flip("figure_is_on_axis")
-        if is_on_axis:
+        if self.flip("figure_is_on_axis"):
             direction = self.rng.choice(space.CARDINAL_DIRECTIONS_6)
         else:
             direction = self.rng.choice(objects.OFF_AXIS_DIRECTIONS)
@@ -209,24 +165,28 @@ class DataGenerator:
 
     # Description sampling
     def sample_true_description(self, scene):
-        is_angular = self.flip("description_is_angular")
-
         description = None
-        if (is_angular):
-            is_intrinsic = self.flip("description_is_intrinsic")
-            if is_intrinsic or scene.ground.is_participant:
-                description = self.sample_angular_description(scene, relative=False)
-            else:
-                description = self.sample_angular_description(scene, relative=True)
-        # If uses_frame is false or sample_angular_description returns None
+        if scene.figure_is_on_axis() and self.flip("description_is_angular"):
+            description = self.sample_angular_description(scene)
         if not description:
             description = self.language.proximity_description(scene)
         return description
 
-    def sample_angular_description(self, scene, relative=False):
-        angular_descriptions = self.language.angular_descriptions(scene, relative=relative)
-        if angular_descriptions:
-            return self.rng.choice(angular_descriptions)
+    def sample_angular_description(self, scene):
+        if scene.figure_is_on_axis(2) and self.flip("description_is_absolute"):
+            description = self.language.absolute_vertical_description(scene)
+        else:
+            description = self.sample_intrinsic_or_relative_description(scene)
+        return description
+
+    def sample_intrinsic_or_relative_description(self, scene):
+        if self.flip("description_is_intrinsic"):
+            descriptions = self.language.intrinsic_descriptions(scene)
+        else:
+            descriptions = self.language.relative_descriptions(scene)
+
+        if descriptions:
+            return self.rng.choice(descriptions)
         else:
             return None
 
@@ -235,43 +195,30 @@ class DataGenerator:
         return word
 
     # Data sampling
+    def sample_data(self, num_samples, for_training=True):
+        data = []
+        for _ in range(num_samples):
+            if for_training:
+                datum = self.sample_training_datum()
+            else:
+                datum = self.sample_testing_datum()
+            data.append(datum)
+        return data
+
     ## Training
     def sample_training_datum(self):
         with self.flip_results_manager() as flip_results:
             scene = self.sample_scene()
-            datum_is_reliable = self.flip("datum_is_reliable")
-            if datum_is_reliable:
+            if self.flip("datum_is_reliable"):
                 description = self.sample_true_description(scene)
             else:
                 description = self.sample_word_randomly()
-            datum = Datum(scene, description, flip_results)
+            datum = TrainingDatum(scene, description, flip_results)
             return datum
 
-    # Returns list of MyInput
-    def sample_training_data(self, num_samples):
-        data = []
-        for _ in range(num_samples):
-            datum = self.sample_training_datum()
-            data.append(datum)
-        return data
-
     ## Testing
-
-    def create_test_items(self, scene):
-        truth_values = self.language.truth_values_by_word(scene)
-        test_items = [] 
-        for word, truth_value in truth_values.items():
-            datum = Datum(scene, word)
-            test_item = TestItem(datum, label=truth_value)
-            test_items.append(test_item)
-        return test_items
-
-    # Don't call with --verbose
-    # Returns list of TestItem
-    def sample_testing_data(self, num_scenes):
-        data = []
-        for _ in range(num_scenes):
-            scene = self.sample_scene()
-            test_items = self.create_test_items(scene)
-            data.extend(test_items)
-        return data
+    def sample_testing_datum(self):
+        scene = self.sample_scene()
+        test_label = self.language.label_scene(scene)
+        datum = TestingDatum(scene, test_label)
+        return datum
