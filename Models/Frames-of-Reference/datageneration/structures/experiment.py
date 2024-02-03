@@ -35,12 +35,12 @@ class ExperimentalCondition:
         return "_".join(sorted(labels))
 
 @dataclass
-class Datum:
+class TrainingDatum:
     scene: Scene
     description: str
     flip_results: Dict[str, bool] = None
 
 @dataclass
-class TestItem:
-    datum: Datum
-    label: TruthValue
+class TestingDatum:
+    scene: Scene
+    label: Dict[str, TruthValue]
