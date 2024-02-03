@@ -22,8 +22,9 @@ class ExperimentalCondition:
     p_ground_is_canonical: float # given nondirect scene
     p_ground_is_upside_down: float # given noncanonical ground
     ## Description probabilities
-    p_description_is_angular: float
+    p_description_is_angular: float # given figure on an axis
     p_description_is_intrinsic: float # given angular description
+    p_description_is_absolute: float # given angular description and figure on z-axis
     # Name
     labels: List[str]
 
