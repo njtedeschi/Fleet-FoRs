@@ -1,6 +1,6 @@
 import numpy as np
 
-from . import space
+from .space import UP, EAST
 from ..structures.world import OrientedObject
 
 # Figure
@@ -23,11 +23,14 @@ NEAR = 0.5
 FAR = 1.5
 
 # Speaker
-CANONICAL_SPEAKER_FORWARD = space.EAST # Arbitrary convention
-CANONICAL_SPEAKER_LEFTWARD = space.NORTH # Consequence of forward
-CANONICAL_SPEAKER_RIGHTWARD = space.SOUTH # Consequence of forward
+_CANONICAL_SPEAKER_FORWARD = EAST # Arbitrary convention
 ## Direct
-CANONICAL_DIRECT_SPEAKER = OrientedObject.speaker(forward=CANONICAL_SPEAKER_FORWARD, upward=space.UP)
+CANONICAL_DIRECT_SPEAKER = OrientedObject.speaker(
+    forward=_CANONICAL_SPEAKER_FORWARD,
+    upward=UP)
 ## Nondirect
-NONDIRECT_SPEAKER_POSITION = np.array([-2,0,0])
-CANONICAL_NONDIRECT_SPEAKER = OrientedObject.speaker(forward=CANONICAL_SPEAKER_FORWARD, upward=space.UP, specified_position=NONDIRECT_SPEAKER_POSITION)
+_NONDIRECT_SPEAKER_POSITION = np.array([-2,0,0])
+CANONICAL_NONDIRECT_SPEAKER = OrientedObject.speaker(
+    forward=_CANONICAL_SPEAKER_FORWARD,
+    upward=UP,
+    specified_position=_NONDIRECT_SPEAKER_POSITION)

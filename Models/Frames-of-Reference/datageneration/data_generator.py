@@ -1,12 +1,16 @@
-from dataclasses import dataclass
-from typing import List, Dict
 from contextlib import contextmanager
 
 import numpy as np
 
 from .structures.world import BaseObject, OrientedObject, Scene
 from .structures.experiment import TrainingDatum, TestingDatum
-from .constants import space, objects
+from .constants.space import (UP, DOWN, NORTH, SOUTH, EAST, WEST,
+                              CARDINAL_DIRECTIONS_4,
+                              CARDINAL_DIRECTIONS_6)
+from .constants.objects import (NEAR, FAR,
+                                OFF_AXIS_DIRECTIONS,
+                                CANONICAL_DIRECT_SPEAKER,
+                                CANONICAL_NONDIRECT_SPEAKER)
 from .constants.languages import LANGUAGES
 
 class DataGenerator:
@@ -60,9 +64,9 @@ class DataGenerator:
     ## Direct Scene
     def sample_direct_scene(self, figure, speaker_is_canonical=True):
         if speaker_is_canonical:
-            speaker = objects.CANONICAL_DIRECT_SPEAKER
+            speaker = CANONICAL_DIRECT_SPEAKER
         else:
-            # Speaker is direct if specified_position=None
+            # Speaker is direct when specified_position=None
             speaker = self.sample_noncanonical_speaker()
         scene = Scene.direct_scene(speaker, figure)
         return scene
@@ -70,9 +74,10 @@ class DataGenerator:
     ## Nondirect Scene
     def sample_nondirect_scene(self, figure, speaker_is_canonical=True):
         if speaker_is_canonical:
-            speaker = objects.CANONICAL_NONDIRECT_SPEAKER
+            speaker = CANONICAL_NONDIRECT_SPEAKER
         else:
-            speaker = self.sample_noncanonical_speaker(specified_position=objects.NONDIRECT_SPEAKER_POSITION)
+            speaker = self.sample_noncanonical_speaker(
+                CANONICAL_NONDIRECT_SPEAKER.position)
         ground = self.sample_ground()
         scene = Scene(speaker, ground, figure)
         return scene
@@ -85,19 +90,25 @@ class DataGenerator:
     def sample_noncanonical_speaker(self, specified_position=None):
         
         if self.flip("speaker_is_upside_down"):
-            speaker = OrientedObject.speaker(objects.CANONICAL_SPEAKER_FORWARD, space.DOWN, specified_position)
+            # The speaker faces the same direction as the canonical one
+            # but upward=DOWN instead of upward=UP
+            speaker = OrientedObject.speaker(
+                CANONICAL_DIRECT_SPEAKER.forward, DOWN, specified_position)
         else:
             speaker = self.sample_lying_speaker(specified_position)
         return speaker
 
     # Lying down, not fibbing
     def sample_lying_speaker(self, specified_position):
+        cds = CANONICAL_DIRECT_SPEAKER
+        # Orientations are restricted to those where either forward or upward
+        # matches the direction faced by the canonical speaker
         possibile_orientations = [
             # (forward, upward)
-            (objects.CANONICAL_SPEAKER_FORWARD, objects.CANONICAL_SPEAKER_LEFTWARD), # lying on left
-            (objects.CANONICAL_SPEAKER_FORWARD, objects.CANONICAL_SPEAKER_RIGHTWARD), # lying on right
-            (space.UP, objects.CANONICAL_SPEAKER_FORWARD), # lying face up
-            (space.DOWN, objects.CANONICAL_SPEAKER_FORWARD) # lying face down
+            (cds.forward, cds.rightward), # lying on right
+            (cds.forward, -cds.rightward), # lying on left
+            (UP, cds.forward), # lying face up
+            (DOWN, cds.forward) # lying face down
         ]
         index = self.rng.choice(len(possibile_orientations))
         forward, upward = possibile_orientations[index]
@@ -115,8 +126,8 @@ class DataGenerator:
         return ground
 
     def sample_canonical_ground(self, body_type):
-        forward = self.rng.choice(space.CARDINAL_DIRECTIONS_4)
-        ground = OrientedObject.ground(forward, space.UP, body_type)
+        forward = self.rng.choice(CARDINAL_DIRECTIONS_4)
+        ground = OrientedObject.ground(forward, UP, body_type)
         return ground
 
     def sample_noncanonical_ground(self, body_type):
@@ -127,14 +138,14 @@ class DataGenerator:
         return ground
 
     def sample_upside_down_ground(self, body_type):
-        forward = self.rng.choice(space.CARDINAL_DIRECTIONS_4)
-        ground = OrientedObject.ground(forward, space.DOWN, body_type)
+        forward = self.rng.choice(CARDINAL_DIRECTIONS_4)
+        ground = OrientedObject.ground(forward, DOWN, body_type)
         return ground
 
     # TODO: Check combinatorics
     # ground lying on its face, back, or side
     def sample_lying_ground(self, body_type):
-        upward = self.rng.choice(space.CARDINAL_DIRECTIONS_4)
+        upward = self.rng.choice(CARDINAL_DIRECTIONS_4)
         forward_possibilities = self._forward_possibilities(upward)
         forward = self.rng.choice(forward_possibilities)
         ground = OrientedObject.ground(forward, upward, body_type)
@@ -144,21 +155,21 @@ class DataGenerator:
     def _forward_possibilities(self, upward):
         # forward can always be in the z-direction
         # (i.e. object lying face up or face down)
-        vertical = [space.UP, space.DOWN]
+        vertical = [UP, DOWN]
         # forward can also be along the horizontal axis orthogonal to upward
-        if np.dot(upward, space.NORTH) == 0:
-            horizontal = [space.NORTH, space.SOUTH]
+        if np.dot(upward, NORTH) == 0:
+            horizontal = [NORTH, SOUTH]
         else:
-            horizontal = [space.EAST, space.WEST]
+            horizontal = [EAST, WEST]
         return vertical + horizontal
 
     ### Figure
     def sample_figure(self):
         if self.flip("figure_is_on_axis"):
-            direction = self.rng.choice(space.CARDINAL_DIRECTIONS_6)
+            direction = self.rng.choice(CARDINAL_DIRECTIONS_6)
         else:
-            direction = self.rng.choice(objects.OFF_AXIS_DIRECTIONS)
-        distance = objects.NEAR if self.flip("figure_is_near") else objects.FAR
+            direction = self.rng.choice(OFF_AXIS_DIRECTIONS)
+        distance = NEAR if self.flip("figure_is_near") else FAR
         position = distance * direction
         figure = BaseObject(position)
         return figure
