@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..constants import space as const
+from ..constants.space import ORIGIN
 
 
 @dataclass
@@ -27,7 +27,7 @@ class OrientedObject(BaseObject):
             position = specified_position
         else:
             # Speaker is direct if specified_position=None
-            position = const.ORIGIN
+            position = ORIGIN
 
         speaker = cls(
             position=position,
@@ -41,7 +41,7 @@ class OrientedObject(BaseObject):
     @classmethod
     def ground(cls, forward, upward, body_type):
         ground = cls(
-            position=const.ORIGIN,
+            position=ORIGIN,
             forward=forward,
             upward=upward,
             is_participant=False,
