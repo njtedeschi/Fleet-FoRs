@@ -2,7 +2,7 @@ from contextlib import contextmanager
 
 import numpy as np
 
-from .structures.world import BaseObject, OrientedObject, Scene
+from .structures.scene import BaseObject, OrientedObject, Scene
 from .structures.experiment import TrainingDatum, TestingDatum
 from .constants.space import (UP, DOWN, NORTH, SOUTH, EAST, WEST,
                               CARDINAL_DIRECTIONS_4,

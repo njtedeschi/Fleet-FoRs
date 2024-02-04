@@ -1,4 +1,4 @@
-from ..structures.language import AbstractDirection
+from ..structures.description import AbstractDirection
 
 # Symmetry locatives
 ABOVE = AbstractDirection("upward", 1)

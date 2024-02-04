@@ -1,5 +1,5 @@
 from . import concepts
-from ..structures.language import Language
+from ..structures.description import Language
 
 ### Languages
 # English

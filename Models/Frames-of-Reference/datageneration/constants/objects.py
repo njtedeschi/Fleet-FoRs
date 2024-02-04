@@ -1,7 +1,7 @@
 import numpy as np
 
 from .space import UP, EAST
-from ..structures.world import OrientedObject
+from ..structures.scene import OrientedObject
 
 # Figure
 ## Off axis Directions
