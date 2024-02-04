@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Dict
 
-from .language import TruthValue
-from .world import Scene
+from .description import TruthValue
+from .scene import Scene
 
 # Specific combination of hyperparameters
 # YAML config must match attribute names
