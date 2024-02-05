@@ -156,7 +156,7 @@ int main(int argc, char** argv){
 
     // Training data
     MyData my_data(language);
-    std::vector<MyInput> train_data = my_data.json_file_to_data(input_path);
+    std::vector<MyInput> training_data = my_data.json_file_to_training_data(input_path);
 
     // Inference
     TopN<MyHypothesis> top;
@@ -165,7 +165,7 @@ int main(int argc, char** argv){
     TopN<MyHypothesis> newtop;
     for(auto h : top.values()) {
         h.clear_cache();
-        h.compute_posterior(train_data);
+        h.compute_posterior(training_data);
         newtop << h;
     }
     top = newtop;
@@ -174,7 +174,7 @@ int main(int argc, char** argv){
     auto h0 = MyHypothesis::sample(my_data.words);
     /* MCMCChain samp(h0, &mydata); */
     //ChainPool samp(h0, &mydata, FleetArgs::nchains);
-    ParallelTempering samp(h0, &train_data, FleetArgs::nchains, max_temp);
+    ParallelTempering samp(h0, &training_data, FleetArgs::nchains, max_temp);
     for(auto& h : samp.run(Control()) | printer(FleetArgs::print) | top) {
             UNUSED(h);
     }
