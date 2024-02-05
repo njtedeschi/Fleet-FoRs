@@ -27,7 +27,7 @@ while IFS=: read -r id subdirectory language; do
     # Check if the current id is in the list of IDs to process
     if [[ ${id_map[$id]} ]]; then
         # Define the path to the zipped file
-        zip_file="$root_dir/training/training_data/${subdirectory}.zip"
+        zip_file="$root_dir/training_data/${subdirectory}.zip"
 
         # Check if the zip file exists
         if [ -f "$zip_file" ]; then
@@ -35,7 +35,7 @@ while IFS=: read -r id subdirectory language; do
             tmp_dir=$(mktemp -d)
 
             # Create the output subdirectory if it doesn't exist
-            output_subdir="$root_dir/training/trained_models/$subdirectory"
+            output_subdir="$root_dir/trained_models/$subdirectory"
             mkdir -p "$output_subdir"
 
             # Extract the zip file
@@ -55,13 +55,13 @@ while IFS=: read -r id subdirectory language; do
 
             # Zip the processed subdirectory
             processed_zip="${subdirectory}.zip"
-            pushd "$root_dir/training/trained_models" > /dev/null
+            pushd "$root_dir/trained_models" > /dev/null
             zip -r "$processed_zip" "$subdirectory"
             popd > /dev/null
 
             # Check if the zip operation was successful and delete the original subdirectory
             if [ $? -eq 0 ]; then
-                processed_zip_path="$root_dir/training/trained_models/$processed_zip"
+                processed_zip_path="$root_dir/trained_models/$processed_zip"
                 if [ -f "$processed_zip_path" ]; then
                     rm -rf "$output_subdir"
                 else

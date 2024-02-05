@@ -114,7 +114,6 @@ class FileManager:
     def set_training_output_directory(self, experimental_condition):
         output_directory = os.path.join(
             self.root,
-            "training",
             "training_data",
             experimental_condition.name,
         )
@@ -139,7 +138,6 @@ class FileManager:
     def set_testing_output_directory(self):
         output_directory = os.path.join(
             self.root,
-            "testing",
             "testing_data"
         )
         return output_directory
