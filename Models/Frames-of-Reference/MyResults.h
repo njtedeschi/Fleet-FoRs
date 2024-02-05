@@ -1,184 +1,122 @@
 #pragma once
 
-struct TrainingStats {
-    std::vector<MyInput> train_data;
-    int train_size;
+#include <tuple>
 
-    TrainingStats(std::vector<MyInput> td) : train_data(td) {
-        train_size = train_data.size();
-    }
+// Numerical columns of CSV
+struct ConfusionMatrix {
+    int true_positives;
+    int true_negatives;
+    int false_positives;
+    int false_negatives;
 
-    std::string vector_to_string(const Vector& v) {
-        std::ostringstream oss;
-        oss << "[" << v[0] << ";" << v[1] << ";" << v[2] << "]";
-        return oss.str();
-    }
+    ConfusionMatrix() : true_positives(0), true_negatives(0), false_positives(0), false_negatives(0) {}
 
-    void write_training_data(std::string train_file_name) {
-        // Open output file in append mode
-        std::ofstream train_file;
-        train_file.open(train_file_name, std::ios_base::app);
-        if (!train_file.is_open()) {
-            std::cerr << "Failed to open or re-open file " << train_file_name << std::endl;
-            return;
+    void update_counts(bool predicted_value, bool target_value) {
+        if(predicted_value){
+            target_value ? true_positives++ : false_positives++;
         }
-
-        for(auto& input : train_data) {
-            // Convert each Vector to string
-            std::string figure_position = vector_to_string(input.scene.figure.position);
-            std::string ground_position = vector_to_string(input.scene.ground.position);
-            std::string ground_forward = vector_to_string(input.scene.ground.forward);
-            std::string speaker_position = vector_to_string(input.scene.speaker.position);
-            std::string speaker_forward = vector_to_string(input.scene.speaker.forward);
-
-            // Write the data
-            train_file << train_size << ","
-                << input.word << ","
-                << (input.true_description ? 1 : 0) << ","
-                << figure_position << ","
-                << ground_position << ","
-                << ground_forward << ","
-                << speaker_position << ","
-                << speaker_forward << std::endl;
+        else{
+            target_value ? false_negatives++ : true_negatives++;
         }
     }
-
 };
 
-struct WordStats {
-    InnerHypothesis formula;
+// Key representing a row of CSV (first 3 columns)
+struct RankWordSense {
+    int rank;
+    std::string word;
+    std::string sense;
 
-    int true_positives = 0;
-    int true_negatives = 0;
-    int false_positives = 0;
-    int false_negatives = 0;
+    RankWordSense(int r, std::string w, std::string s) : rank(r), word(w), sense(s) {}
 
-    int int_true_positives = 0;
-    int int_true_negatives = 0;
-    int int_false_positives = 0;
-    int int_false_negatives = 0;
-
-    int rel_true_positives = 0;
-    int rel_true_negatives = 0;
-    int rel_false_positives = 0;
-    int rel_false_negatives = 0;
+    bool operator==(const RankWordSense& other) const {
+        return rank == other.rank && word == other.word && sense == other.sense;
+    }
 };
 
-struct LexiconStats {
-    MyHypothesis lexicon;
-    double posterior;
-    std::unordered_map<std::string, WordStats> lexicon_stats;
-    MyData data_sampler;
-
-    LexiconStats(MyHypothesis l, MyData d) : lexicon(l), data_sampler(d) {
-        posterior = lexicon.posterior;
-        for(auto& [word, formula] : lexicon.factors) {
-            // WordStats word_stats(formula);
-            WordStats word_stats;
-            lexicon_stats[word] = word_stats;
+namespace std {
+    template<>
+    struct hash<RankWordSense> {
+        std::size_t operator()(const RankWordSense& k) const {
+            return std::hash<int>()(k.rank) 
+                 ^ std::hash<std::string>()(k.word) 
+                 ^ std::hash<std::string>()(k.sense);
         }
-    }
+    };
+}
 
-    void set_counts(std::vector<MyInput> test_data, MyHypothesis target, MyHypothesis intrinsic, MyHypothesis relative){
-        for(auto& datum : test_data){
-            Scene scene = datum.scene;
+// Calculates CSV entries and writes them
+class TestingEvaluator {
+public:
 
-            std::set<std::string> lexicon_true_words;
-            std::set<std::string> target_true_words;
-            std::set<std::string> int_true_words;
-            std::set<std::string> rel_true_words;
-            lexicon_true_words = data_sampler.compute_true_words(lexicon, scene);
-            target_true_words = data_sampler.compute_true_words(target, scene);
-            int_true_words = data_sampler.compute_true_words(intrinsic, scene);
-            rel_true_words = data_sampler.compute_true_words(relative, scene);
+    TestingEvaluator(TopN<MyHypothesis> t, const std::unordered_map<std::string,BodyPartMeaning> wm) : top(t), word_meanings(wm) {}
 
-            for(auto& [word, word_stats] : lexicon_stats){
-                bool predicted_value = lexicon_true_words.count(word);
-                bool target_value = target_true_words.count(word);
-                bool int_value = int_true_words.count(word);
-                bool rel_value = rel_true_words.count(word);
-
-                // Update true/false positives/negatives
-                if(predicted_value){
-                    target_value ? word_stats.true_positives++ : word_stats.false_positives++;
-                    int_value ? word_stats.int_true_positives++ : word_stats.int_false_positives++;
-                    rel_value ? word_stats.rel_true_positives++ : word_stats.rel_false_positives++;
+    void evaluate(std::vector<TestingDatum> testing_data) {
+        int rank = top.size();
+        for (auto& testing_datum : testing_data) {
+            for (auto& lexicon : top.sorted()) {
+                for (auto& [word, target_values] : testing_datum.label) {
+                    BodyPartMeaning* meaning = &(word_meanings[word]);
+                    MyInput my_input(testing_datum.scene, word, meaning);
+                    bool predicted_value = lexicon.at(word).call(my_input);
+                    for (auto& [sense, target_value] : target_values) {
+                        RankWordSense key(rank, word, sense);
+                        auto& matrix = counts[key]; // Creates or accesses matrix
+                        matrix.update_counts(predicted_value, target_value);
+                    }
                 }
-                else{
-                    target_value ? word_stats.false_negatives++ : word_stats.true_negatives++;
-                    int_value ? word_stats.int_false_negatives++ : word_stats.int_true_negatives++;
-                    rel_value ? word_stats.rel_false_negatives++ : word_stats.rel_true_negatives++;
-                }
+                rank--;
             }
         }
     }
-};
 
-struct TrialStats {
+    void write_testing_stats(const std::string& output_filepath) {
+        // Open output file in append mode
+        std::ofstream testing_results_file(output_filepath, std::ios_base::app);
+        if (!testing_results_file.is_open()) {
+            std::cerr << "Failed to open or re-open file " << output_filepath << std::endl;
+            return;
+        }
+
+        // Write header row
+        testing_results_file << "Rank,Word,Sense,TP,TN,FP,FN" << std::endl;
+        // Iterate over the counts map to write stats for each rank-word-sense combination
+        for (auto& [key, matrix] : counts) {
+            // Extract rank, word, and sense from the key
+            const auto& [rank, word, sense] = key;
+
+            // Write the data to the file
+            testing_results_file << rank << "," << word << "," << sense
+                    << "," << matrix.true_positives
+                    << "," << matrix.true_negatives
+                    << "," << matrix.false_positives
+                    << "," << matrix.false_negatives
+                    << std::endl; // End the line for this word's sense
+        }
+        testing_results_file.close();
+    }
+
+    void write_lookup_info(const std::string& lookup_filepath, int training_size, int iteration) {
+        // Open lookup file in append mode
+        std::ofstream lookup_file(lookup_filepath, std::ios_base::app);
+        if (!lookup_file.is_open()) {
+            std::cerr << "Failed to open or re-open file " << lookup_filepath << std::endl;
+            return;
+        }
+        int rank = top.size();
+        for (auto& lexicon : top.sorted()) {
+            lookup_file << training_size << "," << iteration
+                << "," << rank
+                << "," << lexicon.prior
+                << "," << lexicon.likelihood
+                << "," << lexicon.posterior
+                << std::endl;
+            rank--;
+        }
+    }
+
+private:
     TopN<MyHypothesis> top;
-    MyData data_sampler; // Necessary for computing true words
-    int train_size;
-
-    std::vector<LexiconStats> top_stats;
-
-    TrialStats(TopN<MyHypothesis> t, MyData d, int ts) : top(t), data_sampler(d), train_size(ts) {}
-
-    void set_counts(std::vector<MyInput> test_data, MyHypothesis target, MyHypothesis intrinsic, MyHypothesis relative){
-        for(auto lexicon : top.sorted()){
-            LexiconStats lexicon_stats(lexicon, data_sampler);
-            lexicon_stats.set_counts(test_data, target, intrinsic, relative);
-            top_stats.push_back(lexicon_stats);
-        }
-    }
-
-    // std::string current_datetime() {
-    //     auto now = std::chrono::system_clock::now();
-    //     auto time = std::chrono::system_clock::to_time_t(now);
-    //     std::stringstream datetime_ss;
-    //     datetime_ss << std::put_time(std::localtime(&time), "%Y-%m-%d_%H-%M-%S");
-    //     std::string datetime = datetime_ss.str();
-
-    //     return datetime;
-    // }
-
-    void write_lexicon_stats(std::string pr_file_name) {
-        // std::string datetime = current_datetime();
-
-        // Open output file in append mode
-        std::ofstream pr_file;
-        pr_file.open(pr_file_name, std::ios_base::app);
-        if (!pr_file.is_open()) {
-            std::cerr << "Failed to open or re-open file " << pr_file_name << std::endl;
-            return;
-        }
-
-        int n = top.size();
-
-        for(auto& lexicon : top_stats) {
-            double posterior = lexicon.posterior;
-
-            for(auto& [word, word_stats] : lexicon.lexicon_stats) {
-                // Trial
-                pr_file << train_size;
-                // Lexicon
-                pr_file << "," << n << "," << posterior;
-                // Word
-                pr_file << "," << word;
-                pr_file << "," << word_stats.true_positives;
-                pr_file << "," << word_stats.true_negatives;
-                pr_file << "," << word_stats.false_positives;
-                pr_file << "," << word_stats.false_negatives;
-                pr_file << "," << word_stats.int_true_positives;
-                pr_file << "," << word_stats.int_true_negatives;
-                pr_file << "," << word_stats.int_false_positives;
-                pr_file << "," << word_stats.int_false_negatives;
-                pr_file << "," << word_stats.rel_true_positives;
-                pr_file << "," << word_stats.rel_true_negatives;
-                pr_file << "," << word_stats.rel_false_positives;
-                pr_file << "," << word_stats.rel_false_negatives;
-                pr_file << std::endl; // end the line for this lexicon's word
-            }
-            n--;
-        }
-    }
+    std::unordered_map<std::string, BodyPartMeaning> word_meanings;
+    std::unordered_map<RankWordSense, ConfusionMatrix> counts;
 };
