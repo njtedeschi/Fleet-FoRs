@@ -21,11 +21,16 @@ namespace fs = std::filesystem;
 
 // Function to read the serialized string from a file
 std::string read_top_n(const std::string& filepath);
+std::string create_file_with_header(const std::string& directory, 
+                                 const std::string& filename_stem, 
+                                 const std::string& header, 
+                                 const std::string& suffix = "");
 std::pair<int, int> extract_model_label(const std::string& filename_stem);
 
 std::string testing_data_path = "";
 std::string model_directory = "";
 std::string output_directory = "";
+std::string output_filename_stem = "";
 
 std::string language_name = "";
 
@@ -36,6 +41,7 @@ int main(int argc, char** argv) {
     fleet.add_option("--testing_data_path", testing_data_path, "Location of JSON with testing data");
     fleet.add_option("--model_directory", model_directory, "Location of trained models");
     fleet.add_option("--output_directory", output_directory, "Where to save testing results");
+    fleet.add_option("--output_filename_stem", output_directory, "Stem to use for results and lookup table files");
 
     fleet.add_option("--language", language_name, "Name of language used by model");
 
@@ -131,22 +137,12 @@ int main(int argc, char** argv) {
     MyData my_data(language);
     std::vector<TestingDatum> testing_data = my_data.json_file_to_testing_data(testing_data_path);
 
-    // Create lookup table
-    std::string lookup_filename = "lookup_table.csv";
-    std::string lookup_filepath = fs::path(output_directory) / lookup_filename;
-    std::ofstream lookup_file(lookup_filepath, std::ios_base::app);
-    // Check if the file stream is open
-    if (lookup_file.is_open()) {
-        // Write the header row to the file
-        lookup_file << "TrainingSize,Iteration,Prior,Likelihood,Posterior\n";
-
-        // Close the file after writing
-        lookup_file.close();
-        std::cout << "Lookup table created successfully at: " << lookup_filepath << std::endl;
-    } else {
-        // If the file couldn't be opened, print an error message
-        std::cout << "Error opening file for writing: " << lookup_filepath << std::endl;
-    }
+    // Create test results table and save path
+    std::string results_header = "TrainingSize,Iteration,Rank,TP,TN,FP,FN";
+    std::string results_filepath = create_file_with_header(output_directory, output_filename_stem, results_header);
+    // Create prior/likelihood/posterior lookup table and save path
+    std::string lookup_header = "TrainingSize,Iteration,Rank,Prior,Likelihood,Posterior";
+    std::string lookup_filepath = create_file_with_header(output_directory, output_filename_stem, lookup_header, "_lookup");
 
     // Iterate over trained models and test each
     for (const auto& entry : fs::directory_iterator(model_directory)) {
@@ -157,21 +153,19 @@ int main(int argc, char** argv) {
 
             // TODO: Write model's posterior, prior, and likelihood to JSON
 
-            // Construct csv output file path
+            // Obtain training size and iteration from model filename
             std::string input_filename_stem = entry.path().stem().string();
-            std::string output_filename = input_filename_stem + ".csv";
-            std::string output_filepath = fs::path(output_directory) / output_filename;
+            std::pair<int, int> model_label = extract_model_label(input_filename_stem);
+            int training_size = model_label.first;
+            int iteration = model_label.second;
 
             // Write testing results
             TestingEvaluator testing_evaluator(top, language);
             // Write lookup table entries
-            std::pair<int, int> model_label = extract_model_label(input_filename_stem);
-            int training_size = model_label.first;
-            int iteration = model_label.second;
             testing_evaluator.write_lookup_info(lookup_filepath, training_size, iteration);
             // Write confusion matrix entries
             testing_evaluator.evaluate(testing_data);
-            testing_evaluator.write_testing_stats(output_filepath);
+            testing_evaluator.write_testing_stats(results_filepath, training_size, iteration);
         }
     }
 }
@@ -188,6 +182,34 @@ std::string read_top_n(const std::string& filepath) {
     inFile.close();
 
     return buffer.str();
+}
+
+// Function to create a file, write a header, and return the file path
+std::string create_file_with_header(const std::string& directory, 
+                                 const std::string& filename_stem, 
+                                 const std::string& header, 
+                                 const std::string& suffix) {
+    // Construct the full file path
+    std::string filepath = (fs::path(directory) / (filename_stem + suffix + ".csv")).string();
+    
+    // Create and open the file
+    std::ofstream file(filepath, std::ios_base::app);
+    
+    // Check if the file stream is open
+    if (file.is_open()) {
+        // Write the header row to the file
+        file << header << std::endl;
+        
+        // Close the file after writing
+        file.close();
+        std::cout << "File created successfully at: " << filepath << std::endl;
+    } else {
+        // If the file couldn't be opened, print an error message
+        std::cout << "Error opening file for writing: " << filepath << std::endl;
+    }
+    
+    // Return the file path for later use
+    return filepath;
 }
 
 std::pair<int, int> extract_model_label(const std::string& filename_stem) {

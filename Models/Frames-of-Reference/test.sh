@@ -28,38 +28,17 @@ while IFS=: read -r id subdirectory language; do
             # Create a temporary directory for extraction
             tmp_dir=$(mktemp -d)
 
-            # Create the output subdirectory in testing/test_results instead of training/trained_models
-            output_subdir="$root_dir/test_results/$subdirectory"
-            mkdir -p "$output_subdir"
+            output_dir="$root_dir/test_results"
 
             # Extract the zip file
             unzip "$zip_file" -d "$tmp_dir"
 
-            # Find the single json file with the same name as the directory in testing/testing_data
             testing_data_file="$root_dir/testing_data/${subdirectory}.json"
             if [ -f "$testing_data_file" ]; then  # Check if the json file exists
                 # Run the C++ executable for testing instead of training
-                ./test --language="$language" --testing_data_path="$testing_data_file" --model_directory="$tmp_dir/$subdirectory" --output_directory="$output_subdir"
+                ./test --language="$language" --testing_data_path="$testing_data_file" --model_directory="$tmp_dir/$subdirectory" --output_directory="$output_dir" --output_filename_stem="$subdirectory"
             else
                 echo "Testing data file not found: $testing_data_file"
-            fi
-
-            # Zip the processed output directory
-            processed_zip="${subdirectory}.zip"
-            pushd "$root_dir/test_results" > /dev/null
-            zip -r "$processed_zip" "$subdirectory"
-            popd > /dev/null
-
-            # Check if the zip operation was successful and delete the original output subdirectory
-            if [ $? -eq 0 ]; then
-                processed_zip_path="$root_dir/test_results/$processed_zip"
-                if [ -f "$processed_zip_path" ]; then
-                    rm -rf "$output_subdir"
-                else
-                    echo "Failed to create zip: $processed_zip_path"
-                fi
-            else
-                echo "Failed to create zip: $processed_zip"
             fi
 
             # Clean up the temporary directory

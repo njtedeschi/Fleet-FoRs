@@ -70,23 +70,24 @@ public:
         }
     }
 
-    void write_testing_stats(const std::string& output_filepath) {
+    void write_testing_stats(const std::string& results_filepath, int training_size, int iteration) {
         // Open output file in append mode
-        std::ofstream testing_results_file(output_filepath, std::ios_base::app);
+        std::ofstream testing_results_file(results_filepath, std::ios_base::app);
         if (!testing_results_file.is_open()) {
-            std::cerr << "Failed to open or re-open file " << output_filepath << std::endl;
+            std::cerr << "Failed to open or re-open file " << results_filepath << std::endl;
             return;
         }
 
-        // Write header row
-        testing_results_file << "Rank,Word,Sense,TP,TN,FP,FN" << std::endl;
         // Iterate over the counts map to write stats for each rank-word-sense combination
         for (auto& [key, matrix] : counts) {
             // Extract rank, word, and sense from the key
             const auto& [rank, word, sense] = key;
 
             // Write the data to the file
-            testing_results_file << rank << "," << word << "," << sense
+            testing_results_file << training_size << "," << iteration
+                    << "," << rank
+                    << "," << word 
+                    << "," << sense
                     << "," << matrix.true_positives
                     << "," << matrix.true_negatives
                     << "," << matrix.false_positives
