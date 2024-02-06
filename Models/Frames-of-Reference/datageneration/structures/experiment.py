@@ -43,4 +43,4 @@ class TrainingDatum:
 @dataclass
 class TestingDatum:
     scene: Scene
-    label: Dict[str, TruthValue]
+    label: Dict[str, Dict[str, bool]] # word to sense to truth value

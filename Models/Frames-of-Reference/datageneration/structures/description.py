@@ -23,10 +23,11 @@ class AbstractDirection:
 
 @dataclass
 class PossibleDescriptions:
-    proximity: str  # One of "near" or "far"
+    # Easier to make everything a list, even if it necessarily has 1 (or at most 1) entry
+    proximity: List[str]  # One of "near" or "far"
     intrinsic: List[str]
     relative: List[str]
-    absolute: str  # One out of language's "above" and "below"; can be None
+    absolute: List[str] # "above", "below", or neither
 
 @dataclass
 class TruthValue:
@@ -99,35 +100,40 @@ class Language:
 
     # TODO: improve efficiency
     def all_descriptions(self, scene):
-        proximity = self.proximity_description(scene)
+        # Singleton values put in a list
+        proximity = [self.proximity_description(scene)]
         intrinsic = self.intrinsic_descriptions(scene)
         relative = self.relative_descriptions(scene)
         if scene.figure_is_on_axis(2):
-            absolute = self.absolute_vertical_description(scene)
+            absolute = [self.absolute_vertical_description(scene)]
         else:
-            absolute = None
+            absolute = []
         return PossibleDescriptions(proximity, intrinsic, relative, absolute)
 
     def label_scene(self, scene):
         possible_descriptions = self.all_descriptions(scene)
         label = {}
         for word in self.vocabulary:
-            truth_value = self._truth_value_of_word(word, possible_descriptions)
-            label[word] = truth_value
+            label[word] = self._truth_values_by_sense(word, possible_descriptions)
         return label
 
-    def _truth_value_of_word(self, word, possible_descriptions):
-        intrinsic = False
-        relative = False
-        absolute = False
-        if word in possible_descriptions.proximity:
-            intrinsic = True
-            relative = True
-            absolute = True
+    def _truth_values_by_sense(self, word, possible_descriptions):
+        truth_values = {}
+        # near and far only have absolute sense
+        if (word == self.near or word == self.far):
+            return {"Abs": (word in possible_descriptions.proximity)}
+        # All other words have at least intrinsic and relative sense
+        truth_values["Int"] = False
+        truth_values["Rel"] = False
         if word in possible_descriptions.intrinsic:
-            intrinsic = True
+            # TODO further split by symmetry vs meronymy
+            truth_values["Int"] = True
         if word in possible_descriptions.relative:
-            relative = True
-        if possible_descriptions.absolute and word in possible_descriptions.absolute:
-            absolute = True
-        return TruthValue(intrinsic, relative, absolute)
+            truth_values["Rel"] = True
+        # Above and below additionally have absolute sense
+        if (word == self.absolute_above or word == self.absolute_below):
+            truth_values["Abs"] = (word in possible_descriptions.absolute)
+            truth_values["IntRelAbs"] = (truth_values["Int"] or truth_values["Rel"] or truth_values["Abs"])
+        else:
+            truth_values["IntRel"] = (truth_values["Int"] or truth_values["Rel"])
+        return truth_values
