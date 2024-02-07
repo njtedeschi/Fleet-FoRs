@@ -6,15 +6,18 @@
 #include <filesystem>
 #include <utility> // for std::pair
 
+static const double alpha_t = 0.9; // model's reliability parameter
+
 #include "Scene.h"
 #include "MyData.h"
 #include "MyGrammarCylindrical.h"
 #include "MyHypothesis.h"
-#include "MyResults.h"
 
 #include "TopN.h"
 #include "Fleet.h"
 // #include "Bultins.h"
+
+#include "MyResults.h"
 
 // Use the std::filesystem namespace for directory operations
 namespace fs = std::filesystem;
@@ -41,7 +44,7 @@ int main(int argc, char** argv) {
     fleet.add_option("--testing_data_path", testing_data_path, "Location of JSON with testing data");
     fleet.add_option("--model_directory", model_directory, "Location of trained models");
     fleet.add_option("--output_directory", output_directory, "Where to save testing results");
-    fleet.add_option("--output_filename_stem", output_directory, "Stem to use for results and lookup table files");
+    fleet.add_option("--output_filename_stem", output_filename_stem, "Stem to use for results and lookup table files");
 
     fleet.add_option("--language", language_name, "Name of language used by model");
 
@@ -138,7 +141,7 @@ int main(int argc, char** argv) {
     std::vector<TestingDatum> testing_data = my_data.json_file_to_testing_data(testing_data_path);
 
     // Create test results table and save path
-    std::string results_header = "TrainingSize,Iteration,Rank,TP,TN,FP,FN";
+    std::string results_header = "TrainingSize,Iteration,Rank,Word,Sense,TP,TN,FP,FN";
     std::string results_filepath = create_file_with_header(output_directory, output_filename_stem, results_header);
     // Create prior/likelihood/posterior lookup table and save path
     std::string lookup_header = "TrainingSize,Iteration,Rank,Prior,Likelihood,Posterior";
