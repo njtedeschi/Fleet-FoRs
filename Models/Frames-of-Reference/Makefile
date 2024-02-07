@@ -12,3 +12,6 @@ debug:
 
 training:
 	g++-10 Train.cpp -o train -O2 $(FLEET_FLAGS) $(FLEET_INCLUDE) -I  /usr/include/eigen3/ $(FLEET_LIBS)
+
+testing:
+	g++-10 Test.cpp -o test -O2 $(FLEET_FLAGS) $(FLEET_INCLUDE) -I  /usr/include/eigen3/ $(FLEET_LIBS)
