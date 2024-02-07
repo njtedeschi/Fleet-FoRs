@@ -1,14 +1,19 @@
 #!/bin/bash
+set -e # Exit immediately if a command exits with a non-zero status
 
 # Check if at least root directory is provided
-if [ "$#" -lt 2 ]; then
-    echo "Usage: $0 root_directory id1 [id2 ...]"
+if [ "$#" -lt 3 ]; then
+    echo "Usage: $0 cpu_name root_directory id1 [id2 ...]"
     exit 1
 fi
 
-root_dir=$1
+cpu_name=$1
+root_dir=$2
 config_file="$root_dir/config_evaluation.txt"
-shift  # Remove the first argument, now $@ contains only the IDs
+shift 2 # Remove the first two arguments, now $@ contains only the IDs
+
+# Compile the test executable for the specified CPU
+make testing CPU=$cpu_name
 
 # Convert the IDs into an array for easier searching
 declare -A id_map
@@ -36,7 +41,7 @@ while IFS=: read -r id subdirectory language; do
             testing_data_file="$root_dir/testing_data/${subdirectory}.json"
             if [ -f "$testing_data_file" ]; then  # Check if the json file exists
                 # Run the C++ executable for testing instead of training
-                ./test --language="$language" --testing_data_path="$testing_data_file" --model_directory="$tmp_dir/$subdirectory" --output_directory="$output_dir" --output_filename_stem="$subdirectory"
+                ./test_${cpu_name} --language="$language" --testing_data_path="$testing_data_file" --model_directory="$tmp_dir/$subdirectory" --output_directory="$output_dir" --output_filename_stem="$subdirectory"
                 # echo "./test --language=\"$language\" --testing_data_path=\"$testing_data_file\" --model_directory=\"$tmp_dir/$subdirectory\" --output_directory=\"$output_dir\" --output_filename_stem=\"$subdirectory\""
             else
                 echo "Testing data file not found: $testing_data_file"
