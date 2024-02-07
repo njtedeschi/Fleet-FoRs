@@ -50,8 +50,8 @@ class Language:
 
     def get_vocabulary(self):
         vocabulary = {self.near, self.far}
-        vocabulary.union(self.symmetry_locatives.keys())
-        vocabulary.union(self.body_part_locatives.keys())
+        vocabulary = vocabulary.union(self.symmetry_locatives.keys())
+        vocabulary = vocabulary.union(self.body_part_locatives.keys())
         # Include absolute words if there are distinct ones
         return list(vocabulary)
 
