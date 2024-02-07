@@ -37,6 +37,7 @@ while IFS=: read -r id subdirectory language; do
             if [ -f "$testing_data_file" ]; then  # Check if the json file exists
                 # Run the C++ executable for testing instead of training
                 ./test --language="$language" --testing_data_path="$testing_data_file" --model_directory="$tmp_dir/$subdirectory" --output_directory="$output_dir" --output_filename_stem="$subdirectory"
+                # echo "./test --language=\"$language\" --testing_data_path=\"$testing_data_file\" --model_directory=\"$tmp_dir/$subdirectory\" --output_directory=\"$output_dir\" --output_filename_stem=\"$subdirectory\""
             else
                 echo "Testing data file not found: $testing_data_file"
             fi
