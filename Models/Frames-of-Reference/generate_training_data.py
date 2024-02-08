@@ -2,8 +2,8 @@ import argparse
 
 from tqdm import tqdm
 
-from datageneration.data_generator import DataGenerator
-from datageneration.file_manager import FileManager
+from datageneration.src.data_generator import TrainingDataGenerator
+from datageneration.src.file_manager import FileManager
 
 def main():
     parser = argparse.ArgumentParser()
@@ -32,10 +32,10 @@ def main():
     # Produce and save data
     with tqdm(total=total_objects, desc="Overall Progress", unit="object") as pbar:
         for experimental_condition in experimental_conditions:
-            data_generator = DataGenerator(experimental_condition, seed, verbose)
+            data_generator = TrainingDataGenerator(experimental_condition, seed, verbose)
             for train_size in train_sizes:
                 for repetition in range(repetitions):
-                    train_data = data_generator.sample_data(train_size, for_training=True)
+                    train_data = data_generator.generate_data(train_size)
                     file_manager.save_training_data(train_data,
                                         experimental_condition, # Subdirectory
                                         train_size, # File name part 1

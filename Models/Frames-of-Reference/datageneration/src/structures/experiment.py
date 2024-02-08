@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Dict
 
-from .description import TruthValue
 from .scene import Scene
 
 # Specific combination of hyperparameters
@@ -34,13 +33,20 @@ class ExperimentalCondition:
     def condition_name_from_hyperparameter_values(self, labels):
         return "_".join(sorted(labels))
 
-@dataclass
-class TrainingDatum:
-    scene: Scene
-    description: str
-    flip_results: Dict[str, bool] = None
 
 @dataclass
-class TestingDatum:
+class Datum:
     scene: Scene
+
+    def set_flip_results(self, flip_results=None):
+        self.flip_results = flip_results
+
+
+@dataclass
+class TrainingDatum(Datum):
+    description: str
+
+
+@dataclass
+class TestingDatum(Datum):
     label: Dict[str, Dict[str, bool]] # word to sense to truth value

@@ -1,7 +1,7 @@
 import argparse
 
-from datageneration.data_generator import DataGenerator
-from datageneration.file_manager import FileManager
+from datageneration.src.data_generator import TestingDataGenerator
+from datageneration.src.file_manager import FileManager
 
 def main():
     parser = argparse.ArgumentParser()
@@ -22,8 +22,8 @@ def main():
     experimental_conditions = file_manager.experimental_conditions
 
     for experimental_condition in experimental_conditions:
-        data_generator = DataGenerator(experimental_condition, seed, verbose)
-        test_data = data_generator.sample_data(test_size, for_training=False)
+        data_generator = TestingDataGenerator(experimental_condition, seed, verbose)
+        test_data = data_generator.generate_data(test_size)
         file_manager.save_testing_data(test_data, experimental_condition)
 
 if __name__ == "__main__":
