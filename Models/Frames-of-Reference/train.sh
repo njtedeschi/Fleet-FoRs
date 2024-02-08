@@ -1,14 +1,18 @@
 #!/bin/bash
 
 # Check if at least root directory is provided
-if [ "$#" -lt 2 ]; then
-    echo "Usage: $0 root_directory id1 [id2 ...]"
+if [ "$#" -lt 3 ]; then
+    echo "Usage: $0 cpu_name root_directory id1 [id2 ...]"
     exit 1
 fi
 
-root_dir=$1
+cpu_name=$1
+root_dir=$2
 config_file="$root_dir/config_evaluation.txt"
-shift  # Remove the first argument, now $@ contains only the IDs
+shift 2 # Remove the first two arguments, now $@ contains only the IDs
+
+# Compile the train executable for the specified CPU
+make training CPU=$cpu_name
 
 # Convert the IDs into an array for easier searching
 declare -A id_map
@@ -48,7 +52,7 @@ while IFS=: read -r id subdirectory language; do
                     output_file="${output_file%.json}.txt"
 
                     # Run the C++ executable
-                    ./train --chains="$chains" --threads="$threads" --steps="$steps" --top="$top" --language="$language" --input_path="$input_file" --output_path="$output_file"
+                    ./train_${cpu_name} --chains="$chains" --threads="$threads" --steps="$steps" --top="$top" --language="$language" --input_path="$input_file" --output_path="$output_file"
                     # echo "./train --chains=\"$chains\" --threads=\"$threads\" --steps=\"$steps\" --top=\"$top\" --language=\"$language\" --input_path=\"$input_file\" --output_path=\"$output_file\""
                 fi
             done
