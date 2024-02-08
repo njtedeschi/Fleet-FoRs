@@ -30,12 +30,6 @@ class PossibleDescriptions:
     absolute: List[str] # "above", "below", or neither
 
 @dataclass
-class TruthValue:
-    intrinsic: bool
-    relative: bool
-    absolute: bool
-
-@dataclass
 class Language:
     symmetry_locatives: Dict[str, AbstractDirection]
     body_part_locatives: Dict[str, Dict[str, AbstractDirection]]
@@ -77,7 +71,11 @@ class Language:
         return self._angular_descriptions(scene, is_intrinsic=True)
 
     def relative_descriptions(self, scene):
-        return self._angular_descriptions(scene, is_intrinsic=False)
+        # Direct FoRs treated as intrinsic
+        if scene.is_direct():
+            return self.intrinsic_descriptions(scene)
+        else:
+            return self._angular_descriptions(scene, is_intrinsic=False)
     
     # NOTE: intrinsic and relative, but not absolute
     def _angular_descriptions(self, scene, is_intrinsic=True):

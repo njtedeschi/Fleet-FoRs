@@ -36,9 +36,12 @@ class DataGenerator:
     @contextmanager
     def flip_results_manager(self):
         if self.verbose:
-            self.current_flip_results = {} # flip results for current datum being generated
-            yield self.current_flip_results # pass to with block
-            self.current_flip_results = None # clean up after after with block completed
+            # flip results for current datum being generated
+            self.current_flip_results = {}
+            # pass to with block
+            yield self.current_flip_results
+            # clean up after after with block completed
+            self.current_flip_results = None
         else:
             yield None
 
@@ -85,10 +88,10 @@ class DataGenerator:
     ### Speaker
     # No sampling for canonical speakers due to EAST facing restriction
 
-    # Possibilities directions restricted in line with canonical direct and nondirect speakers
+    # Possibilitie directions restricted in line with canonical speakers
     # Either forward or upward must face EAST
     def sample_noncanonical_speaker(self, specified_position=None):
-        
+
         if self.flip("speaker_is_upside_down"):
             # The speaker faces the same direction as the canonical one
             # but upward=DOWN instead of upward=UP
@@ -191,7 +194,9 @@ class DataGenerator:
         return description
 
     def sample_intrinsic_or_relative_description(self, scene):
-        if self.flip("description_is_intrinsic"):
+        # Direct scenes automatically use intrinsic description
+        # as direct frame of reference
+        if scene.is_direct() or self.flip("description_is_intrinsic"):
             descriptions = self.language.intrinsic_descriptions(scene)
         else:
             descriptions = self.language.relative_descriptions(scene)

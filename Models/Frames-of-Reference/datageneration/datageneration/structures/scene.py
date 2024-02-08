@@ -22,7 +22,8 @@ class OrientedObject(BaseObject):
 
     @classmethod
     def speaker(cls, forward, upward, specified_position=None):
-        # Could be handled with a default argument of ORIGIN, but I want things to be more explicit
+        # Could be handled with a default argument of ORIGIN,
+        # but I want things to be more explicit
         if specified_position is not None:
             position = specified_position
         else:
@@ -63,6 +64,9 @@ class Scene:
             figure=figure
         )
         return scene
+
+    def is_direct(self):
+        return self.ground.is_participant
 
     def ground_figure_displacement(self):
         return self.figure.position - self.ground.position
