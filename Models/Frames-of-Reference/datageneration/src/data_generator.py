@@ -191,22 +191,23 @@ class DescriptionGenerator:
         self.sampler = sampler
         self.language = language
 
-    def build_true_description(self, scene):
+    def true_description(self, scene):
         description = None
         if scene.figure_is_on_axis() and self.sampler.flip("description_is_angular"):
-            description = self.build_angular_description(scene)
+            description = self.angular_description(scene)
+        # Default to proximity description if no angular description applies
         if not description:
             description = self.language.proximity_description(scene)
         return description
 
-    def build_angular_description(self, scene):
+    def angular_description(self, scene):
         if scene.figure_is_on_axis(2) and self.sampler.flip("description_is_absolute"):
             description = self.language.absolute_vertical_description(scene)
         else:
-            description = self.build_intrinsic_or_relative_description(scene)
+            description = self.intrinsic_or_relative_description(scene)
         return description
 
-    def build_intrinsic_or_relative_description(self, scene):
+    def intrinsic_or_relative_description(self, scene):
         # Direct scenes automatically use intrinsic description
         # as direct frame of reference
         if scene.is_direct() or self.sampler.flip("description_is_intrinsic"):
@@ -219,7 +220,7 @@ class DescriptionGenerator:
         else:
             return None
 
-    def build_word_randomly(self):
+    def random_word(self):
         word = self.sampler.choice(self.language.vocabulary)
         return word
 
@@ -261,7 +262,9 @@ class TrainingDataGenerator(DataGenerator):
     def _build_datum(self):
         scene = self.scene_generator.build_scene()
         if self.sampler.flip("datum_is_reliable"):
-            description = self.description_generator.build_true_description(scene)
+            description = self.description_generator.true_description(scene)
+        else:
+            description = self.description_generator.random_word()
         datum = TrainingDatum(scene, description)
         return datum
 
