@@ -45,16 +45,25 @@ while IFS=: read -r id subdirectory language; do
             # Extract the zip file
             unzip "$zip_file" -d "$tmp_dir"
 
-            # Loop over all json files in the extracted directory
-            for input_file in "$tmp_dir/$subdirectory"/*.json; do
-                if [ -f "$input_file" ]; then  # Check if it's a file
-                    output_file="$output_subdir/${input_file##*/}"
-                    output_file="${output_file%.json}.txt"
+            # Dynamically identify unique training sizes and iterations
+            json_dir="$tmp_dir/$subdirectory"
+            training_sizes=$(find "$json_dir" -type f -name '*.json' | sed -E 's^.*/([0-9]+)_([0-9]+)\.json^\1^' | sort -u)
+            iterations=$(find "$json_dir" -type f -name '*.json' | sed -E 's^.*/([0-9]+)_([0-9]+)\.json^\2^' | sort -u)
 
-                    # Run the C++ executable
-                    ./train_${cpu_name} --chains="$chains" --threads="$threads" --steps="$steps" --top="$top" --language="$language" --input_path="$input_file" --output_path="$output_file"
-                    # echo "./train --chains=\"$chains\" --threads=\"$threads\" --steps=\"$steps\" --top=\"$top\" --language=\"$language\" --input_path=\"$input_file\" --output_path=\"$output_file\""
-                fi
+            # Loop over files by iteration and then training size
+            for iteration in $iterations; do
+                for training_size in $training_sizes; do
+                # Construct the file name
+                input_file="$json_dir/${training_size}_${iteration}.json"
+                    if [ -f "$input_file" ]; then  # Check if it's a file
+                        output_file="$output_subdir/${input_file##*/}"
+                        output_file="${output_file%.json}.txt"
+
+                        # Run the C++ executable
+                        ./train_${cpu_name} --chains="$chains" --threads="$threads" --steps="$steps" --top="$top" --language="$language" --input_path="$input_file" --output_path="$output_file"
+                        # echo "./train --chains=\"$chains\" --threads=\"$threads\" --steps=\"$steps\" --top=\"$top\" --language=\"$language\" --input_path=\"$input_file\" --output_path=\"$output_file\""
+                    fi
+                done
             done
 
             # Zip the processed subdirectory
