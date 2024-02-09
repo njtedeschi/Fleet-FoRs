@@ -36,7 +36,7 @@ while IFS=: read -r id subdirectory language; do
             output_dir="$root_dir/test_results"
 
             # Extract the zip file
-            unzip "$zip_file" -d "$tmp_dir"
+            unzip -q "$zip_file" -d "$tmp_dir"
 
             testing_data_file="$root_dir/testing_data/${subdirectory}.json"
             if [ -f "$testing_data_file" ]; then  # Check if the json file exists

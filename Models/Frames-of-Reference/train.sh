@@ -43,7 +43,7 @@ while IFS=: read -r id subdirectory language; do
             mkdir -p "$output_subdir"
 
             # Extract the zip file
-            unzip "$zip_file" -d "$tmp_dir"
+            unzip -q "$zip_file" -d "$tmp_dir"
 
             # Dynamically identify unique training sizes and iterations
             json_dir="$tmp_dir/$subdirectory"
