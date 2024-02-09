@@ -37,11 +37,11 @@ namespace {
 
 template <typename ... TT>
 struct hash<std::tuple<TT...>> {
-    size_t operator()(std::tuple<TT...> const& tt) const {                                              
-        size_t seed = 0;                             
-        HashValueImpl<std::tuple<TT...>>::apply(seed, tt);    
-        return seed;                                 
-    }                                              
+    size_t operator()(std::tuple<TT...> const& tt) const {
+        size_t seed = 0;
+        HashValueImpl<std::tuple<TT...>>::apply(seed, tt);
+        return seed;
+    }
 };
 
 } // namespace hash_tuple
@@ -108,7 +108,7 @@ public:
             // Write the data to the file
             testing_results_file << training_size << "," << iteration
                     << "," << rank
-                    << "," << word 
+                    << "," << word
                     << "," << sense
                     << "," << matrix.true_positives
                     << "," << matrix.true_negatives

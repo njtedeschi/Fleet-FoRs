@@ -10,7 +10,7 @@ static const double alpha_t = 0.9; // model's reliability parameter
 
 #include "Scene.h"
 #include "MyData.h"
-#include "MyGrammarCylindrical.h"
+#include "MyGrammar.h"
 #include "MyHypothesis.h"
 
 #include "TopN.h"
@@ -24,9 +24,9 @@ namespace fs = std::filesystem;
 
 // Function to read the serialized string from a file
 std::string read_top_n(const std::string& filepath);
-std::string create_file_with_header(const std::string& directory, 
-                                 const std::string& filename_stem, 
-                                 const std::string& header, 
+std::string create_file_with_header(const std::string& directory,
+                                 const std::string& filename_stem,
+                                 const std::string& header,
                                  const std::string& suffix = "");
 std::pair<int, int> extract_model_label(const std::string& filename_stem);
 
@@ -85,40 +85,40 @@ int main(int argc, char** argv) {
     };
 
     std::unordered_map<std::string, BodyPartMeaning> mixtec = {
-         {"head", BodyPartMeaning( 
-                 BodyPartNoun::head, 
-                 [](const OrientedObject& a) -> Direction { 
-                 switch(a.body_type) { 
-                     case BodyType::biped: 
-                         return a.upward; 
-                     case BodyType::quadruped: 
-                         return {0,0,0}; 
-                 } 
+         {"head", BodyPartMeaning(
+                 BodyPartNoun::head,
+                 [](const OrientedObject& a) -> Direction {
+                 switch(a.body_type) {
+                     case BodyType::biped:
+                         return a.upward;
+                     case BodyType::quadruped:
+                         return {0,0,0};
+                 }
                  return a.upward; // Default to biped
-                 })}, 
-         {"belly", BodyPartMeaning( 
-                 BodyPartNoun::belly, 
-                 [](const OrientedObject& a) -> Direction {return -a.upward;})}, 
-         {"face", BodyPartMeaning( 
-                 BodyPartNoun::face, 
-                 [](const OrientedObject& a) -> Direction {return a.forward;})}, 
-         {"back", BodyPartMeaning( 
-                 BodyPartNoun::back, 
-                 [](const OrientedObject& a) -> Direction { 
-                 switch(a.body_type) { 
-                     case BodyType::biped: 
-                         return -a.forward; 
-                     case BodyType::quadruped: 
-                         return a.upward; 
-                 } 
+                 })},
+         {"belly", BodyPartMeaning(
+                 BodyPartNoun::belly,
+                 [](const OrientedObject& a) -> Direction {return -a.upward;})},
+         {"face", BodyPartMeaning(
+                 BodyPartNoun::face,
+                 [](const OrientedObject& a) -> Direction {return a.forward;})},
+         {"back", BodyPartMeaning(
+                 BodyPartNoun::back,
+                 [](const OrientedObject& a) -> Direction {
+                 switch(a.body_type) {
+                     case BodyType::biped:
+                         return -a.forward;
+                     case BodyType::quadruped:
+                         return a.upward;
+                 }
                  return -a.forward; // Default to biped
-                 })}, 
+                 })},
         {"flank", BodyPartMeaning(
                 BodyPartNoun::flank,
                 [](const OrientedObject& a) -> Direction {Direction sideward(a.rightward, true); return sideward;})},
         {"right", BodyPartMeaning()},
         {"left", BodyPartMeaning()},
-         {"near", BodyPartMeaning()}, 
+         {"near", BodyPartMeaning()},
          {"far", BodyPartMeaning()}
     };
 
@@ -188,21 +188,21 @@ std::string read_top_n(const std::string& filepath) {
 }
 
 // Function to create a file, write a header, and return the file path
-std::string create_file_with_header(const std::string& directory, 
-                                 const std::string& filename_stem, 
-                                 const std::string& header, 
+std::string create_file_with_header(const std::string& directory,
+                                 const std::string& filename_stem,
+                                 const std::string& header,
                                  const std::string& suffix) {
     // Construct the full file path
     std::string filepath = (fs::path(directory) / (filename_stem + suffix + ".csv")).string();
-    
+
     // Create and open the file
     std::ofstream file(filepath, std::ios_base::app);
-    
+
     // Check if the file stream is open
     if (file.is_open()) {
         // Write the header row to the file
         file << header << std::endl;
-        
+
         // Close the file after writing
         file.close();
         std::cout << "File created successfully at: " << filepath << std::endl;
@@ -210,14 +210,14 @@ std::string create_file_with_header(const std::string& directory,
         // If the file couldn't be opened, print an error message
         std::cout << "Error opening file for writing: " << filepath << std::endl;
     }
-    
+
     // Return the file path for later use
     return filepath;
 }
 
 std::pair<int, int> extract_model_label(const std::string& filename_stem) {
     size_t underscorePos = filename_stem.find('_');
-    
+
     if (underscorePos != std::string::npos) {
         std::string trainingSizeStr = filename_stem.substr(0, underscorePos);
         std::string iterationStr = filename_stem.substr(underscorePos + 1);
@@ -225,7 +225,7 @@ std::pair<int, int> extract_model_label(const std::string& filename_stem) {
         try {
             int trainingSize = std::stoi(trainingSizeStr);
             int iteration = std::stoi(iterationStr);
-            
+
             return std::make_pair(trainingSize, iteration);
         } catch (const std::invalid_argument& ia) {
             // Handle invalid argument exception if conversion fails
@@ -235,7 +235,7 @@ std::pair<int, int> extract_model_label(const std::string& filename_stem) {
             std::cerr << "Out of Range error: " << oor.what() << '\n';
         }
     }
-    
+
     // Return a default pair if parsing fails or the format is incorrect
     return std::make_pair(-1, -1);
 }

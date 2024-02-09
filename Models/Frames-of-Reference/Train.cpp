@@ -17,8 +17,7 @@ static const double alpha_t = 0.9; // model's reliability parameter
 #include "Scene.h"
 #include "MyData.h"
 
-/* #include "MyGrammar.h" */
-#include "MyGrammarCylindrical.h"
+#include "MyGrammar.h"
 #include "MyHypothesis.h"
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -27,7 +26,7 @@ static const double alpha_t = 0.9; // model's reliability parameter
 
 #include "TopN.h"
 #include "ParallelTempering.h"
-#include "Fleet.h" 
+#include "Fleet.h"
 #include "Random.h"
 #include "Builtins.h"
 
@@ -51,8 +50,8 @@ void save_top_n(const std::string& filepath, const std::string& top_n) {
 // Language to sample training data from
 std::string language_name = "";
 
-int main(int argc, char** argv){ 
-	
+int main(int argc, char** argv){
+
 	// default include to process a bunch of global variables: mcts_steps, mcc_steps, etc
 	Fleet fleet("Frames of Reference");
 
@@ -103,40 +102,40 @@ int main(int argc, char** argv){
     };
 
     std::unordered_map<std::string, BodyPartMeaning> mixtec = {
-         {"head", BodyPartMeaning( 
-                 BodyPartNoun::head, 
-                 [](const OrientedObject& a) -> Direction { 
-                 switch(a.body_type) { 
-                     case BodyType::biped: 
-                         return a.upward; 
-                     case BodyType::quadruped: 
-                         return {0,0,0}; 
-                 } 
+         {"head", BodyPartMeaning(
+                 BodyPartNoun::head,
+                 [](const OrientedObject& a) -> Direction {
+                 switch(a.body_type) {
+                     case BodyType::biped:
+                         return a.upward;
+                     case BodyType::quadruped:
+                         return {0,0,0};
+                 }
                  return a.upward; // Default to biped
-                 })}, 
-         {"belly", BodyPartMeaning( 
-                 BodyPartNoun::belly, 
-                 [](const OrientedObject& a) -> Direction {return -a.upward;})}, 
-         {"face", BodyPartMeaning( 
-                 BodyPartNoun::face, 
-                 [](const OrientedObject& a) -> Direction {return a.forward;})}, 
-         {"back", BodyPartMeaning( 
-                 BodyPartNoun::back, 
-                 [](const OrientedObject& a) -> Direction { 
-                 switch(a.body_type) { 
-                     case BodyType::biped: 
-                         return -a.forward; 
-                     case BodyType::quadruped: 
-                         return a.upward; 
-                 } 
+                 })},
+         {"belly", BodyPartMeaning(
+                 BodyPartNoun::belly,
+                 [](const OrientedObject& a) -> Direction {return -a.upward;})},
+         {"face", BodyPartMeaning(
+                 BodyPartNoun::face,
+                 [](const OrientedObject& a) -> Direction {return a.forward;})},
+         {"back", BodyPartMeaning(
+                 BodyPartNoun::back,
+                 [](const OrientedObject& a) -> Direction {
+                 switch(a.body_type) {
+                     case BodyType::biped:
+                         return -a.forward;
+                     case BodyType::quadruped:
+                         return a.upward;
+                 }
                  return -a.forward; // Default to biped
-                 })}, 
+                 })},
         {"flank", BodyPartMeaning(
                 BodyPartNoun::flank,
                 [](const OrientedObject& a) -> Direction {Direction sideward(a.rightward, true); return sideward;})},
         {"right", BodyPartMeaning()},
         {"left", BodyPartMeaning()},
-         {"near", BodyPartMeaning()}, 
+         {"near", BodyPartMeaning()},
          {"far", BodyPartMeaning()}
     };
 
