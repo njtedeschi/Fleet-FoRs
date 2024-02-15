@@ -58,6 +58,9 @@ class Language:
         return word
 
     # NOTE: Assumes figure is aligned with z-axis
+    # The check for this occurs in:
+    # - `DescriptionGenerator.angular_description` for training data
+    # - `Language.all_descriptions` for testing data
     def absolute_vertical_description(self, scene):
         _, _, z = scene.ground_figure_displacement()
         if z > 0:
