@@ -20,7 +20,9 @@ BELLY = {
 }
 FACE = {
     "biped": AbstractDirection("forward", 1, reflected_relatively=True),
-    "quadruped": AbstractDirection("forward", 1)
+    # reflected_relatively isn't relevant for quadruped, but it's included to
+    # make the biped and quadruped AbstractDirection objects equivalent
+    "quadruped": AbstractDirection("forward", 1, reflected_relatively=True)
 }
 BACK = {
     "biped": AbstractDirection("forward", -1, reflected_relatively=True),

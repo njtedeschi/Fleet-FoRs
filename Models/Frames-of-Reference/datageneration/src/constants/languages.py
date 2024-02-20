@@ -12,10 +12,10 @@ english_symmetry_locatives = {
     "right": concepts.RIGHT,
     "side": concepts.SIDE
 }
-english_body_part_locatives = dict()
+english_meronymy_locatives = dict()
 ENGLISH = Language(
     symmetry_locatives=english_symmetry_locatives,
-    body_part_locatives=english_body_part_locatives,
+    meronymy_locatives=english_meronymy_locatives,
     absolute_above="above",
     absolute_below="below"
 )
@@ -25,7 +25,7 @@ mixtec_symmetry_locatives = {
     "left": concepts.LEFT,
     "right": concepts.RIGHT
 }
-mixtec_body_part_locatives = {
+mixtec_meronymy_locatives = {
     "head" : concepts.HEAD,
     "belly": concepts.BELLY,
     "face": concepts.FACE,
@@ -34,7 +34,7 @@ mixtec_body_part_locatives = {
 }
 MIXTEC = Language(
     symmetry_locatives=mixtec_symmetry_locatives,
-    body_part_locatives=mixtec_body_part_locatives,
+    meronymy_locatives=mixtec_meronymy_locatives,
     absolute_above="head",
     absolute_below="belly"
 )

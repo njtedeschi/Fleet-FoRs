@@ -191,6 +191,10 @@ class DescriptionGenerator:
         self.sampler = sampler
         self.language = language
 
+    def sample_word(self, words):
+        words = list(words)
+        return self.sampler.choice(words)
+
     def true_description(self, scene):
         description = None
         if scene.figure_is_on_axis() and self.sampler.flip("description_is_angular"):
@@ -216,12 +220,12 @@ class DescriptionGenerator:
             descriptions = self.language.relative_descriptions(scene)
 
         if descriptions:
-            return self.sampler.choice(descriptions)
+            return self.sample_word(descriptions)
         else:
             return None
 
     def random_word(self):
-        word = self.sampler.choice(self.language.vocabulary)
+        word = self.sample_word(self.language.vocabulary)
         return word
 
 
