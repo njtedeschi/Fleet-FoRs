@@ -44,8 +44,12 @@ class Sampler:
         else:
             yield None
 
-    def flip(self, p_label):
-        result = self.rng.random() < self.probs[p_label]
+    def flip(self, p_label, adjustment_label=None):
+        if(adjustment_label):
+            p_adjustment = self.probs[adjustment_label]
+        else:
+            p_adjustment = 0
+        result = self.rng.random() < (self.probs[p_label] + p_adjustment)
         # Logging flip results
         if self.verbose:
             self.current_flip_results[p_label] = result
@@ -205,16 +209,27 @@ class DescriptionGenerator:
         return description
 
     def angular_description(self, scene):
+        if scene.is_canonical():
+            return self._angular_description_canonical(scene)
+        else:
+            return self._angular_description_noncanonical(scene)
+
+    def _angular_description_canonical(self, scene):
+        # For now, absolute descriptions are only for the vertical, and coincide with both intrinsic and relative
+        return self.intrinsic_or_relative_description(scene)
+
+    def _angular_description_noncanonical(self, scene):
         if scene.figure_is_on_axis(2) and self.sampler.flip("description_is_absolute"):
             description = self.language.absolute_vertical_description(scene)
         else:
-            description = self.intrinsic_or_relative_description(scene)
+            description = self.intrinsic_or_relative_description(scene, "noncanonical_adjustment")
         return description
 
-    def intrinsic_or_relative_description(self, scene):
+    def intrinsic_or_relative_description(self, scene, adjustment=None):
         # Direct scenes automatically use intrinsic description
         # as direct frame of reference
-        if scene.is_direct() or self.sampler.flip("description_is_intrinsic"):
+        if scene.is_direct() or self.sampler.flip("description_is_intrinsic",
+                                                  adjustment):
             descriptions = self.language.intrinsic_descriptions(scene)
         else:
             descriptions = self.language.relative_descriptions(scene)

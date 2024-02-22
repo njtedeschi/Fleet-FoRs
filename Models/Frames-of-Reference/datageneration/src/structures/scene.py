@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 import numpy as np
 
-from ..constants.space import ORIGIN
+from ..constants.space import ORIGIN, UP
 
 
 @dataclass
@@ -67,6 +67,12 @@ class Scene:
 
     def is_direct(self):
         return self.ground.is_participant
+
+    def is_canonical(self):
+        return (
+            np.array_equal(self.speaker.upward, UP)
+            and np.array_equal(self.ground.upward, UP)
+        )
 
     def ground_figure_displacement(self):
         return self.figure.position - self.ground.position

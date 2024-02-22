@@ -23,7 +23,10 @@ class ExperimentalCondition:
     ## Description probabilities
     p_description_is_angular: float # given figure on an axis
     p_description_is_intrinsic: float # given angular description
+    # (only differs from relative with noncanonical speakers)
     p_description_is_absolute: float # given angular description and figure on z-axis
+    ## Adjustments
+    p_noncanonical_adjustment: float
     # Name
     labels: List[str]
 
