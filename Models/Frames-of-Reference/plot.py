@@ -65,33 +65,3 @@ if __name__ == "__main__":
         plot_manager.create_senses_plots(data, metric)
     else:
         print("Error: factor isn't supported")
-
-    # for frequency in INTRINSIC_FREQUENCIES:
-    #     for language, words in languages.items():
-    #         for word, senses in words.items():
-    #             filter_conditions = {
-    #                 'Language': language,
-    #                 '%IntrinsicData': frequency,
-    #                 'Word': word
-    #             }
-    #             title = f'{language} ({frequency}% intrinsic): "{word}"'
-    #             if save_results:
-    #                 plot_filestem = f'{language}_int_{frequency}_{word}_{metric}'
-    #                 if sm_separate:
-    #                     plot_filestem += '_sym_mer'
-    #                 else:
-    #                     plot_filename = f'{language}_int_{frequency}_{word}_{metric}.png'
-    #                 plot_filename = plot_filestem.replace("/", "_").lower() + '.png'
-    #                 save_path = os.path.join(base_path, plot_filename)
-    #             else:
-    #                 save_path = None
-
-    #             plotter.plot_mean_values(
-    #                 data,
-    #                 metric,
-    #                 "Sense",
-    #                 senses,
-    #                 filter_conditions,
-    #                 title,
-    #                 save_path
-    #             )
