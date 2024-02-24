@@ -4,100 +4,93 @@ from tqdm import tqdm
 
 class RankCollapser:
 
-    def __init__(self, word_groupings, senses, chunksize=10000):
+    def __init__(self, word_groupings, chunksize=10000):
         self.word_groupings = word_groupings
-        self.senses = senses
         self.chunksize = chunksize
 
-    def csv_to_filtered_counts_df(self, results_path):
+
+    def process_experimental_condition(self, counts_path, posterior_lookup_path):
+        counts_df = self.prepare_counts_df(counts_path)
+        posterior_lookup_df = pd.read_csv(posterior_lookup_path)
+
+        counts_groups = counts_df.groupby(['TrainingSize', 'Iteration'])
+        posterior_groups = posterior_lookup_df.groupby(['TrainingSize', 'Iteration'])
+
+        models = []
+        for ((counts_ts, counts_it), counts_group), ((posterior_ts, posterior_it), posterior_group) in zip(counts_groups, posterior_groups):
+            # Ensure matching groups are processed together
+            assert counts_ts == posterior_ts and counts_it == posterior_it, "Mismatched groups"
+            model_df = pd.merge(counts_group, posterior_group[['Rank', 'Posterior']], on='Rank', how='left')
+            model_df.set_index(['TrainingSize', 'Iteration', 'Rank', 'Word', 'Sense'], inplace=True)
+            model_df = self.collapse_model_ranks(model_df)
+            models.append(model_df)
+        collapsed_df = pd.concat(models, ignore_index=True)
+        # collapsed_df = self.pivot_and_flatten(collapsed_df)
+        # collapsed_df.reset_index()
+        return collapsed_df
+
+    #####
+
+    def prepare_counts_df(self, counts_path):
         words_to_include = self.word_groupings.keys()
         filtered_rows = []
-        for chunk in tqdm(pd.read_csv(results_path, chunksize=self.chunksize),
+        for chunk in tqdm(pd.read_csv(counts_path, chunksize=self.chunksize),
                           desc="Input chunks read"):
             filtered_chunk = chunk[chunk['Word'].isin(words_to_include)]
             filtered_rows.append(filtered_chunk)
-        df = pd.concat(filtered_rows, ignore_index=True)
-        return df
+        counts_df = pd.concat(filtered_rows, ignore_index=True)
 
-    ## Posterior share methods
-    def process_experimental_condition(self, counts_path, posterior_lookup_path):
-        counts_df = self.csv_to_filtered_counts_df(counts_path)
-        classification_df = self.classify_rows(counts_df)
-        consolidated_df = self.consolidate_word_pairs(classification_df)
-
-        posterior_lookup_df = pd.read_csv(posterior_lookup_path)
-        collapsed_df = self.collapse_df_ranks_to_posterior_shares(consolidated_df, posterior_lookup_df)
-        return collapsed_df
-
-    def classify_rows(self, counts_df):
         # Calculate whether accuracy is perfect for sense
         counts_df['PerfectAccuracy'] = ((counts_df['FP'] == 0) & (counts_df['FN'] == 0)).astype(int)
-        # Pivote the table
-        classification_df = counts_df.pivot_table(index=["TrainingSize", "Iteration", "Rank", "Word"],
-                                                  columns="Sense",
-                                                  values="PerfectAccuracy",
-                                                  fill_value=0).reset_index()
-        # Get rid of "Sense" column index from pivoting
-        classification_df.columns.name = None
-        return classification_df
-
-    def consolidate_word_pairs(self, classification_df):
-        # Stage 1: Replace words with their combined names
-        classification_df['Word'] = classification_df['Word'].apply(
+        # Combine words by group and average their metrics
+        counts_df['Word'] = counts_df['Word'].apply(
             lambda word: self.word_groupings.get(word, word))
-
-        # Stage 2: Average sense column values for rows that are the same except for the sense classification values
-        consolidated_df = classification_df.groupby(['TrainingSize', 'Iteration', 'Rank', 'Word'], as_index=False).mean()
-        return consolidated_df
-
-    def collapse_df_ranks_to_posterior_shares(self, consolidated_df, posterior_lookup_df):
-        # Get unique combinations of TrainingSize and Iteration
-        combinations = consolidated_df[['TrainingSize', 'Iteration']].drop_duplicates()
-
-        # TODO update overall use of tqdm
-        collapsed_groups = []
-        for _, row in tqdm(combinations.iterrows(), total=combinations.shape[0], desc="Models processed"):
-            training_size, iteration = row['TrainingSize'], row['Iteration']
-            # Filter consolidated_df and self.posterior_df for the current combination of TrainingSize and Iteration
-            classification_group = consolidated_df[(consolidated_df['TrainingSize'] == training_size) &
-                                      (consolidated_df['Iteration'] == iteration)]
-            posterior_group = posterior_lookup_df[(posterior_lookup_df['TrainingSize'] == training_size) &
-                                                (posterior_lookup_df['Iteration'] == iteration)]
-
-            # Merge Posterior into the group based on Rank
-            merged_group = pd.merge(classification_group, posterior_group[['Rank', 'Posterior']], on='Rank', how='left')
-
-            # Collapse ranks within this group
-            collapsed_group = self.collapse_group_ranks_to_posterior_shares(merged_group)
-            collapsed_groups.append(collapsed_group)
-        collapsed_df = pd.concat(collapsed_groups, ignore_index=True)
-        return collapsed_df
+        counts_df = counts_df.groupby(['TrainingSize', 'Iteration', 'Rank', 'Word', 'Sense'], as_index=False).mean()
+        return counts_df
 
     # Takes group with fixed "TrainingSize" and "Iteration", and "Posterior" values merged in
-    def collapse_group_ranks_to_posterior_shares(self, group):
+    def collapse_model_ranks(self, model_df):
         # Apply the log-sum-exp trick
         # Subtract the max log posterior from each log posterior to make numbers smaller
-        max_log_posterior = group['Posterior'].max()
-        group['StableLogProb'] = group['Posterior'] - max_log_posterior
+        max_log_posterior = model_df['Posterior'].max()
+        model_df['StableLogProb'] = model_df['Posterior'] - max_log_posterior
 
         # Convert these stabilized log probabilities to unnormalized probabilities
-        group['UnnormalizedProb'] = np.exp(group['StableLogProb'])
+        model_df['UnnormalizedProb'] = np.exp(model_df['StableLogProb'])
 
         # Normalize the probabilities
-        # sum_prob = group.groupby(['Word'])['UnnormalizedProb'].sum()
-        # print(f"Sum of probabilities: {sum_prob}")
-        # group['NormalizedProb'] = group['UnnormalizedProb'] / sum_prob
-        group['NormalizedProb'] = group.groupby(['Word'])['UnnormalizedProb'].transform(lambda x: x / x.sum())
+        model_df['NormalizedProb'] = model_df.groupby(['Word', 'Sense'])['UnnormalizedProb'].transform(lambda x: x / x.sum())
 
-        # Calculate the posterior weighted average classifications for each sense column
-        for sense in self.senses:
-            group[f'{sense}-Share'] = group[sense] * group['NormalizedProb']
+        # Sum out ranks to get expected values
+        model_df = model_df.groupby(['TrainingSize', 'Iteration', 'Word', 'Sense']).apply(lambda group: pd.Series({
+            'E[TP]': np.sum(group['TP'] * group['NormalizedProb']),
+            'E[TN]': np.sum(group['TN'] * group['NormalizedProb']),
+            'E[FP]': np.sum(group['FP'] * group['NormalizedProb']),
+            'E[FN]': np.sum(group['FN'] * group['NormalizedProb']),
+            'Share': np.sum(group['PerfectAccuracy'] * group['NormalizedProb']),
+        })).reset_index()
 
-        # Collapse the results across ranks by summing the SenseShares across ranks
-        collapsed_group = group.groupby(['TrainingSize', 'Iteration', 'Word']).agg({
-            f'{sense}-Share': 'sum' for sense in self.senses
-        }).reset_index()
+        model_df = self.calculate_metrics(model_df)
 
-        return collapsed_group
+        return model_df
 
-    ## Precision/recall/accuracy methods
+    def calculate_metrics(self, df):
+        tp = df['E[TP]']
+        tn = df['E[TN]']
+        fp = df['E[FP]']
+        fn = df['E[FN]']
+
+        precision = tp / (tp + fp).replace(0, np.nan)
+        recall = tp / (tp + fn).replace(0, np.nan)
+        accuracy = (tp + tn) / (tp + tn + fp + fn).replace(0, np.nan)
+        f1 = 2 * (precision * recall) / (precision + recall).replace(0, np.nan)
+
+        df['Precision'] = precision
+        df['Recall'] = recall
+        df['F1'] = f1
+        df['Accuracy'] = accuracy
+
+        # Drop the TP, TN, FP, FN columns
+        for metric in ['E[TP]', 'E[TN]', 'E[FP]', 'E[FN]']:
+            df.drop((metric), axis=1, inplace=True, errors='ignore')
+        return df
