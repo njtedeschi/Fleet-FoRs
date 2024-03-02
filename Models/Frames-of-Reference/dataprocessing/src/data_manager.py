@@ -48,7 +48,7 @@ class DataManager:
 
     ###
 
-    def filter_data_for_one_curve(self, df, factor_values):
+    def _filter_data_for_one_curve(self, df, factor_values):
         filtered_df = df
         for factor, value in factor_values.items():
             if factor in filtered_df.columns:
@@ -76,7 +76,19 @@ class PlotManager(DataManager):
     def __init__(self, cl_args):
         super().__init__(cl_args)
 
-    def _save_path(self, metric, factor_i, factor_values):
+    def _initialize_plotter(self, metric, factor_i):
+        plot_configuration = PlotConfiguration(
+            ylabel=METRIC_LABELS[metric],
+            labels=FACTOR_LABELS.get(factor_i, {}),
+            colors=FACTOR_COLORS.get(factor_i, {}),
+            linestyles=FACTOR_LINESTYLES.get(factor_i, {}),
+            title_format=self.config["plot_formatting"]["title"].get(
+                factor_i, ""
+            )
+        )
+        return Plotter(plot_configuration)
+
+    def _determine_save_path(self, metric, factor_i, factor_values):
         filename_format=self.config["plot_formatting"]["filename"].get(
                 factor_i, ""
             )
@@ -93,43 +105,7 @@ class PlotManager(DataManager):
         )
         return save_path
 
-    def _initialize_plotter(self, metric, factor_i):
-        plot_configuration = PlotConfiguration(
-            ylabel=METRIC_LABELS[metric],
-            labels=FACTOR_LABELS.get(factor_i, {}),
-            colors=FACTOR_COLORS.get(factor_i, {}),
-            linestyles=FACTOR_LINESTYLES.get(factor_i, {}),
-            title_format=self.config["plot_formatting"]["title"].get(
-                factor_i, ""
-            ),
-            filename_format=self.config["plot_formatting"]["filename"].get(
-                factor_i, ""
-            )
-        )
-        return Plotter(plot_configuration)
-
-    def plot_data(self, plotter, df, metric, factor_i, factor_values):
-        """Prepare data and delegate plotting to Plotter."""
-        plotter.initialize_plot()
-        for value in self.factors[factor_i]:
-            specific_factor_values = factor_values.copy()
-            specific_factor_values[factor_i] = value
-            filtered_df = self.filter_data_for_one_curve(df, specific_factor_values)
-            if not filtered_df.empty:
-                aggregated_df = self.aggregate_curve_data(filtered_df, metric)
-                plotter.plot_curve(
-                    x=aggregated_df['mean'].index,
-                    y=aggregated_df['mean'].values,
-                    yerr=aggregated_df['sem'].values,
-                    factor_i=factor_i,
-                    value=value
-                )
-        # Adjust to pass the correct parameters for finalize_plot
-        if self.cl_args.save:
-            save_path = self._save_path(metric, factor_i, factor_values)
-        else:
-            save_path = None
-        plotter.finalize_plot(metric, factor_i, factor_values, save_path)
+    ###
 
     def create_all_plots(self, df, metric, factor_i):
         """Create all plots for a given metric and varying factor."""
@@ -143,8 +119,38 @@ class PlotManager(DataManager):
                 continue  # Skip combinations not specified in config
 
             plotter = self._initialize_plotter(metric, factor_i)
-            self.plot_data(plotter, df, metric, factor_i, factor_values)
+            self._create_plot(plotter, df, metric, factor_i, factor_values)
+
+    def _create_plot(self, plotter, df, metric, factor_i, factor_values):
+        """Prepare data and delegate plotting to Plotter."""
+        plotter.initialize_plot()
+        self._process_and_plot_curves(plotter, df, metric, factor_i, factor_values)
+        if self.cl_args.save:
+            save_path = self._determine_save_path(metric, factor_i, factor_values)
+        else:
+            save_path = None
+        plotter.finalize_plot(metric, factor_i, factor_values, save_path)
+
+    def _process_and_plot_curves(self, plotter, df, metric, factor_i, factor_values):
+        for value in self.factors[factor_i]:
+            self._plot_single_curve(plotter, df, metric, factor_i, factor_values, value)
+
+    def _plot_single_curve(self, plotter, df, metric, factor_i, factor_values, value):
+        specific_factor_values = factor_values.copy()
+        specific_factor_values[factor_i] = value
+        filtered_df = self._filter_data_for_one_curve(df, specific_factor_values)
+        if not filtered_df.empty:
+            aggregated_df = self._aggregate_curve_data(filtered_df, metric)
+            plotter.plot_curve(
+                x=aggregated_df['mean'].index,
+                y=aggregated_df['mean'].values,
+                yerr=aggregated_df['sem'].values,
+                factor_i=factor_i,
+                value=value
+            )
 
 
 class StatsManager(DataManager):
-    pass
+
+    def __init__(self, cl_args):
+        super().__init__(cl_args)
