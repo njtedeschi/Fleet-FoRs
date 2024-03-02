@@ -1,193 +1,106 @@
-# Colors
-BLUE = "blue"
-RED = "red"
-YELLOW = "goldenrod"
-PURPLE = "purple"
-GREEN = "green"
-ORANGE = "orange"
-BLACK = "black"
+from enum import Enum
 
-COLOR_I = BLUE
-COLOR_R = RED
-COLOR_A = YELLOW
-COLOR_IRA = BLACK
-def update_secondary_colors():
-    global COLOR_IR, COLOR_IA, COLOR_RA
+### BEGIN LABELS ###
+SENSE_LABELS = {
+    "Int": "Intrinsic Only",
+    "Rel": "Relative Only",
+    "Abs": "Absolute Only",
+        ###
+    "IntRel": "Intrinsic and Relative",
+    "IntAbs": "Intrinsic and Absolute",
+    "RelAbs": "Relative and Absolute",
+        ###
+    "IntRelAbs": "All frames",
+    #########
+    "SInt": "Intrinsic (symmetry) Only",
+    "MInt": "Intrinsic (meronymy) Only",
+        ###
+    "SIntRel": "Intrinsic (symmetry) and Relative",
+    "MIntRel": "Intrinsic (meronymy) and Relative",
+    "SIntAbs": "Intrinsic (symmetry) and Absolute",
+    "MIntAbs": "Intrinsic (meronymy) and Absolute",
+        ###
+    "SIntRelAbs": "All frames (symmetric intrinsic)",
+    "MIntRelAbs":  "All frames (meronymic intrinsic)"
+}
+### END LABELS ###
+
+### BEGIN COLORS ###
+class Color(Enum):
+    BLUE = "blue"
+    RED = "red"
+    YELLOW = "goldenrod"
+    PURPLE = "purple"
+    GREEN = "green"
+    ORANGE = "orange"
+    BLACK = "black"
+
+# Color assignments dictionary
+SENSE_COLORS = {
+    "Int": Color.BLUE.value,
+    "Rel": Color.RED.value,
+    "Abs": Color.YELLOW.value,
+    "IntRelAbs": Color.BLACK.value
+}
+
+def set_sense_secondary_colors():
     # Simplified color mixing logic
     color_mixing = {
-        frozenset({BLUE, RED}): PURPLE,
-        frozenset({BLUE, YELLOW}): GREEN,
-        frozenset({RED, YELLOW}): ORANGE
+        frozenset({Color.BLUE.value, Color.RED.value}): Color.PURPLE.value,
+        frozenset({Color.BLUE.value, Color.YELLOW.value}): Color.GREEN.value,
+        frozenset({Color.RED.value, Color.YELLOW.value}): Color.ORANGE.value
     }
+
     # Update secondary colors based on primary colors
-    COLOR_IR = color_mixing.get(frozenset({COLOR_I, COLOR_R}))
-    COLOR_IA = color_mixing.get(frozenset({COLOR_I, COLOR_A}))
-    COLOR_RA = color_mixing.get(frozenset({COLOR_R, COLOR_A}))
-update_secondary_colors()
-# COLOR_IR = "purple"
-# COLOR_IA = "green"
-# COLOR_RA = "orange"
-# COLOR_IRA = "black"
+    SENSE_COLORS["IntRel"] = color_mixing.get(frozenset({SENSE_COLORS["Int"], SENSE_COLORS["Rel"]}))
+    SENSE_COLORS["IntAbs"] = color_mixing.get(frozenset({SENSE_COLORS["Int"], SENSE_COLORS["Abs"]}))
+    SENSE_COLORS["RelAbs"] = color_mixing.get(frozenset({SENSE_COLORS["Rel"], SENSE_COLORS["Abs"]}))
 
-# Linestyles
-LINESTYLE_S = "dotted"
-LINESTYLE_M = "solid" # solid or "more solid" because correct
+# Initial update to set secondary colors
+set_sense_secondary_colors()
+SENSE_COLORS["SInt"] = SENSE_COLORS["Int"]
+SENSE_COLORS["MInt"] = SENSE_COLORS["Int"]
+SENSE_COLORS["SIntRel"] = SENSE_COLORS["IntRel"]
+SENSE_COLORS["MIntRel"] = SENSE_COLORS["IntRel"]
+SENSE_COLORS["SIntAbs"] = SENSE_COLORS["IntAbs"]
+SENSE_COLORS["MIntAbs"] = SENSE_COLORS["IntAbs"]
+SENSE_COLORS["SIntRelAbs"] = SENSE_COLORS["IntRelAbs"]
+SENSE_COLORS["MIntRelAbs"] = SENSE_COLORS["IntRelAbs"]
+### END COLORS ###
 
-# Factor info
-SENSE_INFO = {
-    "Int": {
-        "color": COLOR_I,
-        "label": "Intrinsic Only",
-        "linestyle": "solid"
-        },
-    "Rel": {
-        "color": COLOR_R,
-        "label": "Relative Only",
-        "linestyle": "solid"
-        },
-    "Abs": {
-        "color": COLOR_A,
-        "label": "Absolute Only",
-        "linestyle": "solid"
-        },
-        ###
-    "IntRel": {
-        "color": COLOR_IR,
-        "label": "Intrinsic and Relative",
-        "linestyle": "solid"
-        },
-    "IntAbs": {
-        "color": COLOR_IA,
-        "label": "Intrinsic and Absolute",
-        "linestyle": "solid"
-        },
-    "RelAbs": {
-        "color": COLOR_RA,
-        "label": "Relative and Absolute",
-        "linestyle": "solid"
-        },
-        ###
-    "IntRelAbs": {
-        "color": COLOR_IRA,
-        "label": "All frames",
-        "linestyle": "solid"
-    },
-    #########
-    "SInt": {
-        "color": COLOR_I,
-        "label": "Intrinsic (symmetry) Only",
-        "linestyle": LINESTYLE_S
-        },
-    "MInt": {
-        "color": COLOR_I,
-        "label": "Intrinsic (meronymy) Only",
-        "linestyle": LINESTYLE_M
-        },
-        ###
-    "SIntRel": {
-        "color": COLOR_IR,
-        "label": "Intrinsic (symmetry) and Relative",
-        "linestyle": LINESTYLE_S
-        },
-    "MIntRel": {
-        "color": COLOR_IR,
-        "label": "Intrinsic (meronymy) and Relative",
-        "linestyle": LINESTYLE_M
-        },
-    "SIntAbs": {
-        "color": COLOR_IA,
-        "label": "Intrinsic (symmetry) and Absolute",
-        "linestyle": LINESTYLE_S
-        },
-    "MIntAbs": {
-        "color": COLOR_IA,
-        "label": "Intrinsic (meronymy) and Absolute",
-        "linestyle": LINESTYLE_M
-        },
-        ###
-    "SIntRelAbs": {
-        "color": COLOR_IRA,
-        "label": "All frames (symmetric intrinsic)",
-        "linestyle": LINESTYLE_S
-    },
-    "MIntRelAbs": {
-        "color": COLOR_IRA,
-        "label": "All frames (meronymic intrinsic)",
-        "linestyle": LINESTYLE_M
-    }
+
+### BEGIN LINESTYLES ###
+SENSE_PREFIX_LINESTYLES = {
+    "SInt": "dotted",
+    "MInt": "solid" # solid or "more solid" because "correct"
 }
+SENSE_LINESTYLES = {}
+def set_sense_linestyles():
+    for sense in SENSE_LABELS.keys():
+        linestyle = "solid" # default
+        for prefix, prefix_linestyle in SENSE_PREFIX_LINESTYLES.items():
+            if sense.startswith(prefix):
+                linestyle = prefix_linestyle
+                break
+        SENSE_LINESTYLES[sense] = linestyle
+### END LINESTYLES ###
 
-# Legend info
-LEGEND_INFO = {
-    "Sense": SENSE_INFO
+### BEGIN LEGEND INFO ###
+FACTOR_LABELS = {
+    "Sense": SENSE_LABELS
 }
+FACTOR_COLORS = {
+    "Sense": SENSE_COLORS
+}
+FACTOR_LINESTYLES = {
+    "Sense": SENSE_LINESTYLES
+}
+### END LEGEND INFO ###
 
-# Metric labels
 METRIC_LABELS = {
     "Share": "Posterior Share",
     "Precision": "Precision",
     "Recall": "Recall",
     "Accuracy": "Accuracy",
     "F1": "F1 score"
-}
-
-# Senses by language and word
-HORIZONTAL_SM_COMBINED = [
-    "Int",
-    "Rel",
-    "IntRel"
-]
-HORIZONTAL_SM_SEPARATE = [
-    "SInt",
-    "MInt",
-    "Rel",
-    "SIntRel",
-    "MIntRel"
-]
-VERTICAL_SM_COMBINED = [
-    "Int",
-    "Rel",
-    "Abs",
-    "IntRel",
-    "IntAbs",
-    "RelAbs",
-    "IntRelAbs"
-]
-VERTICAL_SM_SEPARATE= [
-    "SInt",
-    "MInt",
-    "Rel",
-    "Abs",
-    "SIntRel",
-    "MIntRel",
-    "SIntAbs",
-    "MIntAbs",
-    "RelAbs",
-    "SIntRelAbs"
-    "MIntRelAbs"
-]
-
-ENGLISH_WORD_SENSES = {
-    "above/below": VERTICAL_SM_COMBINED,
-    "front/behind": HORIZONTAL_SM_COMBINED,
-    "left/right": HORIZONTAL_SM_COMBINED,
-    "side": HORIZONTAL_SM_COMBINED,
-}
-
-MIXTEC_WORD_SENSES_SM_COMBINED = {
-    "head": VERTICAL_SM_COMBINED,
-    "belly": VERTICAL_SM_COMBINED,
-    "face": HORIZONTAL_SM_COMBINED,
-    "back": HORIZONTAL_SM_COMBINED,
-    "left/right": HORIZONTAL_SM_COMBINED,
-    "flank": HORIZONTAL_SM_COMBINED,
-}
-
-MIXTEC_WORD_SENSES_SM_SEPARATE = {
-    "head": VERTICAL_SM_SEPARATE,
-    "belly": VERTICAL_SM_COMBINED,
-    "face": HORIZONTAL_SM_COMBINED,
-    "back": HORIZONTAL_SM_SEPARATE,
-    "left/right": HORIZONTAL_SM_COMBINED,
-    "flank": HORIZONTAL_SM_COMBINED,
 }

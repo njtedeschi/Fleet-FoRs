@@ -1,19 +1,6 @@
 import argparse
-# import os
 
-# import pandas as pd
-# import matplotlib.pyplot as plt
-# import yaml
-
-from dataprocessing.src.plotting.plotter import Plotter
-from dataprocessing.src.plotting.plot_manager import PlotManager
-from dataprocessing.src.plotting.constants import (
-    LEGEND_INFO,
-    METRIC_LABELS,
-    ENGLISH_WORD_SENSES,
-    MIXTEC_WORD_SENSES_SM_COMBINED,
-    MIXTEC_WORD_SENSES_SM_SEPARATE
-)
+from dataprocessing.src.data_manager import PlotManager
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -34,34 +21,17 @@ if __name__ == "__main__":
                         action='store_true',
                         help="Whether to save plots as pngs"
     )
-    args = parser.parse_args()
+    cl_args = parser.parse_args()
+    metric = cl_args.metric
+    factor = cl_args.factor
 
-    root = args.root
-    metric = args.metric
-    factor = args.factor
-    # factor = args.factor
-    simple = args.simple
-    save_results = args.save
-
-    languages = {
-        "English" : ENGLISH_WORD_SENSES
-        # Mixtec set after processing data
-    }
-    if(simple):
-        languages["Mixtec"] = MIXTEC_WORD_SENSES_SM_COMBINED
+    if(cl_args.simple):
         results_type = "simplified_shares"
         # Override choice of metric if provided
         metric = "Share"
     else:
-        languages["Mixtec"] = MIXTEC_WORD_SENSES_SM_SEPARATE
         results_type = "all_metrics"
 
-    plotter = Plotter(LEGEND_INFO, METRIC_LABELS)
-    plot_manager = PlotManager(root, languages, plotter,
-                               simple, save_results)
+    plot_manager = PlotManager(cl_args)
     data = plot_manager.load_df(results_type)
-
-    if factor == "Sense":
-        plot_manager.create_senses_plots(data, metric)
-    else:
-        print("Error: factor isn't supported")
+    plot_manager.create_all_plots(data, metric, factor)
