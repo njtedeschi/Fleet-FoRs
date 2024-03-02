@@ -57,7 +57,7 @@ class DataManager:
                 ]
         return filtered_df
 
-    def aggregate_curve_data(self, filtered_df, metric):
+    def _aggregate_curve_data(self, filtered_df, metric, variability='sem'):
         return (
             filtered_df
             .groupby(
@@ -65,7 +65,7 @@ class DataManager:
             )[metric]
             .agg([
                 'mean',
-                'sem'
+                variability
             ])
             .unstack()
         )
