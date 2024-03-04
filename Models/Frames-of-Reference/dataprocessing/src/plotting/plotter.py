@@ -7,6 +7,9 @@ class Plotter:
 
     def __init__(self, config):
         self.config = config
+        self.labels = config.labels
+        self.colors = config.colors
+        self.linestyles = config.linestyles
         self.default_colors = cycle(
             plt.rcParams['axes.prop_cycle']
             .by_key()['color']
@@ -21,10 +24,10 @@ class Plotter:
             x,
             y,
             yerr=yerr,
-            label=self.config.labels.get(value, f"{factor_i}-{value}"),
+            label=self.labels.get(value, f"{factor_i}-{value}"),
             # Use color from FACTOR_COLORS if available, otherwise use the next color from the default cycle
-            color=self.config.colors.get(value, next(self.default_colors)),
-            linestyle=self.config.linestyles.get(value, "solid")
+            color=self.colors.get(value, next(self.default_colors)),
+            linestyle=self.linestyles.get(value, "solid")
         )
 
     def finalize_plot(self, metric, factor_i, factor_values, save_path=None):
