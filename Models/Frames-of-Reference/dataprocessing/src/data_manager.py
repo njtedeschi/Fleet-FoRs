@@ -82,11 +82,18 @@ class PlotManager(DataManager):
             labels=FACTOR_LABELS.get(factor_i, {}),
             colors=FACTOR_COLORS.get(factor_i, {}),
             linestyles=FACTOR_LINESTYLES.get(factor_i, {}),
-            title_format=self.config["plot_formatting"]["title"].get(
-                factor_i, ""
-            )
         )
         return Plotter(plot_configuration)
+
+    def _determine_title(self, metric, factor_i, factor_values):
+        title_format = self.config["plot_formatting"]["title"].get(
+            factor_i, ""
+        )
+        if title_format:
+            title = title_format.format(**factor_values)
+        else:
+            title = f"{metric} Learning Curve for {factor_values}, varying {factor_i}"
+        return title
 
     def _determine_save_path(self, metric, factor_i, factor_values):
         filename_format=self.config["plot_formatting"]["filename"].get(
@@ -125,11 +132,12 @@ class PlotManager(DataManager):
         """Prepare data and delegate plotting to Plotter."""
         plotter.initialize_plot()
         self._process_and_plot_curves(plotter, df, metric, factor_i, factor_values)
+        title = self._determine_title(metric, factor_i, factor_values)
         if self.cl_args.save:
             save_path = self._determine_save_path(metric, factor_i, factor_values)
         else:
             save_path = None
-        plotter.finalize_plot(metric, factor_i, factor_values, save_path)
+        plotter.finalize_plot(title, save_path)
 
     def _process_and_plot_curves(self, plotter, df, metric, factor_i, factor_values):
         for value in self.factors[factor_i]:

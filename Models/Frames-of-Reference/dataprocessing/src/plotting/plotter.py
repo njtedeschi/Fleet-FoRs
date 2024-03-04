@@ -30,17 +30,12 @@ class Plotter:
             linestyle=self.linestyles.get(value, "solid")
         )
 
-    def finalize_plot(self, metric, factor_i, factor_values, save_path=None):
+    def finalize_plot(self, title, save_path=None):
         """Finalize and display or save the plot."""
-        if self.config.title_format:
-            title = self.config.title_format.format(**factor_values)
-        else:
-            title = f"{metric} Learning Curve for {factor_values}, varying {factor_i}"
-
         plt.ylim(self.config.ylim)
         plt.title(title)
         plt.xlabel(self.config.xlabel)
-        plt.ylabel(self.config.ylabel or metric)
+        plt.ylabel(self.config.ylabel)
         plt.legend()
         if save_path:
             plt.savefig(save_path)
