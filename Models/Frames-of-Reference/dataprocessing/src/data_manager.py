@@ -46,6 +46,44 @@ class DataManager:
         )
         return pd.read_csv(csv_path)
 
+    def combine_factor_values(self, df, metric, factor_i, factor_values, combine_lambda, new_name):
+        """
+        Combines factor values in a DataFrame, applies a lambda function to metric values,
+        and appends the new rows with a custom factor value to the original DataFrame.
+
+        Parameters:
+        - df: The original DataFrame.
+        - factor_i:
+        - factor_values: A list of factor values to combine.
+        - combine_lambda: A lambda function defining how to combine `metric` values.
+        - new_name: The name for the new `factor` value in the new row.
+
+        Returns:
+        - A DataFrame with the new rows appended.
+        """
+        # Filter the dataset for rows that match any of the senses in the list
+        filtered_df = df[df[factor_i].isin(factor_values)]
+
+        # Group by all index columns except `factor` apply the lambda to `metric` values, and create new rows
+        factors_except_i = [factor for factor in self.factors.keys() if factor != factor_i]
+        grouped = filtered_df.groupby(factors_except_i + ['TrainingSize', 'Iteration'])
+        new_rows_list = []
+
+        for _, group in grouped:
+            combined_metric = combine_lambda(group[metric])
+            new_row = group.iloc[0].copy()  # Copy the first row to retain all other column values
+            new_row[factor_i] = new_name  # Set the new "Sense" value
+            new_row[metric] = combined_metric  # Set the combined `metric` value using the lambda function
+            new_rows_list.append(new_row)
+
+        # Create a DataFrame from the new rows
+        new_rows_df = pd.DataFrame(new_rows_list)
+
+        # Append these new rows to the original dataset
+        updated_df = pd.concat([df, new_rows_df], ignore_index=True)
+
+        return updated_df
+
     ###
 
     def _filter_data_for_one_curve(self, df, factor_values):
