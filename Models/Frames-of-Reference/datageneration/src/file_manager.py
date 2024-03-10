@@ -22,7 +22,7 @@ class FileManager:
             self.create_training_output_directories()
 
     def get_from_config(self, param):
-        return self.config["experiment"][param]
+        return self.config["experiment"].get(param, None)
 
     def load_config(self):
         try:
