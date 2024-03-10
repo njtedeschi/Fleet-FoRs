@@ -23,12 +23,19 @@ def main():
     train_min = file_manager.get_from_config("train_min")
     train_max = file_manager.get_from_config("train_max")
     train_step = file_manager.get_from_config("train_step")
-    train_sizes = range(train_min, train_max+1, train_step)
+
+    train_sizes = list(range(train_min, train_max+1, train_step))
     repetitions = file_manager.get_from_config("repetitions")
     experimental_conditions = file_manager.experimental_conditions
 
     # Calculate total number of items created for estimating progress
     total_objects = sum(train_sizes) * repetitions * len(experimental_conditions)
+
+    additional_train_sizes = file_manager.get_from_config("additional_train_sizes")
+    if additional_train_sizes:
+        train_sizes += additional_train_sizes
+        total_objects += sum(additional_train_sizes) * repetitions * len(experimental_conditions)
+
     # Produce and save data
     with tqdm(total=total_objects, desc="Overall Progress", unit="object") as pbar:
         for experimental_condition in experimental_conditions:
