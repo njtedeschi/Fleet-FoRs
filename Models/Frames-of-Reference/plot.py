@@ -34,4 +34,17 @@ if __name__ == "__main__":
 
     plot_manager = PlotManager(cl_args)
     data = plot_manager.load_df(results_type)
+    ### UNCOMMENT FOR DOING MORE COMPLEX CURVES
+    # data = plot_manager.combine_factor_values(
+    #     data,
+    #     "Share",
+    #     "Sense",
+    #     # ["Int", "Rel", "IntRel"],
+    #     ["Int", "Rel"],
+    #     # lambda shares: shares.sum(),
+    #     lambda shares: shares.iloc[0] - shares.iloc[1],
+    #     # "Angular"
+    #     "Int - Rel"
+    # )
+    ###
     plot_manager.create_all_plots(data, metric, factor)

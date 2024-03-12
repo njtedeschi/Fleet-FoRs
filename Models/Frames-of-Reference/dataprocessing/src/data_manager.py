@@ -143,8 +143,6 @@ class PlotManager(DataManager):
             filename = filestem + '_simple.png'
         else:
             filename = filestem + f'_{metric}.png'
-        if self.cl_args.mixtec_paired:
-            filename = 'mixtec_paired_' + filename
         filename = filename.replace("/", "_").lower()
         save_path = os.path.join(
             self.root,
