@@ -6,8 +6,8 @@ import os
 import pandas as pd
 import yaml
 
-# INPUT_SUBDIRECTORY = "test_results"
-INPUT_SUBDIRECTORY = "test_results_sorted"
+INPUT_SUBDIRECTORY = "test_results"
+# INPUT_SUBDIRECTORY = "test_results_sorted"
 OUTPUT_SUBDIRECTORY = "aggregate_results"
 OUTPUT_FILENAME_METRICS = "all_metrics.csv"
 # Only include shares, and consolidate "SInt" and "MInt"
