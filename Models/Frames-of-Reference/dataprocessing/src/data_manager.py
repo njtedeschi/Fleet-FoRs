@@ -12,6 +12,7 @@ from .plotting.constants import (
 )
 from .plotting.plot_configuration import PlotConfiguration
 from .plotting.plotter import Plotter
+from .statistics.spline_calculator import SplineCalculator
 
 class DataManager:
 
@@ -142,6 +143,8 @@ class PlotManager(DataManager):
             filename = filestem + '_simple.png'
         else:
             filename = filestem + f'_{metric}.png'
+        if self.cl_args.mixtec_paired:
+            filename = 'mixtec_paired_' + filename
         filename = filename.replace("/", "_").lower()
         save_path = os.path.join(
             self.root,
@@ -196,7 +199,70 @@ class PlotManager(DataManager):
             )
 
 
-class StatsManager(DataManager):
+class BootstrapManager(DataManager):
 
     def __init__(self, cl_args):
         super().__init__(cl_args)
+        self.spline_calculator = SplineCalculator()
+
+    def _resample(self, df):
+        groupby_cols = list(self.factors.keys()) + ["TrainingSize"]
+        return df.groupby(groupby_cols, group_keys=False).apply(
+            lambda x: x.sample(n=len(x), replace=True)
+        )
+
+    def calculate_header(self):
+        factor_cols = [
+            f"{factor}_1,{factor}_2"
+            for factor in self.factors.keys()
+        ]
+        header_cols = (
+            ["Metric"]
+            + factor_cols
+            + ["Lower", "Upper"]
+        )
+        header = ",".join(header_cols) + "\n"
+        return header
+
+    def calculate_row(self, metric, condition_1, condition_2, lower, upper):
+        row_elements = [metric]
+        for factor in self.factors.keys():
+            row_elements.append(str(condition_1[factor]))
+            row_elements.append(str(condition_2[factor]))
+        row_elements = row_elements + [str(lower), str(upper)]
+        row = ",".join(row_elements) + "\n"
+        return row
+
+    def sample_across_conditions(
+            self,
+            df,
+            condition_1,
+            condition_2,
+            metric,
+            num_bootstrap_samples=1000
+        ):
+        filtered_data_1 = self._filter_data_for_one_curve(df, condition_1)
+        filtered_data_2 = self._filter_data_for_one_curve(df, condition_2)
+
+        bootstrapped_areas = []
+        for _ in range(num_bootstrap_samples):
+            sample_1 = self._resample(filtered_data_1)
+            sample_2 = self._resample(filtered_data_2)
+            aggregated_1 = self._aggregate_curve_data(sample_1, metric, 'std')
+            aggregated_2 = self._aggregate_curve_data(sample_2, metric, 'std')
+
+            # print(aggregated_1)
+            # print(aggregated_2)
+            # exit()
+            area_1 = self.spline_calculator.area(
+                aggregated_1['mean'].index,
+                aggregated_1['mean'].values,
+                aggregated_1['std'].values
+            )
+            area_2 = self.spline_calculator.area(
+                aggregated_2['mean'].index,
+                aggregated_2['mean'].values,
+                aggregated_2['std'].values
+            )
+            bootstrapped_areas.append(area_1 - area_2)
+        return bootstrapped_areas

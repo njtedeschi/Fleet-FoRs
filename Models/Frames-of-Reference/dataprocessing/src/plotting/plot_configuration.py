@@ -11,4 +11,3 @@ class PlotConfiguration:
     labels: Dict[str, str] = field(default_factory=dict)
     colors: Dict[str, str] = field(default_factory=dict)
     linestyles: Dict[str, str] = field(default_factory=dict)
-    title_format: str = ""
