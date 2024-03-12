@@ -11,16 +11,13 @@ class SplineCalculator:
         self.spacing = spacing
 
     # Fitting splines
-    def calculate_b_spline(self, aggregate_data, metric):
-        y = aggregate_data[metric]['mean']
-        x = aggregate_data.index
-        weights = self.calculate_weights(aggregate_data, metric)
+    def calculate_b_spline(self, x, y, standard_deviations):
+        weights = self.calculate_weights(standard_deviations)
 
         tck = splrep(x, y, w=weights, s=self.smoothing)
         return tck
 
-    def calculate_weights(self, aggregate_data, metric):
-        standard_deviations = aggregate_data[metric]['std']
+    def calculate_weights(self, standard_deviations):
         min_std = 1e-3
         weights = []
         for std in standard_deviations:
@@ -32,9 +29,8 @@ class SplineCalculator:
         return weights
 
     # Evaluating splines
-    def area(self, aggregate_data, metric):
-        tck = self.calculate_b_spline(aggregate_data, metric)
-        x = aggregate_data.index
+    def area(self, x, y, standard_deviations):
+        tck = self.calculate_b_spline(x, y, standard_deviations)
         return self._area(tck, min(x), max(x))
 
     def _area(self, tck, x_min, x_max):
