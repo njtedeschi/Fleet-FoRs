@@ -21,6 +21,12 @@ if __name__ == "__main__":
                         action='store_true',
                         help="Whether to save plots as pngs"
     )
+    parser.add_argument('--xmax',
+                        type=int,
+                        nargs='?',
+                        default=None,
+                        help='Optional maximum x value'
+    )
     cl_args = parser.parse_args()
     metric = cl_args.metric
     factor = cl_args.factor
