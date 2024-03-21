@@ -1,6 +1,7 @@
 import os
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import yaml
 
@@ -220,6 +221,70 @@ class PlotManager(DataManager):
                 value=value
             )
 
+    ###
+
+    def create_all_plot_grids(self, df, metric, factor_i, row_factor, col_factor):
+        specified_factors = {factor_i, row_factor, col_factor}
+        other_factors = {factor: self.factors[factor] for factor in self.factors if factor not in specified_factors}
+        unique_combinations = df.drop_duplicates(subset=list(other_factors.keys()))
+
+        for _, row in unique_combinations.iterrows():
+            factor_values = {factor: row[factor] for factor in other_factors if factor in row}
+            valid = all(factor_values.get(factor, None) in self.factors.get(factor, []) for factor in factor_values)
+            if not valid:
+                continue  # Skip combinations not specified in config
+
+            plotter = self._initialize_plotter(metric, factor_i)
+            self._create_plot_grid(plotter, df, metric, factor_i, row_factor, col_factor, factor_values)
+
+    def _create_plot_grid(self, plotter, df, metric, factor_i, row_factor, col_factor, factor_values):
+        row_values = self.factors[row_factor]
+        col_values = self.factors[col_factor]
+
+        # Determine grid size
+        nrows, ncols = len(row_values), len(col_values)
+        # fig, axs = plt.subplots(nrows, ncols, figsize=(5 * ncols, 4 * nrows), sharex=True, sharey=True)
+        fig, axs = plt.subplots(nrows, ncols, figsize=(4 * ncols, 4 * nrows), sharex=True, sharey=True)
+
+        # Make sure axs is a 2D array
+        if nrows == 1 or ncols == 1:
+            axs = np.array(axs).reshape(nrows, ncols)
+
+        for row_idx, row_value in enumerate(row_values):
+            for col_idx, col_value in enumerate(col_values):
+                ax = axs[row_idx, col_idx]
+                for factor_i_value in self.factors[factor_i]:
+                    specific_factor_values = factor_values.copy()
+                    specific_factor_values[row_factor] = row_value
+                    specific_factor_values[col_factor] = col_value
+                    specific_factor_values[factor_i] = factor_i_value
+
+                    filtered_df = self._filter_data_for_one_curve(df, specific_factor_values)
+                    if not filtered_df.empty:
+                        aggregated_df = self._aggregate_curve_data(filtered_df, metric)
+                        plotter.plot_curve_on_ax(
+                            ax,
+                            x=aggregated_df['mean'].index,
+                            y=aggregated_df['mean'].values,
+                            yerr=aggregated_df['sem'].values,
+                            factor_i=factor_i,
+                            value=factor_i_value
+                        )
+
+                    # ax.set_title(f"{row_value} | {col_value}")
+                    # if col_idx == 0:
+                    #     # Label for rows
+                    #     ax.set_ylabel(row_value, fontsize=12)  # Adjust fontsize as needed
+
+                    if row_idx == 0:
+                        # Label for columns
+                        ax.set_title(col_value, fontsize=12)  # Adjust fontsize as needed
+
+        fig.tight_layout()
+        # Row labels (if preferred over y-axis labels)
+        for ax, row_value in zip(axs[:,0], row_values):
+            ax.set_ylabel(row_value, rotation=0, size='large', labelpad=15)
+        plt.show()
 
 class BootstrapManager(DataManager):
 

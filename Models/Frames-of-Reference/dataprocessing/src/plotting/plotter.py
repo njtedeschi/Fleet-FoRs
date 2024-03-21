@@ -44,3 +44,15 @@ class Plotter:
             plt.close()
         else:
             plt.show()
+
+    def plot_curve_on_ax(self, ax, x, y, yerr=None, factor_i="", value=""):
+        """Plot a single curve with error bars."""
+        ax.errorbar(
+            x,
+            y,
+            yerr=yerr,
+            label=self.labels.get(value, f"{factor_i}-{value}"),
+            # Use color from FACTOR_COLORS if available, otherwise use the next color from the default cycle
+            color=self.colors.get(value, next(self.default_colors)),
+            linestyle=self.linestyles.get(value, "solid")
+        )
