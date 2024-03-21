@@ -306,17 +306,17 @@ class BootstrapManager(DataManager):
         header_cols = (
             ["Metric"]
             + factor_cols
-            + ["Lower", "Upper"]
+            + ["Lower", "Upper", "n_bootstrap"]
         )
         header = ",".join(header_cols) + "\n"
         return header
 
-    def calculate_row(self, metric, condition_1, condition_2, lower, upper):
+    def calculate_row(self, metric, condition_1, condition_2, lower, upper, n_bootstrap):
         row_elements = [metric]
         for factor in self.factors.keys():
             row_elements.append(str(condition_1[factor]))
             row_elements.append(str(condition_2[factor]))
-        row_elements = row_elements + [str(lower), str(upper)]
+        row_elements = row_elements + [str(lower), str(upper), str(n_bootstrap)]
         row = ",".join(row_elements) + "\n"
         return row
 
@@ -352,4 +352,26 @@ class BootstrapManager(DataManager):
                 aggregated_2['std'].values
             )
             bootstrapped_areas.append(area_1 - area_2)
+        return bootstrapped_areas
+
+    def sample_within_condition(
+            self,
+            df,
+            condition,
+            metric,
+            num_bootstrap_samples=1000
+        ):
+        filtered_data = self._filter_data_for_one_curve(df, condition)
+
+        bootstrapped_areas = []
+        for _ in range(num_bootstrap_samples):
+            sample = self._resample(filtered_data)
+            aggregated = self._aggregate_curve_data(sample, metric, 'std')
+
+            area = self.spline_calculator.area(
+                aggregated['mean'].index,
+                aggregated['mean'].values,
+                aggregated['std'].values
+            )
+            bootstrapped_areas.append(area)
         return bootstrapped_areas
