@@ -17,6 +17,14 @@ if __name__ == "__main__":
                         action='store_true',
                         help="Whether to just plot shares with symmetric and meronymic senses combined"
     )
+    parser.add_argument('--title',
+                        action='store_true',
+                        help="Whether to give title to plots"
+    )
+    parser.add_argument('--no_legend',
+                        action='store_false',
+                        dest='legend',
+                        help="Disable the legend.")
     parser.add_argument('--save',
                         action='store_true',
                         help="Whether to save plots as pngs"
