@@ -19,6 +19,7 @@ class DataManager:
     def __init__(self, cl_args):
         self.cl_args = cl_args
         self.root = cl_args.root
+        self.full_results = not self.root.startswith("experiments")
         self.config = self._load_config()
         self.factors = self.config['factors']
 
@@ -40,12 +41,24 @@ class DataManager:
 
     def load_df(self, results_type):
         results_file = self.config["results_files"][results_type]
-        csv_path = os.path.join(
-            self.root,
-            "aggregate_results",
-            results_file
-        )
-        return pd.read_csv(csv_path)
+        if self.full_results:
+            results_dir = self.root
+        else:
+            results_dir = os.path.join(self.root, "aggregate_results")
+        csv_path = os.path.join(results_dir, results_file)
+        df = pd.read_csv(csv_path)
+        df = self._preprocess_df(df)
+        return df
+
+    def _preprocess_df(self, df):
+        if self.full_results:
+            dates_to_use = self.config["dates_to_use"]
+            df = df[df.apply(lambda row: row['Date'] == dates_to_use.get(row['Language'], None), axis=1)]
+            df = df.drop(columns=['Date'])
+        xmax = self.cl_args.xmax
+        if xmax:
+            df = df[df['TrainingSize'] <= xmax]
+        return df
 
     def combine_factor_values(self, df, metric, factor_i, factor_values, combine_lambda, new_name):
         """
