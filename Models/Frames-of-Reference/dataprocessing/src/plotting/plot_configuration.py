@@ -5,7 +5,8 @@ from typing import Dict, Tuple
 class PlotConfiguration:
     figsize: Tuple[int, int] = (12, 6)
     ylim: Tuple[int, int] = (0, 1)
-    xlabel: str = "Training Size"
+    # xlabel: str = "Training Size"
+    xlabel: str = "Amount of data"
     #
     ylabel: str = ""
     labels: Dict[str, str] = field(default_factory=dict)
