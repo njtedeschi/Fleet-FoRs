@@ -30,13 +30,15 @@ class Plotter:
             linestyle=self.linestyles.get(value, "solid")
         )
 
-    def finalize_plot(self, title, save_path=None):
+    def finalize_plot(self, title=None, save_path=None, include_legend=True):
         """Finalize and display or save the plot."""
         plt.ylim(self.config.ylim)
-        plt.title(title)
+        if title:
+            plt.title(title)
+        if include_legend:
+            plt.legend()
         plt.xlabel(self.config.xlabel)
         plt.ylabel(self.config.ylabel)
-        plt.legend()
         if save_path:
             plt.savefig(save_path)
             plt.close()

@@ -186,12 +186,21 @@ class PlotManager(DataManager):
         """Prepare data and delegate plotting to Plotter."""
         plotter.initialize_plot()
         self._process_and_plot_curves(plotter, df, metric, factor_i, factor_values)
-        title = self._determine_title(metric, factor_i, factor_values)
+
+        # Initialize a dictionary with parameters that will always be passed
+        plot_params = {'include_legend': self.cl_args.legend}
+
+        # Conditionally add title to the parameters if requested
+        if self.cl_args.title:
+            plot_params['title'] = self._determine_title(metric, factor_i, factor_values)
+
+        # Conditionally add save path to the parameters if requested
         if self.cl_args.save:
-            save_path = self._determine_save_path(metric, factor_i, factor_values)
-        else:
-            save_path = None
-        plotter.finalize_plot(title, save_path)
+            plot_params['save_path'] = self._determine_save_path(metric, factor_i, factor_values)
+
+        # Pass the parameters to the plot finalization method
+        plotter.finalize_plot(**plot_params)
+
 
     def _process_and_plot_curves(self, plotter, df, metric, factor_i, factor_values):
         for value in self.factors[factor_i]:
