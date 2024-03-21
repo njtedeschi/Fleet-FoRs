@@ -22,6 +22,8 @@ class DataManager:
         self.full_results = not self.root.startswith("experiments")
         self.config = self._load_config()
         self.factors = self.config['factors']
+        if getattr(cl_args, "other", None):
+            self.factors["Sense"].append("Other")
 
     def _load_config(self):
         try:
