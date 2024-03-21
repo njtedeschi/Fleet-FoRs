@@ -35,6 +35,10 @@ if __name__ == "__main__":
                         default=None,
                         help='Optional maximum x value'
     )
+    parser.add_argument('--other',
+                        action='store_true',
+                        help="Whether to include 'Other' sense in plots"
+    )
     cl_args = parser.parse_args()
     metric = cl_args.metric
     factor = cl_args.factor
@@ -48,17 +52,18 @@ if __name__ == "__main__":
 
     plot_manager = PlotManager(cl_args)
     data = plot_manager.load_df(results_type)
-    ### UNCOMMENT FOR DOING MORE COMPLEX CURVES
-    # data = plot_manager.combine_factor_values(
-    #     data,
-    #     "Share",
-    #     "Sense",
-    #     # ["Int", "Rel", "IntRel"],
-    #     ["Int", "Rel"],
-    #     # lambda shares: shares.sum(),
-    #     lambda shares: shares.iloc[0] - shares.iloc[1],
-    #     # "Angular"
-    #     "Int - Rel"
-    # )
-    ###
+
+    ### Begin "Other" calculation ###
+    if metric == "Share" and cl_args.other:
+        senses = plot_manager.factors['Sense']
+        data = plot_manager.combine_factor_values(
+            data,
+            metric="Share",
+            factor_i="Sense",
+            factor_values=senses,
+            combine_lambda=lambda shares: 1 - shares.sum(),
+            new_name="Other"
+        )
+    ### End "Other" calculation
+
     plot_manager.create_all_plots(data, metric, factor)
