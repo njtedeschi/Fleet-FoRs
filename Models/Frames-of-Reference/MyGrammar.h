@@ -175,6 +175,36 @@ public:
                             return cs == 1;
                         }
                     });
+            // Canonicity of ground orientation
+            // NOTE: assumes ground orientation vectors are unit aligned with coordinate axes
+            // Upright (canonical for x, y, and z)
+            add("g_upward_up(%s)", +[](MyInput x) -> bool {
+                        return x.scene.ground.upward == Space::up;
+                    });
+            // Upside-down (canonical for x and y; non-canonical for z)
+            add("g_upward_down(%s)", +[](MyInput x) -> bool {
+                        return x.scene.ground.upward == Space::down;
+                    });
+            // Not lying horizontally (canonical for x and y; *either* canonical or non-canonical for z)
+            add("g_upward_vertical(%s)", +[](MyInput x) -> bool {
+                        Direction g_upward = x.scene.ground.upward;
+                        return (g_upward == Space::up || g_upward == Space::down);
+                    });
+            // Lying horizontally (non-canonical for *either* x or y; non-canonical for z)
+            add("g_upward_horizontal(%s)", +[](MyInput x) -> bool {
+                        Direction g_upward = x.scene.ground.upward;
+                        return !(g_upward == Space::up || g_upward == Space::down);
+                    });
+            // Lying face up or down (canonical for x; non-canonical for y and z)
+            add("g_forward_vertical(%s)", +[](MyInput x) -> bool {
+                        Direction g_forward = x.scene.ground.forward;
+                        return (g_forward == Space::up || g_forward == Space::down);
+                    });
+            // Lying on left or right side (canonical for y; non-canonical for x and z)
+            add("g_rightward_vertical(%s)", +[](MyInput x) -> bool {
+                        Direction g_rightward = x.scene.ground.rightward;
+                        return (g_rightward == Space::up || g_rightward == Space::down);
+                    });
             // Directions
             add("UP", +[]() -> Direction {
                         return Space::up;
