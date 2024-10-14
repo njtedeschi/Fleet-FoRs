@@ -139,12 +139,24 @@ struct zBool {
     }
 };
 
+// TODO: think of better alternative to this and making higher-order versions of canonicity primitives
+struct anchorBool {
+    std::function<bool(Frame)> func;
+
+    anchorBool(std::function<bool(Frame)> f) :
+        func(f){}
+
+    bool operator()(const Frame& frame) const {
+        return func(frame);
+    }
+};
+
 /* struct SpatialWord { */
 /*     std::string name; */
 /*     std::function<Direction(OrientedObject)>; */
 /* }; */
 
-class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,Anchor,Transformation,coordinateBool,OrientedObject,Direction,ft<Direction,Frame>,BodyPartNoun>,
+class MyGrammar : public Grammar<MyInput,bool,   MyInput,bool,Frame,ft<bool,Frame>,std::vector<Frame>,fBool,anchorBool,Anchor,Transformation,coordinateBool,OrientedObject,Direction,ft<Direction,Frame>,BodyPartNoun>,
 				  public Singleton<MyGrammar> {
 public:
 	MyGrammar() {
@@ -373,6 +385,20 @@ public:
                             return (f.anchor == a) && (f.transformation == t);
                         });
                     });
+            // "restricted" frame conditions that have an additional "anchor bool" restriction on the frame's anchor
+            // TODO: replace this temporary workaround with a better way to incorporate restrictions on frame use
+            add("rframe(%s,%s)",
+                    +[](Anchor a, anchorBool r) -> fBool {
+                        return fBool([=](Frame f) {
+                            return (f.anchor == a) && (f.transformation == Transformation::none) && r(f);
+                        });
+                    });
+            add("rframe'(%s,%s,%s)",
+                    +[](Anchor a, Transformation t, anchorBool r) -> fBool {
+                        return fBool([=](Frame f) {
+                            return (f.anchor == a) && (f.transformation == t) && r(f);
+                        });
+                    });
             add("G",
                     +[]() -> Anchor {
                         return Anchor::ground;
@@ -392,6 +418,44 @@ public:
             add("TR",
                     +[]() -> Transformation {
                         return Transformation::transreflected;
+                    }, TERMINAL_WEIGHT);
+            // Canonicity of ground orientation
+            // NOTE: assumes ground orientation vectors are unit aligned with coordinate axes
+            // Upright (canonical for x, y, and z)
+            add("z_plus_up", +[]() -> anchorBool {
+                        return anchorBool([=](Frame f) {
+                            return f.upward == Space::up;
+                        });
+                    }, TERMINAL_WEIGHT);
+            // Upside-down (canonical for x and y; non-canonical for z)
+            add("z_plus_down", +[]() -> anchorBool {
+                        return anchorBool([=](Frame f) {
+                            return f.upward == Space::down;
+                        });
+                    }, TERMINAL_WEIGHT);
+            // Not lying horizontally (canonical for x and y; *either* canonical or non-canonical for z)
+            add("z_plus_vertical", +[]() -> anchorBool {
+                        return anchorBool([=](Frame f) {
+                            return (f.upward == Space::up || f.upward == Space::down);
+                        });
+                    }, TERMINAL_WEIGHT);
+            // Lying horizontally (non-canonical for *either* x or y; non-canonical for z)
+            add("z_plus_horizontal", +[]() -> anchorBool {
+                        return anchorBool([=](Frame f) {
+                            return !(f.upward == Space::up || f.upward == Space::down);
+                        });
+                    }, TERMINAL_WEIGHT);
+            // Lying face up or down (canonical for x; non-canonical for y and z)
+            add("y_plus_vertical", +[]() -> anchorBool {
+                        return anchorBool([=](Frame f) {
+                            return (f.forward == Space::up || f.forward == Space::down);
+                        });
+                    }, TERMINAL_WEIGHT);
+            // Lying on left or right side (canonical for y; non-canonical for x and z)
+            add("x_plus_vertical", +[]() -> anchorBool {
+                        return anchorBool([=](Frame f) {
+                            return (f.rightward == Space::up || f.rightward == Space::down);
+                        });
                     }, TERMINAL_WEIGHT);
             /***/
             /* Radial conditions */
