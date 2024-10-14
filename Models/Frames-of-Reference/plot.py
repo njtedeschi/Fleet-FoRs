@@ -67,3 +67,4 @@ if __name__ == "__main__":
     ### End "Other" calculation
 
     plot_manager.create_all_plots(data, metric, factor)
+    # plot_manager.create_all_plot_grids(data, metric, factor, "%IntrinsicData", "Language")

@@ -29,13 +29,22 @@ class SplineCalculator:
         return weights
 
     # Evaluating splines
-    def area(self, x, y, standard_deviations):
-        tck = self.calculate_b_spline(x, y, standard_deviations)
-        return self._area(tck, min(x), max(x))
-
-    def _area(self, tck, x_min, x_max):
-        xs = np.linspace(x_min, x_max, self.spacing)
+    def evaluate_spline(self, x, tck):
+        xs = np.linspace(min(x), max(x), self.spacing)
         ys = splev(xs, tck)
+        return xs, ys
 
-        area = np.trapz(ys, xs) / (x_max - x_min)
+    def area(self, xs, ys):
+        area = np.trapz(ys, xs) / (max(xs) - min(xs))
         return area
+
+    # def area(self, x, y, standard_deviations):
+    #     tck = self.calculate_b_spline(x, y, standard_deviations)
+    #     return self._area(tck, min(x), max(x))
+
+    # def _area(self, tck, x_min, x_max):
+    #     xs = np.linspace(x_min, x_max, self.spacing)
+    #     ys = splev(xs, tck)
+
+    #     area = np.trapz(ys, xs) / (x_max - x_min)
+    #     return area

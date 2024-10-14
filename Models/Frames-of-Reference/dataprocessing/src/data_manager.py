@@ -306,19 +306,33 @@ class BootstrapManager(DataManager):
         header_cols = (
             ["Metric"]
             + factor_cols
-            + ["Lower", "Upper", "n_bootstrap"]
+            + ["Lower", "Upper", "%<0", "n_bootstrap"]
         )
         header = ",".join(header_cols) + "\n"
         return header
 
-    def calculate_row(self, metric, condition_1, condition_2, lower, upper, n_bootstrap):
+    def calculate_row(self, metric, condition_1, condition_2, lower, upper, subzero, n_bootstrap):
         row_elements = [metric]
         for factor in self.factors.keys():
             row_elements.append(str(condition_1[factor]))
             row_elements.append(str(condition_2[factor]))
-        row_elements = row_elements + [str(lower), str(upper), str(n_bootstrap)]
+        row_elements = row_elements + [str(lower), str(upper), str(subzero), str(n_bootstrap)]
         row = ",".join(row_elements) + "\n"
         return row
+
+    def _sample_fit(self, filtered_df, metric):
+        sample_df = self._resample(filtered_df)
+        aggregated_df = self._aggregate_curve_data(sample_df, metric, 'std')
+        x = aggregated_df['mean'].index
+        y = aggregated_df['mean'].values
+        yerr = aggregated_df['std'].values
+        tck = self.spline_calculator.calculate_b_spline(x, y, yerr)
+        xs, ys = self.spline_calculator.evaluate_spline(x, tck)
+        area = self.spline_calculator.area(xs, ys)
+        return area, (x, y, xs, ys, yerr)  # Return additional data needed for plotting
+        # if self.cl_args.test and area < 0:
+        #     title = "Sample " + str(n_sample)+ ": " + str(condition)
+        #     self._plot_spline_fit(x, y, xs, ys, yerr, ylabel=metric, title=title)
 
     def sample_across_conditions(
             self,
@@ -328,29 +342,12 @@ class BootstrapManager(DataManager):
             metric,
             num_bootstrap_samples=1000
         ):
-        filtered_data_1 = self._filter_data_for_one_curve(df, condition_1)
-        filtered_data_2 = self._filter_data_for_one_curve(df, condition_2)
-
+        filtered_df_1 = self._filter_data_for_one_curve(df, condition_1)
+        filtered_df_2 = self._filter_data_for_one_curve(df, condition_2)
         bootstrapped_areas = []
         for _ in range(num_bootstrap_samples):
-            sample_1 = self._resample(filtered_data_1)
-            sample_2 = self._resample(filtered_data_2)
-            aggregated_1 = self._aggregate_curve_data(sample_1, metric, 'std')
-            aggregated_2 = self._aggregate_curve_data(sample_2, metric, 'std')
-
-            # print(aggregated_1)
-            # print(aggregated_2)
-            # exit()
-            area_1 = self.spline_calculator.area(
-                aggregated_1['mean'].index,
-                aggregated_1['mean'].values,
-                aggregated_1['std'].values
-            )
-            area_2 = self.spline_calculator.area(
-                aggregated_2['mean'].index,
-                aggregated_2['mean'].values,
-                aggregated_2['std'].values
-            )
+            area_1, _ = self._sample_fit(filtered_df_1, metric)
+            area_2, _ = self._sample_fit(filtered_df_2, metric)
             bootstrapped_areas.append(area_1 - area_2)
         return bootstrapped_areas
 
@@ -361,17 +358,20 @@ class BootstrapManager(DataManager):
             metric,
             num_bootstrap_samples=1000
         ):
-        filtered_data = self._filter_data_for_one_curve(df, condition)
-
+        filtered_df = self._filter_data_for_one_curve(df, condition)
         bootstrapped_areas = []
-        for _ in range(num_bootstrap_samples):
-            sample = self._resample(filtered_data)
-            aggregated = self._aggregate_curve_data(sample, metric, 'std')
-
-            area = self.spline_calculator.area(
-                aggregated['mean'].index,
-                aggregated['mean'].values,
-                aggregated['std'].values
-            )
+        for n_sample in range(num_bootstrap_samples):
+            area, plot_data = self._sample_fit(filtered_df, metric)
+            if self.cl_args.test and area < 0:
+                title = "Sample " + str(n_sample)+ ": " + str(condition)
+                self._plot_spline_fit(*plot_data, ylabel=metric, title=title)
             bootstrapped_areas.append(area)
         return bootstrapped_areas
+
+    def _plot_spline_fit(self, x, y, xs, ys, yerr, ylabel, title):
+        plt.errorbar(x, y, yerr=yerr, label="Original", color="blue")
+        plt.plot(xs, ys, label="Spline fit", color="red")
+        plt.xlabel('Amount of data')
+        plt.ylabel(ylabel)
+        plt.title(title)
+        plt.show()

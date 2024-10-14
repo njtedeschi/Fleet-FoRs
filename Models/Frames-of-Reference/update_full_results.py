@@ -4,8 +4,8 @@ import os
 import pandas as pd
 import yaml
 
-FULL_RESULTS_DIRECTORY = "results"
-CONFIG_FILENAME = "config.yaml"
+FULL_RESULTS_DIRECTORY = "full_results"
+CONFIG_FILENAME = "config_consolidation.yaml"
 CONFIG_PATH = os.path.join(
     FULL_RESULTS_DIRECTORY,
     CONFIG_FILENAME
@@ -76,14 +76,18 @@ class ResultsUpdater:
 
     def _set_missing_value(self, date, factor):
         # Check if date is in the config and has a specific value for the factor
-        experiment_defaults = self.config["default_factor_values"][date]
+        experiment_defaults = self.config["default_factor_values"].get(date, {})
         return experiment_defaults.get(factor, "NA")
 
-    def update_results_files(self, result_types=None, dates=None):
+    def update_results_files(self, result_types=None, dir_dates=None):
         if result_types is None:
             result_types = self.config['result_types']
-        if dates is None:
-            dates = self.config['dates']
+        if dir_dates is None:
+            dir_dates = self.config['dates'].keys()
+        csv_dates = {
+            dir_date: self.config['dates'].get(dir_date, dir_date)
+            for dir_date in dir_dates
+        }
 
         for result_type in result_types:
             full_results_path = FULL_RESULTS_PATH.format(
@@ -99,26 +103,34 @@ class ResultsUpdater:
             updated_results_df = self._update_results_df(
                 full_results_df,
                 result_type,
-                dates
+                csv_dates
             )
+            updated_results_df = self._postprocess_results(updated_results_df)
             updated_results_df.to_csv(full_results_path, index=False)
 
-    def _update_results_df(self, full_results_df, result_type, dates):
+    def _update_results_df(self, full_results_df, result_type, csv_dates):
         # Remove existing entries for the given date from the full results DataFrame
-        full_results_df = full_results_df[~full_results_df['Date'].isin(dates)]
+        full_results_df = full_results_df[~full_results_df['Date'].isin(csv_dates.values())]
         all_dfs = [full_results_df]
-        for date in dates:
+        for dir_date, csv_date in csv_dates.items():
             experiment_results_path = EXPERIMENT_RESULTS_PATH.format(
-                date=date,
+                date=dir_date,
                 result_type=result_type
             )
             if os.path.exists(experiment_results_path):
                 experiment_df = pd.read_csv(experiment_results_path)
-                experiment_df = self._adjust_columns_to_config(experiment_df, date)
+                experiment_df = self._adjust_columns_to_config(experiment_df, csv_date)
                 all_dfs.append(experiment_df)
             else:
                 print(f"No file at {experiment_results_path}")
         return pd.concat(all_dfs, ignore_index=True)
+
+    def _postprocess_results(self, df):
+        # Treat Mixtec data where p_bipedal_ground=0.8 as a separate language
+        df.loc[(df['Date'] == '2024-02-08') & (df['Language'] == 'Mixtec'), 'Language'] = 'Mixtec_80'
+        # Sort by date, language, hyperparameter values, training size, iteration, word, and sense
+        df = df.sort_values(by=self.config["index_cols"])
+        return df
 
 
 def main(args):

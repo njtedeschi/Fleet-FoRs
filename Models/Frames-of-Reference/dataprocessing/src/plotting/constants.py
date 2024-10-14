@@ -21,7 +21,9 @@ SENSE_LABELS = {
     "MIntAbs": "Intrinsic (meronymy) and Absolute",
         ###
     "SIntRelAbs": "All frames (symmetric intrinsic)",
-    "MIntRelAbs":  "All frames (meronymic intrinsic)"
+    "MIntRelAbs":  "All frames (meronymic intrinsic)",
+    #########
+    "Other": "Other"
 }
 ### END LABELS ###
 
@@ -34,38 +36,43 @@ class Color(Enum):
     GREEN = "green"
     ORANGE = "orange"
     BLACK = "black"
-
-# Color assignments dictionary
 SENSE_COLORS = {
     "Int": Color.BLUE.value,
     "Rel": Color.RED.value,
-    "Abs": Color.YELLOW.value,
-    "IntRelAbs": Color.BLACK.value
+    "IntRel": Color.GREEN.value,
+    "Other": "grey"
 }
+# Color assignments dictionary
+# SENSE_COLORS = {
+#     "Int": Color.BLUE.value,
+#     "Rel": Color.RED.value,
+#     "Abs": Color.YELLOW.value,
+#     "IntRelAbs": Color.BLACK.value
+# }
 
-def set_sense_secondary_colors():
-    # Simplified color mixing logic
-    color_mixing = {
-        frozenset({Color.BLUE.value, Color.RED.value}): Color.PURPLE.value,
-        frozenset({Color.BLUE.value, Color.YELLOW.value}): Color.GREEN.value,
-        frozenset({Color.RED.value, Color.YELLOW.value}): Color.ORANGE.value
-    }
+# def set_sense_secondary_colors():
+#     # Simplified color mixing logic
+#     color_mixing = {
+#         frozenset({Color.BLUE.value, Color.RED.value}): Color.PURPLE.value,
+#         frozenset({Color.BLUE.value, Color.YELLOW.value}): Color.GREEN.value,
+#         frozenset({Color.RED.value, Color.YELLOW.value}): Color.ORANGE.value
+#     }
 
-    # Update secondary colors based on primary colors
-    SENSE_COLORS["IntRel"] = color_mixing.get(frozenset({SENSE_COLORS["Int"], SENSE_COLORS["Rel"]}))
-    SENSE_COLORS["IntAbs"] = color_mixing.get(frozenset({SENSE_COLORS["Int"], SENSE_COLORS["Abs"]}))
-    SENSE_COLORS["RelAbs"] = color_mixing.get(frozenset({SENSE_COLORS["Rel"], SENSE_COLORS["Abs"]}))
+#     # Update secondary colors based on primary colors
+#     SENSE_COLORS["IntRel"] = color_mixing.get(frozenset({SENSE_COLORS["Int"], SENSE_COLORS["Rel"]}))
+#     SENSE_COLORS["IntAbs"] = color_mixing.get(frozenset({SENSE_COLORS["Int"], SENSE_COLORS["Abs"]}))
+#     SENSE_COLORS["RelAbs"] = color_mixing.get(frozenset({SENSE_COLORS["Rel"], SENSE_COLORS["Abs"]}))
 
-# Initial update to set secondary colors
-set_sense_secondary_colors()
-SENSE_COLORS["SInt"] = SENSE_COLORS["Int"]
-SENSE_COLORS["MInt"] = SENSE_COLORS["Int"]
-SENSE_COLORS["SIntRel"] = SENSE_COLORS["IntRel"]
-SENSE_COLORS["MIntRel"] = SENSE_COLORS["IntRel"]
-SENSE_COLORS["SIntAbs"] = SENSE_COLORS["IntAbs"]
-SENSE_COLORS["MIntAbs"] = SENSE_COLORS["IntAbs"]
-SENSE_COLORS["SIntRelAbs"] = SENSE_COLORS["IntRelAbs"]
-SENSE_COLORS["MIntRelAbs"] = SENSE_COLORS["IntRelAbs"]
+# # Initial update to set secondary colors
+# set_sense_secondary_colors()
+# SENSE_COLORS["SInt"] = SENSE_COLORS["Int"]
+# SENSE_COLORS["MInt"] = SENSE_COLORS["Int"]
+# SENSE_COLORS["SIntRel"] = SENSE_COLORS["IntRel"]
+# SENSE_COLORS["MIntRel"] = SENSE_COLORS["IntRel"]
+# SENSE_COLORS["SIntAbs"] = SENSE_COLORS["IntAbs"]
+# SENSE_COLORS["MIntAbs"] = SENSE_COLORS["IntAbs"]
+# SENSE_COLORS["SIntRelAbs"] = SENSE_COLORS["IntRelAbs"]
+# SENSE_COLORS["MIntRelAbs"] = SENSE_COLORS["IntRelAbs"]
 ### END COLORS ###
 
 
@@ -98,7 +105,8 @@ FACTOR_LINESTYLES = {
 ### END LEGEND INFO ###
 
 METRIC_LABELS = {
-    "Share": "Posterior Share",
+    # "Share": "Posterior Share",
+    "Share": "Posterior probability",
     "Precision": "Precision",
     "Recall": "Recall",
     "Accuracy": "Accuracy",

@@ -3,7 +3,7 @@ import os
 
 import pandas as pd
 
-from dataprocessing.src.statistics.significance_testing import confidence_interval
+from dataprocessing.src.statistics.significance_testing import confidence_interval, percentile
 from dataprocessing.src.data_manager import BootstrapManager
 
 def sense_across_languages(bootstrap_manager, data, output_path, language_1, language_2, n_bootstrap=1000):
@@ -46,6 +46,7 @@ def sense_across_languages(bootstrap_manager, data, output_path, language_1, lan
             )
 
             lower, upper = confidence_interval(bootstrapped_areas, alpha=0.05)
+            subzero = percentile(bootstrapped_areas, 0)
             # Construct the row according to the header format
             row = bootstrap_manager.calculate_row(
                 metric,
@@ -53,6 +54,7 @@ def sense_across_languages(bootstrap_manager, data, output_path, language_1, lan
                 condition_2,
                 lower,
                 upper,
+                subzero,
                 n_bootstrap
             )
             if cl_args.save:
@@ -102,6 +104,7 @@ def senses_within_language(bootstrap_manager, data, output_path, language, n_boo
             )
 
             lower, upper = confidence_interval(bootstrapped_areas, alpha=0.05)
+            subzero = percentile(bootstrapped_areas, 0)
             # Construct the row according to the header format
             row = bootstrap_manager.calculate_row(
                 metric,
@@ -109,6 +112,7 @@ def senses_within_language(bootstrap_manager, data, output_path, language, n_boo
                 blank,
                 lower,
                 upper,
+                subzero,
                 n_bootstrap
             )
             if cl_args.save:
@@ -149,6 +153,7 @@ def boosts(bootstrap_manager, data, output_path, language, n_bootstrap=1000):
         )
 
         lower, upper = confidence_interval(bootstrapped_areas, alpha=0.05)
+        subzero = percentile(bootstrapped_areas, 0)
         # Construct the row according to the header format
         row = bootstrap_manager.calculate_row(
             metric,
@@ -156,6 +161,7 @@ def boosts(bootstrap_manager, data, output_path, language, n_bootstrap=1000):
             condition_2,
             lower,
             upper,
+            subzero,
             n_bootstrap
         )
         if cl_args.save:
@@ -195,9 +201,9 @@ if __name__ == "__main__":
                         default=1000,
                         help='Number of bootstrap samples'
     )
-    parser.add_argument('--save',
+    parser.add_argument('--test',
                         action='store_true',
-                        help="Whether to save results as csv"
+                        help="Whether to plot bootstrapped curves under certain conditions"
     )
     cl_args = parser.parse_args()
 
@@ -258,3 +264,4 @@ if __name__ == "__main__":
         boosts(bootstrap_manager, data, output_path, language, n_bootstrap)
     sense_across_languages(bootstrap_manager, data, output_path, "English", "Engtec", n_bootstrap)
     sense_across_languages(bootstrap_manager, data, output_path, "Engtec", "Mixtec", n_bootstrap)
+    sense_across_languages(bootstrap_manager, data, output_path, "English", "Mixtec", n_bootstrap)
