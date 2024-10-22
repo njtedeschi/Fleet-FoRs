@@ -38,14 +38,17 @@ while IFS=: read -r id subdirectory language; do
             # Extract the zip file
             unzip -q "$zip_file" -d "$tmp_dir"
 
-            testing_data_file="$root_dir/testing_data/${subdirectory}.json"
-            if [ -f "$testing_data_file" ]; then  # Check if the json file exists
-                # Run the C++ executable for testing instead of training
-                ./test_${cpu_name} --language="$language" --testing_data_path="$testing_data_file" --model_directory="$tmp_dir/$subdirectory" --output_directory="$output_dir" --output_filename_stem="$subdirectory"
-                # echo "./test --language=\"$language\" --testing_data_path=\"$testing_data_file\" --model_directory=\"$tmp_dir/$subdirectory\" --output_directory=\"$output_dir\" --output_filename_stem=\"$subdirectory\""
-            else
-                echo "Testing data file not found: $testing_data_file"
-            fi
+            # Loop over all test data json files in the testing_data directory
+            for testing_data_file in "$root_dir/testing_data"/*json; do
+                if [ -f "$testing_data_file" ]; then
+                    test_name=$(basename "$testing_data_file" .json)
+                    # Run the C++ executable for testing instead of training
+                    ./test_${cpu_name} --language="$language" --testing_data_path="$testing_data_file" --model_directory="$tmp_dir/$subdirectory" --output_directory="$output_dir" --output_filename_stem="${subdirectory}_${test_name}"
+                    # echo "./test --language=\"$language\" --testing_data_path=\"$testing_data_file\" --model_directory=\"$tmp_dir/$subdirectory\" --output_directory=\"$output_dir\" --output_filename_stem=\"${subdirectory}_${test_name}\""
+                else
+                    echo "Testing data file not found: $testing_data_file"
+                fi
+            done
 
             # Clean up the temporary directory
             rm -rf "$tmp_dir"
