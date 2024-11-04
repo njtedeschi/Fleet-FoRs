@@ -22,3 +22,6 @@ testing:
 
 deserialize:
 	g++-10 DeserializeModels.cpp -o deserialize -O2 $(FLEET_FLAGS) $(FLEET_INCLUDE) -I  /usr/include/eigen3/ $(FLEET_LIBS)
+
+training3:
+	g++-10 Ch3Train.cpp -o train_3_$(CPU) -O2 $(FLEET_FLAGS) $(FLEET_INCLUDE) -I  /usr/include/eigen3/ $(FLEET_LIBS)
