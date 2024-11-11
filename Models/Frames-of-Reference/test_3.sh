@@ -13,7 +13,7 @@ config_file="$root_dir/config_evaluation.txt"
 shift 2 # Remove the first two arguments, now $@ contains only the IDs
 
 # Compile the test executable for the specified CPU
-# make testing3 CPU=$cpu_name
+make testing3 CPU=$cpu_name
 
 # Convert the IDs into an array for easier searching
 declare -A id_map
