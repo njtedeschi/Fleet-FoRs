@@ -10,6 +10,17 @@
 
 using json = nlohmann::json;
 
+// TODO: replace Ch 2 testing equivalents
+using TruthValue = std::unordered_map<std::string, bool>;
+using Label = std::unordered_map<std::string, TruthValue>;
+
+struct TestingDatum {
+    Context context;
+    Label label;
+
+    TestingDatum(Context c, Label l) : context(c), label(l) {}
+};
+
 class MyData {
 public:
     const std::vector<Word> words;
@@ -19,6 +30,11 @@ public:
     std::vector<MyInput> json_file_to_training_data(const std::string& filename) {
         json j_object = json_file_to_item(filename);
         return json_item_to_training_data(j_object);
+    }
+
+    std::vector<TestingDatum> json_file_to_testing_data(const std::string& filename) {
+        json j_object = json_file_to_item(filename);
+        return json_item_to_testing_data(j_object);
     }
 
 private:
@@ -40,11 +56,26 @@ private:
         return training_data;
     }
 
+    std::vector<TestingDatum> json_item_to_testing_data(json& j_object){
+        std::vector<TestingDatum> testing_data;
+        for (auto& [key, val] : j_object.items()) {
+            // std::cout << "key: " << key << ", value:" << val << '\n';
+            testing_data.emplace_back(json_item_to_testing_datum(val));
+        }
+        return testing_data;
+    }
+
     // Parse datum
     MyInput json_item_to_datum(json j){
         const Context& context = json_item_to_context(j["scene"]);
         std::string utterance = j["description"];
         return MyInput(context, utterance);
+    }
+
+    TestingDatum json_item_to_testing_datum(const json& j) {
+        const Context& context = json_item_to_context(j["scene"]);
+        const Label& label = json_item_to_label(j["label"]);
+        return TestingDatum(context, label);
     }
 
     // Parse Scene
@@ -71,5 +102,21 @@ private:
     T json_item_to_vector(json j){
         Vector vector = {j.at(0), j.at(1), j.at(2)};
         return T(vector);
+    }
+
+    Label json_item_to_label(const json& j) {
+        Label label;
+        for (auto& item : j.items()) {
+            label[item.key()] = json_to_truth_value(item.value());
+        }
+        return label;
+    }
+
+    TruthValue json_to_truth_value(const json& j) {
+        TruthValue truth_value;
+        for (auto& item : j.items()) {
+            truth_value[item.key()] = item.value();
+        }
+        return truth_value;
     }
 };
