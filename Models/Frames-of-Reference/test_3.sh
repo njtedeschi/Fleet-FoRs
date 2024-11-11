@@ -1,6 +1,6 @@
-#!/usr/local/bin/bash
+#!/bin/bash
 set -e # Exit immediately if a command exits with a non-zero status
-# TODO: !/bin/bash
+
 # Check if at least root directory is provided
 if [ "$#" -lt 3 ]; then
     echo "Usage: $0 cpu_name root_directory id1 [id2 ...]"
