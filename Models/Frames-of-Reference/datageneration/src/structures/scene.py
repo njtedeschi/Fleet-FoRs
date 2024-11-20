@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 import numpy as np
+from scipy.spatial.distance import cosine
 
 from ..constants.space import ORIGIN, UP
 
@@ -19,6 +20,7 @@ class OrientedObject(BaseObject):
     # Note: forward and upward should be orthogonal
     def __post_init__(self):
         self.rightward = np.cross(self.forward, self.upward)
+        self.is_upright = np.array_equal(self.upward, UP)
 
     @classmethod
     def speaker(cls, forward, upward, specified_position=None):
@@ -56,6 +58,12 @@ class Scene:
     ground: OrientedObject
     figure: BaseObject
 
+    def __post_init__(self):
+        self.is_direct = self._is_direct()
+        self.satisfies_POCO = True
+        if not self.ground.is_upright:
+            self.satisfies_POCO = self._satisfies_POCO()
+
     @classmethod
     def direct_scene(cls, speaker, figure):
         scene = cls(
@@ -65,14 +73,41 @@ class Scene:
         )
         return scene
 
-    def is_direct(self):
+    def _is_direct(self):
         return self.ground.is_participant
 
-    def is_canonical(self):
-        return (
-            np.array_equal(self.speaker.upward, UP)
-            and np.array_equal(self.ground.upward, UP)
-        )
+    def _satisfies_POCO(self):
+        canonicity = self._ground_canonicity_by_axis()
+        axis = self._intrinsic_figure_axis()
+        if axis:
+            return canonicity[axis]
+        # TODO: error handling for off-axis case?
+        return False
+
+    def _ground_canonicity_by_axis(self):
+        axis_is_canonical = {
+            "rightward": True,
+            "forward": True,
+            "upward": True
+        }
+        # If object isn't upright
+        if not np.array_equal(self.ground.upward, UP):
+            axis_is_canonical["upward"] = False
+            if np.dot(self.ground.forward, UP) != 0:
+                axis_is_canonical["forward"] = False
+            if np.dot(self.ground.rightward, UP) != 0:
+                axis_is_canonical["rightward"] = False
+        return axis_is_canonical
+
+    # TODO: this and the import of cosine introduced redundancy with description.py
+    def _intrinsic_figure_axis(self):
+        g_to_f = self.ground_figure_displacement()
+        for axis in ["upward", "forward", "rightward"]:
+            cosine_similarity = 1-cosine(g_to_f,
+                                         getattr(self.ground, axis))
+            if (abs(cosine_similarity) == 1):
+                return axis
+
 
     def ground_figure_displacement(self):
         return self.figure.position - self.ground.position

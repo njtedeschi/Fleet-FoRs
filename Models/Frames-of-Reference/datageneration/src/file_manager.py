@@ -2,6 +2,7 @@ from dataclasses import fields
 import itertools
 import json
 import os
+from copy import deepcopy
 
 import numpy as np
 import yaml
@@ -14,15 +15,15 @@ class FileManager:
 
     def __init__(self, root, training=True):
         self.root = root
+        self.data_type = "training" if training else "testing"
         self.config = self.load_config()
-        self.validate_config()
-        self.experimental_conditions = self.determine_experimental_conditions()
-
         if training:
+            self.validate_config()
+            self.experimental_conditions = self.determine_experimental_conditions()
             self.create_training_output_directories()
 
     def get_from_config(self, param):
-        return self.config["experiment"].get(param, None)
+        return self.config[self.data_type]["experiment"].get(param, None)
 
     def load_config(self):
         try:
@@ -39,7 +40,7 @@ class FileManager:
 
     def validate_config(self):
             # Extracting the hyperparameters section from the config
-            hyperparameters_config = self.config.get('hyperparameters', {})
+            hyperparameters_config = self.config["training"].get('hyperparameters', {})
 
             # Getting all the fields from ExperimentalCondition that start with 'p_'
             experimental_condition_fields = [f.name for f in fields(ExperimentalCondition) if f.name.startswith('p_')]
@@ -56,7 +57,7 @@ class FileManager:
 
     # Get all combinations of hyperparameters
     def determine_experimental_conditions(self):
-        hyperparameters = self.config["hyperparameters"]
+        hyperparameters = self.config["training"]["hyperparameters"]
 
         # Separate fixed and variable hyperparameters
         fixed_hyperparams = {}
@@ -134,7 +135,14 @@ class FileManager:
         with open(filepath, 'w') as file:
             file.write(json_data)
 
-    # Testing
+    # Get all combinations of hyperparameters
+    def determine_test_condition(self):
+        hyperparameters = self.config["testing"]["hyperparameters"]
+        test_condition = ExperimentalCondition(**hyperparameters,
+                                                   labels=["test"])
+
+        return test_condition
+
     def set_testing_output_directory(self):
         output_directory = os.path.join(
             self.root,
@@ -142,15 +150,15 @@ class FileManager:
         )
         return output_directory
 
-    def set_testing_filepath(self, output_directory, experimental_condition):
-        filename = experimental_condition.name + ".json"
+    def set_testing_filepath(self, output_directory, test_condition):
+        filename = test_condition.name + ".json"
         filepath = os.path.join(output_directory, filename)
         return filepath
 
-    def save_testing_data(self, data, experimental_condition):
+    def save_testing_data(self, data, test_condition):
         json_data = json.dumps(data, default=self.serialize_to_json)
         output_directory = self.set_testing_output_directory()
-        filepath = self.set_testing_filepath(output_directory, experimental_condition)
+        filepath = self.set_testing_filepath(output_directory, test_condition)
 
         with open(filepath, 'w') as file:
             file.write(json_data)

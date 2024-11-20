@@ -11,7 +11,7 @@ from .constants.objects import (NEAR, FAR,
                                 OFF_AXIS_DIRECTIONS,
                                 CANONICAL_DIRECT_SPEAKER,
                                 CANONICAL_NONDIRECT_SPEAKER)
-from .constants.languages import LANGUAGES
+from .constants.languages import LANGUAGES_CH_2, LANGUAGES_CH_3
 
 class Sampler:
 
@@ -44,12 +44,21 @@ class Sampler:
         else:
             yield None
 
+    # NOTE: assumes values for adjustment_label are factors to reduce odds by
     def flip(self, p_label, adjustment_label=None):
+        p = self.probs[p_label]
         if(adjustment_label):
-            p_adjustment = self.probs[adjustment_label]
+            odds_adjustment = float(self.probs[adjustment_label])
+
+            if odds_adjustment == float('inf'):
+                adjusted_p = 0.0
+            else:
+                odds = p / (1-p)
+                adjusted_odds = odds / odds_adjustment
+                adjusted_p = adjusted_odds / (1+adjusted_odds)
         else:
-            p_adjustment = 0
-        result = self.rng.random() < (self.probs[p_label] + p_adjustment)
+            adjusted_p = p
+        result = self.rng.random() < adjusted_p
         # Logging flip results
         if self.verbose:
             self.current_flip_results[p_label] = result
@@ -61,8 +70,9 @@ class Sampler:
 
 class SceneGenerator:
 
-    def __init__(self, sampler):
+    def __init__(self, sampler, chapter):
         self.sampler = sampler
+        self.chapter = chapter
 
     def build_scene(self):
         # Sample values that are same for all scene types
@@ -183,17 +193,21 @@ class SceneGenerator:
             direction = self.sampler.choice(CARDINAL_DIRECTIONS_6)
         else:
             direction = self.sampler.choice(OFF_AXIS_DIRECTIONS)
-        distance = NEAR if self.sampler.flip("figure_is_near") else FAR
-        position = distance * direction
+        if self.chapter == 2:
+            distance = NEAR if self.sampler.flip("figure_is_near") else FAR
+            position = distance * direction
+        elif self.chapter == 3:
+            position = direction # only unit distances
         figure = BaseObject(position)
         return figure
 
 
 class DescriptionGenerator:
 
-    def __init__(self, sampler, language):
+    def __init__(self, sampler, language, chapter):
         self.sampler = sampler
         self.language = language
+        self.chapter = chapter
 
     def sample_word(self, words):
         words = list(words)
@@ -201,15 +215,19 @@ class DescriptionGenerator:
 
     def true_description(self, scene):
         description = None
+
         if scene.figure_is_on_axis() and self.sampler.flip("description_is_angular"):
             description = self.angular_description(scene)
         # Default to proximity description if no angular description applies
         if not description:
+            if self.chapter == 3:
+                raise Exception("No true descriptions in Language")
             description = self.language.proximity_description(scene)
         return description
 
+    # TODO: decide whether non-canonical *speakers* should actually be handled
     def angular_description(self, scene):
-        if scene.is_canonical():
+        if scene.satisfies_POCO:
             return self._angular_description_canonical(scene)
         else:
             return self._angular_description_noncanonical(scene)
@@ -222,13 +240,14 @@ class DescriptionGenerator:
         if scene.figure_is_on_axis(2) and self.sampler.flip("description_is_absolute"):
             description = self.language.absolute_vertical_description(scene)
         else:
+            print("Violates POCO")
             description = self.intrinsic_or_relative_description(scene, "noncanonical_adjustment")
         return description
 
     def intrinsic_or_relative_description(self, scene, adjustment=None):
         # Direct scenes automatically use intrinsic description
         # as direct frame of reference
-        if scene.is_direct() or self.sampler.flip("description_is_intrinsic",
+        if scene.is_direct or self.sampler.flip("description_is_intrinsic",
                                                   adjustment):
             descriptions = self.language.intrinsic_descriptions(scene)
         else:
@@ -243,12 +262,18 @@ class DescriptionGenerator:
         word = self.sample_word(self.language.vocabulary)
         return word
 
-
 class DataGenerator:
 
-    def __init__(self, experimental_condition, seed=None, verbose=False):
+    def __init__(self, experimental_condition, chapter, seed=None, verbose=False):
         self.sampler = Sampler(experimental_condition, seed, verbose)
-        self.scene_generator = SceneGenerator(self.sampler)
+        self.scene_generator = SceneGenerator(self.sampler, chapter)
+        self.chapter = chapter
+        if chapter == 2:
+            self.language = LANGUAGES_CH_2[experimental_condition.language]
+        elif chapter == 3:
+            self.language = LANGUAGES_CH_3[experimental_condition.language]
+        else:
+            raise ValueError('Invalid chapter number')
 
     def generate_data(self, num_samples):
         data = []
@@ -272,10 +297,9 @@ class DataGenerator:
 
 class TrainingDataGenerator(DataGenerator):
 
-    def __init__(self, experimental_condition, seed=None, verbose=False):
-        super().__init__(experimental_condition, seed, verbose)
-        language = LANGUAGES[experimental_condition.language]
-        self.description_generator = DescriptionGenerator(self.sampler, language)
+    def __init__(self, experimental_condition, chapter, seed=None, verbose=False):
+        super().__init__(experimental_condition, chapter, seed, verbose)
+        self.description_generator = DescriptionGenerator(self.sampler, self.language, chapter)
 
     # Override super
     def _build_datum(self):
@@ -290,13 +314,12 @@ class TrainingDataGenerator(DataGenerator):
 
 class TestingDataGenerator(DataGenerator):
 
-    def __init__(self, experimental_condition, seed=None, verbose=False):
-        super().__init__(experimental_condition, seed, verbose)
-        self.language = LANGUAGES[experimental_condition.language]
+    def __init__(self, experimental_condition, chapter, seed=None, verbose=False):
+        super().__init__(experimental_condition, chapter, seed, verbose)
 
     # Override super
     def _build_datum(self):
         scene = self.scene_generator.build_scene()
-        label = self.language.label_scene(scene)
+        label = self.language.label_scene(scene, self.chapter)
         datum = TestingDatum(scene, label)
         return datum

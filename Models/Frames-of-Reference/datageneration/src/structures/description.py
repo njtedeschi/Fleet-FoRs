@@ -37,8 +37,8 @@ class Language:
     meronymy_locatives: Dict[str, Dict[str, AbstractDirection]]
     absolute_above: str
     absolute_below: str
-    near: str = "near"
-    far: str = "far"
+    near: str
+    far: str
     near_far_threshold: float = 1
 
     def __post_init__(self):
@@ -49,7 +49,9 @@ class Language:
         vocabulary = {self.near, self.far}
         vocabulary = vocabulary.union(self.symmetry_locatives.keys())
         vocabulary = vocabulary.union(self.meronymy_locatives.keys())
-        # Include absolute words if there are distinct ones
+        # TODO: Include absolute words if there are distinct ones
+        # Remove empty strings (i.e. near/far for chapter 3)
+        vocabulary = {word for word in vocabulary if word}
         return vocabulary
 
     # Meronmy locatives that actually exhibit a difference depending on
@@ -114,7 +116,7 @@ class Language:
     def relative_descriptions(self, scene):
         # Direct FoRs treated as intrinsic
         # This condition shouldn't be reached due to a previous check
-        if scene.is_direct():
+        if scene.is_direct:
             return self.intrinsic_descriptions(scene)
         else:
             g_to_f = scene.ground_figure_displacement()
@@ -151,7 +153,15 @@ class Language:
         int_sym_mer = self._intrinsic_descriptions_symmetry_with_meronym(g_to_f, anchor)
         return PossibleDescriptions(proximity, int_sym, int_mer, int_sym_mer, relative, absolute)
 
-    def label_scene(self, scene):
+    def label_scene(self, scene, chapter):
+        if chapter == 2:
+            return self._label_scene_ch_2(scene)
+        elif chapter == 3:
+            return self._label_scene_ch_3(scene)
+        else:
+            raise ValueError("Invalid chapter number")
+
+    def _label_scene_ch_2(self, scene):
         possible_descriptions = self.all_descriptions(scene)
         label = {}
         # Proximity
@@ -166,6 +176,22 @@ class Language:
                 label[word] = self._truth_values_true_meronyms(word, possible_descriptions)
             else:
                 label[word] = self._truth_values(word, possible_descriptions)
+        return label
+
+    def _label_scene_ch_3(self, scene):
+        possible_descriptions = self.all_descriptions(scene)
+        label = {}
+        for word in self.symmetry_locatives:
+            truth_values = {}
+            truth_values["Int"] = (word in possible_descriptions.intrinsic_symmetry)
+            truth_values["PInt"] = (truth_values["Int"] and scene.satisfies_POCO)
+            truth_values["Rel"] = (word in possible_descriptions.relative)
+            truth_values["IntRel"] = (truth_values["Int"] or truth_values["Rel"])
+            truth_values["PIntRel"] = (truth_values["PInt"] or truth_values["Rel"])
+            if word not in [self.absolute_above, self.absolute_below]:
+                truth_values["QInt"] = (truth_values["Int"] and scene.ground.is_upright)
+                truth_values["QIntRel"] = (truth_values["QInt"] or truth_values["Rel"])
+            label[word] = truth_values
         return label
 
     def _truth_values(self, word, possible_descriptions):
