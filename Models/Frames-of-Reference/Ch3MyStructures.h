@@ -336,7 +336,8 @@ struct Context {
 enum class Transformation {
     AlignStandard,
     AlignMirrored,
-    AlignVertical
+    AlignVertical,
+    Mimic
 };
 
 struct MyInput {
