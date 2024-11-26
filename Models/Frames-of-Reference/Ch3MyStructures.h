@@ -364,12 +364,35 @@ std::string to_string(Axis axis) {
     }
 }
 
+std::string to_string(Part part) {
+    switch (part) {
+        case Part::Head: return "head";
+        case Part::Belly: return "belly";
+        case Part::Face: return "face";
+        case Part::Back: return "back";
+        case Part::Side: return "side";
+        default: return "Unknown";
+    }
+}
+
 std::string to_string(const Object& obj) {
     std::ostringstream oss;
     oss << "Object(position=" << to_string(obj.position) << ", axial_directions={";
 
     for (const auto& [axis, direction] : obj.axial_directions) {
         oss << to_string(axis) << ": ";
+        if (direction.has_value()) {
+            oss << to_string(*direction);
+        } else {
+            oss << "None";
+        }
+        oss << ", ";
+    }
+
+    oss << "}, part_directions={";
+
+    for (const auto& [part, direction] : obj.part_directions) {
+        oss << to_string(part) << ": ";
         if (direction.has_value()) {
             oss << to_string(*direction);
         } else {
