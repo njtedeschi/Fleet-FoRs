@@ -37,8 +37,8 @@ int main(int argc, char** argv) {
 
     // Input and output
     fleet.add_option("--model_directory", model_directory, "Location of trained models");
-    fleet.add_option("--n_top", model_directory, "Number of top hypotheses to show per model");
-    fleet.add_option("--n_train", model_directory, "Minimum training size to start displaying results");
+    fleet.add_option("--n_top", n_top, "Number of top hypotheses to show per model");
+    fleet.add_option("--n_train", n_train, "Minimum training size to start displaying results");
     // fleet.add_option("--output_directory", output_directory, "Where to save testing results");
     // fleet.add_option("--output_filename_stem", output_filename_stem, "Stem to use for results and lookup table files");
 
