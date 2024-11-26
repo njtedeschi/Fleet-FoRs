@@ -10,29 +10,6 @@
 
 double TERMINAL_WEIGHT = 5.0;
 
-// English
-namespace Language {
-
-    const std::vector<Word> words = {
-        Word("above", Axis::Z, true),
-        Word("below", Axis::Z, false),
-        Word("front", Axis::Y, true),
-        Word("behind", Axis::Y, false),
-        Word("right", Axis::X, true),
-        Word("left", Axis::X, false)
-    };
-
-    // const std::vector<Sense> senses = {
-    //     Sense::Intrinsic,
-    //     Sense::Relative,
-    //     Sense::Absolute
-    // };
-    const std::vector<Sense> senses = {
-        Sense::Intrinsic,
-        Sense::Relative
-    };
-}
-
 using Weight = double;
 using SenseWeights = std::unordered_map<Sense, Weight>;
 using WordSenseWeights = std::unordered_map<Word, SenseWeights>;
@@ -133,17 +110,53 @@ namespace DSL {
         const SenseConditions<JudgmentType>& sense_conditions_z
     ) {
         WordSenseConditions<JudgmentType> word_sense_conditions;
-        for (const auto& word : Language::words) {
+        for (const auto& word : LanguageContext::get_words()) {
             switch(word.axis) {
                 case Axis::X:
-                    word_sense_conditions[word] = std::make_shared<const SenseConditions<JudgmentType>>(sense_conditions_x);
+                    word_sense_conditions.emplace(word, std::make_shared<const SenseConditions<JudgmentType>>(sense_conditions_x));
                     break;
                 case Axis::Y:
-                    word_sense_conditions[word] = std::make_shared<const SenseConditions<JudgmentType>>(sense_conditions_y);
+                    word_sense_conditions.emplace(word, std::make_shared<const SenseConditions<JudgmentType>>(sense_conditions_y));
                     break;
                 case Axis::Z:
-                    word_sense_conditions[word] = std::make_shared<const SenseConditions<JudgmentType>>(sense_conditions_z);
+                    word_sense_conditions.emplace(word, std::make_shared<const SenseConditions<JudgmentType>>(sense_conditions_z));
                     break;
+            }
+        }
+        return word_sense_conditions;
+    }
+
+    template <typename JudgmentType>
+    WordSenseConditions<JudgmentType> generate_word_sense_conditions_with_parts(
+        const SenseConditions<JudgmentType>& sense_conditions_x,
+        const SenseConditions<JudgmentType>& sense_conditions_y,
+        const SenseConditions<JudgmentType>& sense_conditions_z,
+        const Condition<JudgmentType>& condition_part
+    ) {
+        WordSenseConditions<JudgmentType> word_sense_conditions;
+        for (const auto& word : LanguageContext::get_words()) {
+            const SenseConditions<JudgmentType>* sense_conditions_axis = nullptr;
+            switch(word.axis) {
+                case Axis::X:
+                    sense_conditions_axis = &sense_conditions_x;
+                    break;
+                case Axis::Y:
+                    sense_conditions_axis = &sense_conditions_y;
+                    break;
+                case Axis::Z:
+                    sense_conditions_axis = &sense_conditions_z;
+                    break;
+            }
+            if (!sense_conditions_axis) {
+                throw std::invalid_argument("Some axis lacked sense conditions");
+            }
+
+            if (word.part) {
+                auto sense_conditions = *sense_conditions_axis;
+                sense_conditions[Sense::Intrinsic] = std::make_shared<const Condition<JudgmentType>>(condition_part);
+                word_sense_conditions.emplace(word, std::make_shared<const SenseConditions<JudgmentType>>(sense_conditions));
+            } else {
+                word_sense_conditions.emplace(word, std::make_shared<const SenseConditions<JudgmentType>>(*sense_conditions_axis));
             }
         }
         return word_sense_conditions;
@@ -156,7 +169,7 @@ namespace DSL {
         const Condition<JudgmentType>& condition_a
     ) {
         SenseConditions<JudgmentType> sense_conditions;
-        for (const auto& sense : Language::senses) {
+        for (const auto& sense : LanguageContext::get_senses()) {
             switch(sense) {
                 case Sense::Intrinsic:
                     sense_conditions[sense] = std::make_shared<const Condition<JudgmentType>>(condition_i);
@@ -178,7 +191,7 @@ namespace DSL {
         const SenseWeights& sense_weights_z
     ) {
         WordSenseWeights word_sense_weights;
-        for (const auto& word : Language::words) {
+        for (const auto& word : LanguageContext::get_words()) {
             switch(word.axis) {
                 case Axis::X:
                     word_sense_weights[word] = sense_weights_x;
@@ -200,7 +213,7 @@ namespace DSL {
         const Weight& weight_a
     ) {
         SenseWeights sense_weights;
-        for (const auto& sense : Language::senses) {
+        for (const auto& sense : LanguageContext::get_senses()) {
             switch(sense) {
                 case Sense::Intrinsic:
                     sense_weights[sense] = weight_i;
@@ -231,7 +244,29 @@ namespace DSL {
     std::optional<Direction> get_axial_direction(const Object& anchor, const Word& word) {
         const std::optional<Direction>& direction = anchor.axial_directions.at(word.axis);
         if (direction) {
-            return word.is_positive ? *direction : -(*direction);
+            return word.sign == Sign::Plus ? *direction : -(*direction);
+        }
+        return std::nullopt;
+    }
+
+    bool vectors_are_aligned(const Displacement& g_to_f, const Direction& reference_direction, Alignment alignment) {
+        // NOTE: assumes unit vectors
+        double cosine_similarity = dot_product(g_to_f, reference_direction);
+        switch (alignment) {
+            case Alignment::PlusParallel:
+                return cosine_similarity == 1;
+            case Alignment::MinusParallel:
+                return cosine_similarity == -1;
+            case Alignment::PlusMinusParallel:
+                return (cosine_similarity == 1 || cosine_similarity == -1);
+            default:
+                return false;
+        }
+    }
+
+    std::optional<Direction> get_part_direction(const Object& anchor, const Word& word) {
+        if (word.part && !anchor.part_directions.empty()) {
+            return anchor.part_directions.at(*word.part);
         }
         return std::nullopt;
     }
@@ -245,7 +280,7 @@ namespace DSL {
         const Displacement& g_to_f = context.g_to_f;
         const std::optional<Direction>& direction = get_axial_direction(anchor, word);
         if (direction) {
-            return dot_product(g_to_f, *direction) == 1;
+            return vectors_are_aligned(g_to_f, *direction, Alignment::PlusParallel);
         }
         return false;
     }
@@ -259,9 +294,21 @@ namespace DSL {
         const std::optional<Direction>& direction = get_axial_direction(anchor, word);
         if (direction) {
             if (word.axis == Axis::Y) {
-                return dot_product(g_to_f, *direction) == -1;
+                return vectors_are_aligned(g_to_f, *direction, Alignment::MinusParallel);
             }
-            return dot_product(g_to_f, *direction) == 1;
+            return vectors_are_aligned(g_to_f, *direction, Alignment::PlusParallel);
+        }
+        return false;
+    }
+
+    bool aligned_mimic(const Context& context, const Word& word, const Sense& sense) {
+        const Object& anchor = context.ground; // Only intrinsic FoRs, at least right now
+        if (sense == Sense::Intrinsic && !anchor.part_directions.empty()) {
+            const Displacement& g_to_f = context.g_to_f;
+            const std::optional<Direction>& direction = get_part_direction(anchor, word);
+            if (direction) {
+                return vectors_are_aligned(g_to_f, *direction, Alignment::PlusParallel);
+            }
         }
         return false;
     }
@@ -274,7 +321,7 @@ namespace DSL {
         const Displacement& g_to_f = context.g_to_f;
         const std::optional<Direction>& direction = get_axial_direction(anchor, word);
         if (direction) {
-            return dot_product(g_to_f, *direction) == 1;
+            return vectors_are_aligned(g_to_f, *direction, Alignment::PlusParallel);
         }
         return false;
     }
@@ -282,6 +329,14 @@ namespace DSL {
     bool anchor_has_axis(const Context& context, const Word& word, const Sense& sense) {
         const Object& anchor = get_anchor(context, sense);
         return anchor.has_axis(word.axis);
+    }
+
+    bool anchor_has_part(const Context& context, const Word& word, const Sense& sense) {
+        if (word.part) {
+            const Object& anchor = get_anchor(context, sense);
+            return anchor.has_part(*word.part);
+        }
+        return false;
     }
 
     // Condition<Truth> condition_and_subcondition(const Condition<Truth>& f, const Subcondition& g) {
@@ -361,6 +416,17 @@ public:
                         sense_conditions_xyz,
                         sense_conditions_xyz,
                         sense_conditions_xyz
+                    );
+                }
+            );
+            add(
+                "t-xyz-part(%s,%s)",
+                +[](SenseConditions<Truth> sense_conditions_xyz, Condition<Truth> condition_part) -> WordSenseConditions<Truth> {
+                    return DSL::generate_word_sense_conditions_with_parts<Truth>(
+                        sense_conditions_xyz,
+                        sense_conditions_xyz,
+                        sense_conditions_xyz,
+                        condition_part
                     );
                 }
             );
@@ -586,6 +652,8 @@ public:
                             return DSL::aligned_mirrored;
                         case Transformation::AlignVertical:
                             return DSL::aligned_vertical;
+                        case Transformation::Mimic:
+                            return DSL::aligned_mimic;
                     }
                     return DSL::aligned_standard;
                 }
