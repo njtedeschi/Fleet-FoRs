@@ -94,7 +94,8 @@ private:
             const Direction& upward = json_item_to_vector<Direction>(j["upward"]);
             const Direction& forward = json_item_to_vector<Direction>(j["forward"]);
             const Direction& rightward = json_item_to_vector<Direction>(j["rightward"]);
-            return Object(position, upward, forward, rightward);
+            BodyType body_type = j["body_type"] == "biped" ? BodyType::biped : BodyType::quadruped;
+            return Object(position, upward, forward, rightward, body_type);
         }
         return Object(position);
     }
