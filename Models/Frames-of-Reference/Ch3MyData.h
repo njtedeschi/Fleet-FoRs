@@ -23,6 +23,7 @@ struct TestingDatum {
 
 class MyData {
 public:
+    // Note: this isn't currently used. It's a copy-paste relic
     const std::vector<Word> words;
 
     MyData(const std::vector<Word>& w) : words(w) {}
