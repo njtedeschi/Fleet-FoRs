@@ -500,10 +500,10 @@ struct English : Language {
 struct Mixtec : Language {
     const std::vector<Word>& get_words() const override {
         static const std::vector<Word> words = {
-            Word("above", Axis::Z, Sign::Plus, Part::Head),
-            Word("below", Axis::Z, Sign::Minus, Part::Belly),
-            Word("front", Axis::Y, Sign::Plus, Part::Face),
-            Word("behind", Axis::Y, Sign::Minus, Part::Back),
+            Word("head", Axis::Z, Sign::Plus, Part::Head),
+            Word("belly", Axis::Z, Sign::Minus, Part::Belly),
+            Word("face", Axis::Y, Sign::Plus, Part::Face),
+            Word("back", Axis::Y, Sign::Minus, Part::Back),
             Word("right", Axis::X, Sign::Plus),
             Word("left", Axis::X, Sign::Minus)
         };
