@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <optional>
 #include <unordered_map>
+#include <memory>
 
 #include <type_traits>
 
@@ -515,3 +516,25 @@ struct Mixtec : Language {
         return senses;
     }
 };
+
+struct WordSense {
+    Word word;
+    Sense sense;
+
+    WordSense(Word w, Sense s) : word(std::move(w)), sense(s) {}
+
+    bool operator==(const WordSense& other) const {
+        return word == other.word && sense == other.sense;
+    }
+};
+
+template <typename OuterKey, typename InnerKey>
+struct KeyPairHash {
+    std::size_t operator()(const std::pair<OuterKey, InnerKey>& p) const {
+        std::size_t h1 = std::hash<OuterKey>{}(p.first);
+        std::size_t h2 = std::hash<InnerKey>{}(p.second);
+        // Combine the two hash values
+        return h1 ^ (h2 << 1);
+    }
+};
+
