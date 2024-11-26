@@ -53,6 +53,7 @@ void save_top_n(const std::string& filepath, const std::string& top_n) {
 
 // Language to sample training data from
 std::string language_name = "";
+std::shared_ptr<Language> LanguageContext::current_language = nullptr;
 
 int main(int argc, char** argv){
 
@@ -72,18 +73,17 @@ int main(int argc, char** argv){
     fleet.initialize(argc, argv);
 
     // Set language
-    // TODO: actually choose between different languages
-    std::vector<Word> language;
-    if (language_name == "english"){
-        language = Language::words;
-    }
-    else {
+    if (language_name == "english") {
+        LanguageContext::set_language(std::make_shared<English>());
+    } else if (language_name == "mixtec") {
+        LanguageContext::set_language(std::make_shared<Mixtec>());
+    } else {
         std::cerr << "Invalid language name provided." << std::endl;
         return 1;
     }
 
     // Training data
-    MyData my_data(language);
+    MyData my_data(LanguageContext::get_words());
     std::vector<MyInput> training_data = my_data.json_file_to_training_data(input_path);
 
     // Inference

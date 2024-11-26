@@ -84,24 +84,59 @@ enum class Axis {
     Z = 2
 };
 
+enum class Sign {
+    Plus = 1,
+    Minus = -1,
+    PlusMinus = 0
+};
+
+enum class Alignment {
+    PlusParallel = 1,
+    MinusParallel = -1,
+    PlusMinusParallel = 0
+};
+
+enum class Part {
+    Side = 0,
+    Face = 1,
+    Back = -1,
+    Head = 2,
+    Belly = -2
+};
+
+enum class BodyType {
+    biped = 0,
+    quadruped = 1
+};
+
 struct Word {
     std::string form;
     Axis axis;
-    bool is_positive;
+    Sign sign;
+    std::optional<Part> part;
 
     Word(
         std::string f,
         Axis a,
-        bool is_p
+        Sign s,
+        std::optional<Part> p = std::nullopt
     )
-        : form(f), axis(a), is_positive(is_p) {}
+        : form(f), axis(a), sign(s), part(p) {}
 
     bool operator==(const Word& other) const {
         return form == other.form &&
                axis == other.axis &&
-               is_positive == other.is_positive;
+               sign == other.sign &&
+               part == other.part;
     }
 
+    bool has_part_meaning() const {
+        return part.has_value();
+    }
+
+    bool is_vertical() const {
+        return axis == Axis::Z;
+    }
 };
 
 enum class Sense {
@@ -110,25 +145,25 @@ enum class Sense {
     Absolute = 2
 };
 
-// Custom hash functions for Word, Axis, and Sense
 namespace std {
-    template <>
-    struct hash<Word> {
-        std::size_t operator()(const Word& word) const {
-            // Hash the components of Word (word_form, axis, is_positive) and combine them
-            std::size_t h1 = std::hash<std::string>{}(word.form);
-            std::size_t h2 = std::hash<int>{}(static_cast<int>(word.axis));
-            std::size_t h3 = std::hash<bool>{}(word.is_positive);
-
-            // Combine the hashes in a way to avoid collisions
-            return h1 ^ (h2 * 31) ^ (h3 * 131);
-        }
-    };
-
     template<>
     struct hash<Axis> {
         std::size_t operator()(const Axis& axis) const noexcept {
             return static_cast<std::size_t>(axis);
+        }
+    };
+
+    template<>
+    struct hash<Sign> {
+        std::size_t operator()(const Sign& sign) const noexcept {
+            return static_cast<std::size_t>(sign);
+        }
+    };
+
+    template<>
+    struct hash<Part> {
+        std::size_t operator()(const Part& part) const noexcept {
+            return static_cast<std::size_t>(part);
         }
     };
 
@@ -138,33 +173,81 @@ namespace std {
             return static_cast<std::size_t>(sense);
         }
     };
-}
 
+    template <>
+    struct hash<Word> {
+        std::size_t operator()(const Word& word) const {
+            // Hash the components of Word (word_form, axis, sign, optional part) and combine them
+            std::size_t h1 = std::hash<std::string>{}(word.form);
+            std::size_t h2 = std::hash<Axis>{}(word.axis);
+            std::size_t h3 = std::hash<Sign>{}(word.sign);
+
+            std::size_t h4 = 0;
+            if (word.part) {
+                h4 = std::hash<Part>{}(*word.part);
+            }
+
+            // Combine the hashes in a way to avoid collisions
+            return h1 ^ (h2 * 31) ^ (h3 * 131) ^ (h4 * 17);
+        }
+    };
+}
 
 struct Object {
     using ReferenceDirection = std::optional<Direction>;
     using AxialDirections = std::unordered_map<Axis, ReferenceDirection>;
+    using PartDirections = std::unordered_map<Part, ReferenceDirection>;
 
     // Basic properties
     Position position;
 
     AxialDirections axial_directions;
+    PartDirections part_directions;
 
     Object(
         Position p,
         ReferenceDirection upward = std::nullopt,
         ReferenceDirection forward = std::nullopt,
-        ReferenceDirection rightward = std::nullopt
+        ReferenceDirection rightward = std::nullopt,
+        std::optional<BodyType> body_type = std::nullopt
     )
         : position(p)
     {
+        // Set axial directions
         axial_directions[Axis::Z] = upward;
         axial_directions[Axis::Y] = forward;
         axial_directions[Axis::X] = rightward;
+        // Set body part directions
+        if (body_type && has_all_axes()) {
+            switch(*body_type) {
+                case BodyType::biped:
+                    set_part_directions_biped();
+                    break;
+                case BodyType::quadruped:
+                    set_part_directions_quadruped();
+                    break;
+            }
+        }
     }
 
     bool has_axis(Axis axis) const {
         return axial_directions.at(axis).has_value();
+    }
+
+    bool has_part(Part part) const {
+        auto it = part_directions.find(part);
+        if (it != part_directions.end()) {
+            return it->second.has_value();
+        }
+        return false;
+    }
+
+    ReferenceDirection get_part_direction(Part part) const {
+        auto it = part_directions.find(part);
+        if (it != part_directions.end() && it->second.has_value()) {
+            return it->second.value();
+        }
+        return std::nullopt;
     }
 
     bool has_all_axes() const {
@@ -219,6 +302,20 @@ struct Object {
         return false;
     }
 
+private:
+    void set_part_directions_biped() {
+        part_directions[Part::Head] = *(axial_directions.at(Axis::Z));
+        part_directions[Part::Belly] = -(*(axial_directions.at(Axis::Z)));
+        part_directions[Part::Face] = *(axial_directions.at(Axis::Y));
+        part_directions[Part::Back] = -(*(axial_directions.at(Axis::Y)));
+    }
+
+    void set_part_directions_quadruped() {
+        part_directions[Part::Head] = std::nullopt;
+        part_directions[Part::Belly] = -(*(axial_directions.at(Axis::Z)));
+        part_directions[Part::Face] = *(axial_directions.at(Axis::Y));
+        part_directions[Part::Back] = *(axial_directions.at(Axis::Z));
+    }
 };
 
 struct Context {
@@ -297,3 +394,124 @@ std::string to_string(const Context& ctx) {
         << "\n)";
     return oss.str();
 }
+
+struct Language {
+    virtual const std::vector<Word>& get_words() const = 0;
+    virtual const std::vector<Word>& get_part_words() const = 0;
+    virtual const std::vector<Word>& get_nonpart_words() const = 0;
+    virtual const std::vector<Sense>& get_senses() const = 0;
+    virtual ~Language() = default;
+};
+
+class LanguageContext {
+private:
+    static std::shared_ptr<Language> current_language;
+
+public:
+    static void set_language(std::shared_ptr<Language> language) {
+        current_language = language;
+    }
+
+    static const Language& get_language() {
+        if (!current_language) {
+            throw std::runtime_error("Language not set.");
+        }
+        return *current_language;
+    }
+
+    // Convenience getters
+    static const std::vector<Word>& get_words() {
+        return get_language().get_words();
+    }
+
+    static const std::vector<Word>& get_part_words() {
+        return get_language().get_part_words();
+    }
+
+    static const std::vector<Word>& get_nonpart_words() {
+        return get_language().get_nonpart_words();
+    }
+
+    static const std::vector<Sense>& get_senses() {
+        return get_language().get_senses();
+    }
+};
+
+struct English : Language {
+    // NOTE: static ensures vectors only initialized once
+    const std::vector<Word>& get_words() const override {
+        static const std::vector<Word> words = {
+            Word("above", Axis::Z, Sign::Plus),
+            Word("below", Axis::Z, Sign::Minus),
+            Word("front", Axis::Y, Sign::Plus),
+            Word("behind", Axis::Y, Sign::Minus),
+            Word("right", Axis::X, Sign::Plus),
+            Word("left", Axis::X, Sign::Minus)
+        };
+        return words;
+    }
+
+    const std::vector<Word>& get_part_words() const override {
+        // Return an empty vector since no words are considered "part words"
+        static const std::vector<Word> part_words = {};
+        return part_words;
+    }
+
+    const std::vector<Word>& get_nonpart_words() const override {
+        // Return all words since English doesn't have "part words"
+        static const std::vector<Word>& nonpart_words = get_words();
+        return nonpart_words;
+    }
+
+    const std::vector<Sense>& get_senses() const override {
+        static const std::vector<Sense> senses = {
+            Sense::Intrinsic,
+            Sense::Relative
+        };
+        return senses;
+    }
+};
+
+struct Mixtec : Language {
+    const std::vector<Word>& get_words() const override {
+        static const std::vector<Word> words = {
+            Word("head", Axis::Z, Sign::Plus, Part::Head),
+            Word("belly", Axis::Z, Sign::Minus, Part::Belly),
+            Word("face", Axis::Y, Sign::Plus, Part::Face),
+            Word("back", Axis::Y, Sign::Minus, Part::Back),
+            Word("right", Axis::X, Sign::Plus),
+            Word("left", Axis::X, Sign::Minus)
+        };
+        return words;
+    }
+
+    const std::vector<Word>& get_part_words() const override {
+        static const std::vector<Word> part_words = [] {
+            const auto& words = Mixtec().get_words();
+            std::vector<Word> result;
+            std::copy_if(words.begin(), words.end(), std::back_inserter(result),
+                         [](const Word& word) { return word.part.has_value(); });
+            return result;
+        }();
+        return part_words;
+    }
+
+    const std::vector<Word>& get_nonpart_words() const override {
+        static const std::vector<Word> nonpart_words = [] {
+            const auto& words = Mixtec().get_words();
+            std::vector<Word> result;
+            std::copy_if(words.begin(), words.end(), std::back_inserter(result),
+                         [](const Word& word) { return word.part.has_value(); });
+            return result;
+        }();
+        return nonpart_words;
+    }
+
+    const std::vector<Sense>& get_senses() const override {
+        static const std::vector<Sense> senses = {
+            Sense::Intrinsic,
+            Sense::Relative
+        };
+        return senses;
+    }
+};
