@@ -17,13 +17,6 @@
 #include "Ch3MyGrammar.h"
 #include "Ch3MyHypothesis.h"
 
-// MyHypothesis target_01(grammar.simple_parse("output(f-judgments(t-judgments(t-xyz(t-i_r(truth(align-standard),truth(align-mirrored))),x),f-x_y_z(f-i(felicity(not(g-rightward-vertical))),f-i(felicity(not(g-forward-vertical))),f-i(felicity(g-upward-up))),x),w-xyz(w-i_r(001,001)))"));
-// MyHypothesis target_02(grammar.simple_parse("output(f-judgments(t-judgments(t-xyz(t-i_r(truth(align-standard),truth(align-mirrored))),x),f-x_y_z(f-i(felicity(not(g-rightward-vertical))),f-i(felicity(not(g-forward-vertical))),f-i(felicity(g-upward-up))),x),w-xyz(w-i_r(001,002)))"));
-// MyHypothesis target_04(grammar.simple_parse("output(f-judgments(t-judgments(t-xyz(t-i_r(truth(align-standard),truth(align-mirrored))),x),f-x_y_z(f-i(felicity(not(g-rightward-vertical))),f-i(felicity(not(g-forward-vertical))),f-i(felicity(g-upward-up))),x),w-xyz(w-i_r(001,004)))"));
-// MyHypothesis target_08(grammar.simple_parse("output(f-judgments(t-judgments(t-xyz(t-i_r(truth(align-standard),truth(align-mirrored))),x),f-x_y_z(f-i(felicity(not(g-rightward-vertical))),f-i(felicity(not(g-forward-vertical))),f-i(felicity(g-upward-up))),x),w-xyz(w-i_r(001,008)))"));
-// MyHypothesis target_16(grammar.simple_parse("output(f-judgments(t-judgments(t-xyz(t-i_r(truth(align-standard),truth(align-mirrored))),x),f-x_y_z(f-i(felicity(not(g-rightward-vertical))),f-i(felicity(not(g-forward-vertical))),f-i(felicity(g-upward-up))),x),w-xyz(w-i_r(001,016)))"));
-// MyHypothesis target_32(grammar.simple_parse("output(f-judgments(t-judgments(t-xyz(t-i_r(truth(align-standard),truth(align-mirrored))),x),f-x_y_z(f-i(felicity(not(g-rightward-vertical))),f-i(felicity(not(g-forward-vertical))),f-i(felicity(g-upward-up))),x),w-xyz(w-i_r(001,032)))"));
-
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /// Main code
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

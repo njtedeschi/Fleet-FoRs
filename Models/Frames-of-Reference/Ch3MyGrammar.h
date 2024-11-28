@@ -303,7 +303,7 @@ namespace DSL {
 
     bool aligned_mimic(const Context& context, const Word& word, const Sense& sense) {
         const Object& anchor = context.ground; // Only intrinsic FoRs, at least right now
-        if (sense == Sense::Intrinsic && !anchor.part_directions.empty()) {
+        if (sense == Sense::Intrinsic && word.part && !anchor.part_directions.empty()) {
             const Displacement& g_to_f = context.g_to_f;
             const std::optional<Direction>& direction = get_part_direction(anchor, word);
             if (direction) {
@@ -391,26 +391,26 @@ public:
 	MyGrammar() {
             // add("", +[]() -> {});
             add(
-                "output(%s,%s)",
+                "JW(%s,%s)",
                 +[](WordSenseJudgments<Felicity> judgments, WordSenseWeights weights) -> MyOutput {
                     return std::make_pair(judgments, weights);
                 }
             );
             add(
-                "t-judgments(%s,%s)",
+                "J-T(%s,%s)",
                 +[](WordSenseConditions<Truth> truth_conditions, Context context) -> WordSenseJudgments<Truth> {
                     return DSL::initial_word_sense_judgments<Truth>(truth_conditions, context);
                 }
             );
             add(
-                "f-judgments(%s,%s,%s)",
+                "J-F(%s,%s,%s)",
                 +[](WordSenseJudgments<Truth> truth_judgments, WordSenseConditions<Felicity> felicity_conditions, Context context) -> WordSenseJudgments<Felicity> {
                     return DSL::updated_word_sense_judgments<Felicity,Truth>(felicity_conditions, context, truth_judgments);
                 }
             );
             //////////////////////////////////
             add(
-                "t-xyz(%s)",
+                "T2-xyz(%s)",
                 +[](SenseConditions<Truth> sense_conditions_xyz) -> WordSenseConditions<Truth> {
                     return DSL::generate_word_sense_conditions<Truth>(
                         sense_conditions_xyz,
@@ -420,7 +420,7 @@ public:
                 }
             );
             add(
-                "t-xyz-part(%s,%s)",
+                "T2-xyz_part(%s,%s)",
                 +[](SenseConditions<Truth> sense_conditions_xyz, Condition<Truth> condition_part) -> WordSenseConditions<Truth> {
                     return DSL::generate_word_sense_conditions_with_parts<Truth>(
                         sense_conditions_xyz,
@@ -481,7 +481,7 @@ public:
             //     }
             // );
             add(
-                "t-i_r(%s,%s)",
+                "T1-i_r(%s,%s)",
                 +[](Condition<Truth> condition_i, Condition<Truth> condition_r) -> SenseConditions<Truth> {
                     return DSL::generate_sense_conditions<Truth>(
                         condition_i,
@@ -541,18 +541,29 @@ public:
             //         );
             //     }
             // );
+            // add(
+            //     "F2-x_y_z(%s,%s,%s)",
+            //     +[](SenseConditions<Felicity> sense_conditions_x, SenseConditions<Felicity> sense_conditions_y, SenseConditions<Felicity> sense_conditions_z) -> WordSenseConditions<Felicity> {
+            //         return DSL::generate_word_sense_conditions<Felicity>(
+            //             sense_conditions_x,
+            //             sense_conditions_y,
+            //             sense_conditions_z
+            //         );
+            //     }
+            // );
+            // add(
+            //     "F2-x_y_z_part(%s,%s,%s,%s)",
+            //     +[](SenseConditions<Felicity> sense_conditions_x, SenseConditions<Felicity> sense_conditions_y, SenseConditions<Felicity> sense_conditions_z, Condition<Felicity> condition_part) -> WordSenseConditions<Felicity> {
+            //         return DSL::generate_word_sense_conditions_with_parts<Felicity>(
+            //             sense_conditions_x,
+            //             sense_conditions_y,
+            //             sense_conditions_z,
+            //             condition_part
+            //         );
+            //     }
+            // );
             add(
-                "f-x_y_z(%s,%s,%s)",
-                +[](SenseConditions<Felicity> sense_conditions_x, SenseConditions<Felicity> sense_conditions_y, SenseConditions<Felicity> sense_conditions_z) -> WordSenseConditions<Felicity> {
-                    return DSL::generate_word_sense_conditions<Felicity>(
-                        sense_conditions_x,
-                        sense_conditions_y,
-                        sense_conditions_z
-                    );
-                }
-            );
-            add(
-                "f-xy_z(%s,%s)",
+                "F2-xy_z(%s,%s)",
                 +[](SenseConditions<Felicity> sense_conditions_xy, SenseConditions<Felicity> sense_conditions_z) -> WordSenseConditions<Felicity> {
                     return DSL::generate_word_sense_conditions<Felicity>(
                         sense_conditions_xy,
@@ -562,7 +573,18 @@ public:
                 }
             );
             add(
-                "f-0",
+                "F2-xy_z_part(%s,%s,%s)",
+                +[](SenseConditions<Felicity> sense_conditions_xy, SenseConditions<Felicity> sense_conditions_z, Condition<Felicity> condition_part) -> WordSenseConditions<Felicity> {
+                    return DSL::generate_word_sense_conditions_with_parts<Felicity>(
+                        sense_conditions_xy,
+                        sense_conditions_xy,
+                        sense_conditions_z,
+                        condition_part
+                    );
+                }
+            );
+            add(
+                "F1-true",
                 +[]() -> SenseConditions<Felicity> {
                     return DSL::generate_sense_conditions<Felicity>(
                         DSL::True<Felicity>(),
@@ -572,7 +594,7 @@ public:
                 }
             );
             add(
-                "f-i(%s)",
+                "F1-i(%s)",
                 +[](Condition<Felicity> condition_i) -> SenseConditions<Felicity> {
                     return DSL::generate_sense_conditions<Felicity>(
                         condition_i,
@@ -582,7 +604,7 @@ public:
                 }
             );
             add(
-                "f-r(%s)",
+                "F1-r(%s)",
                 +[](Condition<Felicity> condition_r) -> SenseConditions<Felicity> {
                     return DSL::generate_sense_conditions<Felicity>(
                         DSL::True<Felicity>(),
@@ -602,7 +624,7 @@ public:
             //     }
             // );
             add(
-                "f-i_r(%s,%s)",
+                "F1-i_r(%s,%s)",
                 +[](Condition<Felicity> condition_i, Condition<Felicity> condition_r) -> SenseConditions<Felicity> {
                     return DSL::generate_sense_conditions<Felicity>(
                         condition_i,
@@ -643,14 +665,14 @@ public:
             // );
             ///////////////////////////////////////////
             add(
-                "truth(%s)",
+                "T0(%s)",
                 +[](Transformation transformation) -> Condition<Truth> {
                     switch(transformation) {
                         case Transformation::AlignStandard:
                             return DSL::aligned_standard;
                         case Transformation::AlignMirrored:
                             return DSL::aligned_mirrored;
-                        case Transformation::AlignVertical:
+                        case Transformation::AlignVertical: // Note: not used right now
                             return DSL::aligned_vertical;
                         case Transformation::Mimic:
                             return DSL::aligned_mimic;
@@ -673,13 +695,13 @@ public:
             //     }
             // );
             add(
-                "felicity(%s)",
+                "F0(%s)",
                 +[](Subcondition subcondition) -> Condition<Felicity> {
                     return DSL::to_condition<Felicity>(subcondition);
                 }
             );
             add(
-                "f-false",
+                "F0-false",
                 +[]() -> Condition<Felicity> {
                     return DSL::False<Felicity>();
                 }
@@ -698,6 +720,11 @@ public:
             add(
                 "align-mirrored",
                 +[]() -> Transformation {return Transformation::AlignMirrored;},
+                TERMINAL_WEIGHT
+            );
+            add(
+                "mimic",
+                +[]() -> Transformation {return Transformation::Mimic;},
                 TERMINAL_WEIGHT
             );
             // add(
@@ -739,35 +766,44 @@ public:
                 TERMINAL_WEIGHT
             );
             add(
-                "g-upward-vertical",
+                "g-axis-vertical",
                 +[]() -> Subcondition {
                     return Subcondition([](const Context& context, const Word& word, const Sense& sense) -> bool {
-                        return context.ground.upward_is_vertical();
+                        return context.ground.axis_is_vertical(word.axis);
                     });
                 },
                 TERMINAL_WEIGHT
             );
-            add(
-                "g-forward-vertical",
-                +[]() -> Subcondition {
-                    return Subcondition([](const Context& context, const Word& word, const Sense& sense) -> bool {
-                        return context.ground.forward_is_vertical();
-                    });
-                },
-                TERMINAL_WEIGHT
-            );
-            add(
-                "g-rightward-vertical",
-                +[]() -> Subcondition {
-                    return Subcondition([](const Context& context, const Word& word, const Sense& sense) -> bool {
-                        return context.ground.rightward_is_vertical();
-                    });
-                },
-                TERMINAL_WEIGHT
-            );
+            // add(
+            //     "g-upward-vertical",
+            //     +[]() -> Subcondition {
+            //         return Subcondition([](const Context& context, const Word& word, const Sense& sense) -> bool {
+            //             return context.ground.axis_is_vertical(Axis::Z);
+            //         });
+            //     },
+            //     TERMINAL_WEIGHT
+            // );
+            // add(
+            //     "g-forward-vertical",
+            //     +[]() -> Subcondition {
+            //         return Subcondition([](const Context& context, const Word& word, const Sense& sense) -> bool {
+            //             return context.ground.axis_is_vertical(Axis::Y);
+            //         });
+            //     },
+            //     TERMINAL_WEIGHT
+            // );
+            // add(
+            //     "g-rightward-vertical",
+            //     +[]() -> Subcondition {
+            //         return Subcondition([](const Context& context, const Word& word, const Sense& sense) -> bool {
+            //             return context.ground.axis_is_vertical(Axis::X);
+            //         });
+            //     },
+            //     TERMINAL_WEIGHT
+            // );
             add("x",             Builtins::X<MyGrammar>, TERMINAL_WEIGHT);
             add(
-                "w-xyz(%s)",
+                "W2-xyz(%s)",
                 +[](SenseWeights sense_weights_xyz) -> WordSenseWeights {
                     return DSL::generate_word_sense_weights(
                         sense_weights_xyz,
@@ -794,7 +830,7 @@ public:
             //         );
             //     });
             add(
-                "w-i_r(%s,%s)",
+                "W1-i_r(%s,%s)",
                 +[](Weight weight_i, Weight weight_r) -> SenseWeights {
                     return DSL::generate_sense_weights(
                         weight_i,

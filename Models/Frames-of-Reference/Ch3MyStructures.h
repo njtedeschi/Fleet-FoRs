@@ -256,7 +256,7 @@ struct Object {
     }
 
     bool upward_is_up() const {
-        ReferenceDirection upward = axial_directions.at(Axis::Z);
+        const ReferenceDirection& upward = axial_directions.at(Axis::Z);
         if (upward) {
             return *upward == Space::up;
         }
@@ -264,41 +264,25 @@ struct Object {
     }
 
     bool upward_is_down() const {
-        ReferenceDirection upward = axial_directions.at(Axis::Z);
+        const ReferenceDirection& upward = axial_directions.at(Axis::Z);
         if (upward) {
             return *upward == Space::down;
         }
         return false;
     }
 
-    bool upward_is_vertical() const {
-        ReferenceDirection upward = axial_directions.at(Axis::Z);
-        if (upward) {
-            return *upward == Space::up || *upward == Space::down;
+    bool axis_is_vertical(Axis axis) const {
+        const ReferenceDirection& direction = axial_directions.at(axis);
+        if (direction) {
+            return *direction == Space::up || *direction == Space::down;
         }
         return false;
     }
 
-    bool upward_is_horizontal() const {
-        ReferenceDirection upward = axial_directions.at(Axis::Z);
-        if (upward) {
-            return dot_product(*upward, Space::up) == 0;
-        }
-        return false;
-    }
-
-    bool forward_is_vertical() const {
-        ReferenceDirection forward = axial_directions.at(Axis::Y);
-        if (forward) {
-            return *forward == Space::up || *forward == Space::down;
-        }
-        return false;
-    }
-
-    bool rightward_is_vertical() const {
-        ReferenceDirection rightward = axial_directions.at(Axis::X);
-        if (rightward) {
-            return *rightward == Space::up || *rightward == Space::down;
+    bool axis_is_horizontal(Axis axis) const {
+        const ReferenceDirection& direction = axial_directions.at(axis);
+        if (direction) {
+            return dot_product(*direction, Space::up) == 0;
         }
         return false;
     }
