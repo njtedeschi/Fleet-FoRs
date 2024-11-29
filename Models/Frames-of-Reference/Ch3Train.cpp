@@ -13,6 +13,7 @@
 
 #include "Ch3MyStructures.h"
 #include "Ch3MyData.h"
+#include "Ch3MyDSL.h"
 
 #include "Ch3MyGrammar.h"
 #include "Ch3MyHypothesis.h"
