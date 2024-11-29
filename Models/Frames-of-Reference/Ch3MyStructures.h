@@ -85,6 +85,12 @@ enum class Axis {
     Z = 2
 };
 
+enum class CardinalAxis {
+    EastWest = 0,
+    NorthSouth = 1,
+    UpDown = 2
+};
+
 enum class Sign {
     Plus = 1,
     Minus = -1,
@@ -95,6 +101,66 @@ enum class Alignment {
     PlusParallel = 1,
     MinusParallel = -1,
     PlusMinusParallel = 0
+};
+
+struct UnitVector {
+    CardinalAxis axis;
+    Sign sign;
+
+    UnitVector() = default;
+    UnitVector(CardinalAxis a, Sign s) : axis(a), sign(s) {}
+    // Constructor to convert from Vector
+    UnitVector(const Vector& v, bool is_bidirectional = false) {
+        int nonzero_index = -1;
+
+        for (int i = 0; i < 3; i++) {
+            if (v[i] != 0) {
+                if (nonzero_index != -1) {
+                    throw std::invalid_argument("Vector can only have one non-zero component");
+                }
+                nonzero_index = i;
+            }
+        }
+
+        if (nonzero_index == -1) {
+            throw std::invalid_argument("Vector cannot be the zero vector");
+        }
+
+        axis = static_cast<CardinalAxis>(nonzero_index);
+        if (is_bidirectional) {
+            sign = Sign::PlusMinus;
+        } else {
+            sign = (v[nonzero_index] > 0) ? Sign::Plus : Sign::Minus;
+        }
+    }
+
+    UnitVector operator-() const {
+        return UnitVector(
+            axis,
+            static_cast<Sign>(-static_cast<int>(sign))
+        );
+    }
+
+    Vector to_vector() const {
+        Vector v;
+
+        int nonzero_index = static_cast<int>(axis);
+        double nonzero_value = (sign == Sign::Minus) ? -1.0 : 1.0;
+        v[nonzero_index] = nonzero_value;
+        return v;
+    }
+
+    bool is_vertical() const {
+        return axis == CardinalAxis::UpDown;
+    }
+
+    bool is_up() const {
+        return is_vertical() && sign == Sign::Plus;
+    }
+
+    bool is_down() const {
+        return is_vertical() && sign == Sign::Minus;
+    }
 };
 
 enum class Part {
@@ -194,8 +260,8 @@ namespace std {
     };
 }
 
+using ReferenceDirection = std::optional<UnitVector>;
 struct Object {
-    using ReferenceDirection = std::optional<Direction>;
     using AxialDirections = std::unordered_map<Axis, ReferenceDirection>;
     using PartDirections = std::unordered_map<Part, ReferenceDirection>;
 
@@ -207,17 +273,17 @@ struct Object {
 
     Object(
         Position p,
-        ReferenceDirection upward = std::nullopt,
-        ReferenceDirection forward = std::nullopt,
-        ReferenceDirection rightward = std::nullopt,
+        std::optional<Direction> upward = std::nullopt,
+        std::optional<Direction> forward = std::nullopt,
+        std::optional<Direction> rightward = std::nullopt,
         std::optional<BodyType> body_type = std::nullopt
     )
         : position(p)
     {
         // Set axial directions
-        axial_directions[Axis::Z] = upward;
-        axial_directions[Axis::Y] = forward;
-        axial_directions[Axis::X] = rightward;
+        set_axial_direction(Axis::Z, upward);
+        set_axial_direction(Axis::Y, forward);
+        set_axial_direction(Axis::X, rightward);
         // Set body part directions
         if (body_type && has_all_axes()) {
             switch(*body_type) {
@@ -257,37 +323,33 @@ struct Object {
 
     bool upward_is_up() const {
         const ReferenceDirection& upward = axial_directions.at(Axis::Z);
-        if (upward) {
-            return *upward == Space::up;
-        }
-        return false;
+        return upward ? (*upward).is_up() : false;
     }
 
     bool upward_is_down() const {
         const ReferenceDirection& upward = axial_directions.at(Axis::Z);
-        if (upward) {
-            return *upward == Space::down;
-        }
-        return false;
+        return upward ? (*upward).is_down() : false;
     }
 
     bool axis_is_vertical(Axis axis) const {
         const ReferenceDirection& direction = axial_directions.at(axis);
-        if (direction) {
-            return *direction == Space::up || *direction == Space::down;
-        }
-        return false;
+        return direction ? (*direction).is_vertical() : false;
     }
 
     bool axis_is_horizontal(Axis axis) const {
         const ReferenceDirection& direction = axial_directions.at(axis);
-        if (direction) {
-            return dot_product(*direction, Space::up) == 0;
-        }
-        return false;
+        return direction ? !(*direction).is_vertical() : false;
     }
 
 private:
+    void set_axial_direction(Axis axis, std::optional<Direction> direction) {
+        if (direction) {
+            axial_directions.emplace(axis, UnitVector(*direction));
+        } else {
+            axial_directions.emplace(axis, std::nullopt);
+        }
+    }
+
     void set_part_directions_biped() {
         part_directions[Part::Head] = *(axial_directions.at(Axis::Z));
         part_directions[Part::Belly] = -(*(axial_directions.at(Axis::Z)));
@@ -308,12 +370,19 @@ struct Context {
 	Object figure;
 	Object speaker;
     Object environment;
-    Displacement g_to_f;
+
+    UnitVector g_to_f;
+    double gf_distance;
 
         Context(const Object& g, const Object& f, const Object& s)
-            : ground(g), figure(f), speaker(s), environment(Space::origin, Space::up)
+            : ground(g),
+              figure(f),
+              speaker(s),
+              environment(Space::origin, Space::up)
         {
-            g_to_f = figure.position - ground.position;
+            const Displacement& gf_displacement = figure.position - ground.position;
+            g_to_f = UnitVector(gf_displacement);
+            gf_distance = magnitude(gf_displacement);
         }
 };
 
@@ -337,6 +406,10 @@ std::string to_string(const Vector& v) {
     std::ostringstream oss;
     oss << "[" << v[0] << ", " << v[1] << ", " << v[2] << "]";
     return oss.str();
+}
+
+std::string to_string(const UnitVector& v) {
+    return to_string(v.to_vector());
 }
 
 std::string to_string(Axis axis) {
