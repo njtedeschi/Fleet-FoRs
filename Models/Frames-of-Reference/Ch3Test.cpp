@@ -49,17 +49,17 @@ int main(int argc, char** argv) {
     fleet.initialize(argc, argv);
 
     // Set language
-    std::vector<Word> language;
-    if (language_name == "english"){
-        language = Language::words;
-    }
-    else {
+    if (language_name == "english") {
+        LanguageContext::set_language(std::make_shared<English>());
+    } else if (language_name == "mixtec") {
+        LanguageContext::set_language(std::make_shared<Mixtec>());
+    } else {
         std::cerr << "Invalid language name provided." << std::endl;
         return 1;
     }
 
     // Testing data
-    MyData my_data(language);
+    MyData my_data(LanguageContext::get_words());
     std::vector<TestingDatum> testing_data = my_data.json_file_to_testing_data(testing_data_path);
 
     // Create test results table and save path
