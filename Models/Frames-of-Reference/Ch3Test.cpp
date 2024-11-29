@@ -8,7 +8,7 @@
 
 #include "Ch3MyStructures.h"
 #include "Ch3MyData.h"
-#include "Ch3MyGrammar.h"
+#include "Ch3GrammarSelection.h"
 #include "Ch3MyHypothesis.h"
 
 #include "TopN.h"

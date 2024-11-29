@@ -15,7 +15,7 @@
 #include "Ch3MyData.h"
 #include "Ch3MyDSL.h"
 
-#include "Ch3MyGrammar.h"
+#include "Ch3GrammarSelection.h"
 #include "Ch3MyHypothesis.h"
 
 ///~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
