@@ -437,6 +437,7 @@ std::string to_string(Sense sense) {
         case Sense::Intrinsic: return "Int";
         case Sense::Relative: return "Rel";
         case Sense::Absolute: return "Abs";
+        default: return "Unknown";
     }
 }
 
