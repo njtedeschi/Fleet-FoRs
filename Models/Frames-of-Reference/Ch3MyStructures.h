@@ -432,6 +432,14 @@ std::string to_string(Part part) {
     }
 }
 
+std::string to_string(Sense sense) {
+    switch (sense) {
+        case Sense::Intrinsic: return "Int";
+        case Sense::Relative: return "Rel";
+        case Sense::Absolute: return "Abs";
+    }
+}
+
 std::string to_string(const Object& obj) {
     std::ostringstream oss;
     oss << "Object(position=" << to_string(obj.position) << ", axial_directions={";
