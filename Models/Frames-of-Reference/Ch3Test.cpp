@@ -34,6 +34,7 @@ std::string output_directory = "";
 std::string output_filename_stem = "";
 
 std::string language_name = "";
+std::shared_ptr<Language> LanguageContext::current_language = nullptr;
 
 int main(int argc, char** argv) {
 	Fleet fleet("Frames of Reference");
