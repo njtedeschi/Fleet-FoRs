@@ -38,6 +38,26 @@ struct Bool {
     }
 };
 
+template <typename JudgmentType>
+std::string to_string(Bool<JudgmentType> b) {
+    switch (b.value) {
+        case Judgment::False: return "False";
+        case Judgment::True: return "True";
+        case Judgment::Felicitous: return "Felicitous";
+        default: return "Unknown";
+    }
+}
+
+template <typename JudgmentType>
+int to_int(Bool<JudgmentType> b) {
+    switch (b.value) {
+        case Judgment::False: return 0;
+        case Judgment::True: return 1;
+        case Judgment::Felicitous: return 2;
+        default: return -1;
+    }
+}
+
 struct Subcondition {
     std::function<bool(const Context&, const Word&, const Sense&)> func;
 

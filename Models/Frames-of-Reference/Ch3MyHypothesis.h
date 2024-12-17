@@ -4,7 +4,7 @@
 // #include "CachedCallHypothesis.h"
 
 #include "Ch3MyStructures.h"
-#include "Ch3MyGrammar.h"
+// Grammar imported in main file
 
 // model reliability parameters
 // static const double alpha_p = 0.9;
@@ -110,8 +110,10 @@ public:
             bool is_observed_word = (word.form == datum.utterance);
             for (const auto& [sense, judgment] : sense_judgments) {
                 double weight = weights.at(word).at(sense);
+                // TODO: find a more robust alternative to int conversion
+                // NOTE: this is a fix for the use of static_cast<int>, which did not behave as expected
                 for (int j = 0; j < 3; j++) {
-                    if (static_cast<int>(judgment) >= j) {
+                    if (to_int(judgment) >= j) {
                         numerators[j] += is_observed_word ? weight : 0;
                         denominators[j] += weight;
                     }
