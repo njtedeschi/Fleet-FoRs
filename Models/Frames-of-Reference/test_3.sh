@@ -2,18 +2,20 @@
 set -e # Exit immediately if a command exits with a non-zero status
 
 # Check if at least root directory is provided
-if [ "$#" -lt 3 ]; then
-    echo "Usage: $0 cpu_name root_directory id1 [id2 ...]"
+if [ "$#" -lt 4 ]; then
+    echo "Usage: $0 cpu_name make_command root_directory id1 [id2 ...]"
     exit 1
 fi
 
 cpu_name=$1
-root_dir=$2
+make_command=$2
+root_dir=$3
 config_file="$root_dir/config_evaluation.txt"
-shift 2 # Remove the first two arguments, now $@ contains only the IDs
+shift 3 # Remove the first three arguments, now $@ contains only the IDs
 
 # Compile the test executable for the specified CPU
-make testing3 CPU=$cpu_name
+# Dynamically replace '{CPU}' in make_command with the actual CPU name
+eval "${make_command//\{CPU\}/$cpu_name}"
 
 # Convert the IDs into an array for easier searching
 declare -A id_map
