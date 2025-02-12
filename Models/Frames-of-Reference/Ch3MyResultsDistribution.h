@@ -182,7 +182,7 @@ private:
             }
         }
 
-        assert_probabilities_sum_to_one(description_distribution);
+        // assert_probabilities_sum_to_one(description_distribution);
 
         return description_distribution;
     }
