@@ -21,6 +21,48 @@ struct TestingDatum {
     TestingDatum(Context c, Label l) : context(c), label(l) {}
 };
 
+struct ContextProperties {
+    std::string intrinsic_description;
+    std::string relative_description;
+    bool ground_x_canonical;
+    bool ground_y_canonical;
+    bool ground_z_canonical;
+
+    // Mapping function for description conversion
+    static std::string abbreviate_description(const std::string& input) {
+        static const std::unordered_map<std::string, std::string> abbreviation_map = {
+            {"above", "z+"}, {"below", "z-"},
+            {"front", "y+"}, {"behind", "y-"},
+            {"right", "x+"}, {"left", "x-"}
+        };
+
+        auto it = abbreviation_map.find(input);
+        return (it != abbreviation_map.end()) ? it->second : input; // Default to input if not found
+    }
+
+    // Constructor with mapping logic
+    ContextProperties(const std::string& i,
+                      const std::string& r,
+                      bool x,
+                      bool y,
+                      bool z)
+        :
+          intrinsic_description(abbreviate_description(i)),
+          relative_description(abbreviate_description(r)),
+          ground_x_canonical(x),
+          ground_y_canonical(y),
+          ground_z_canonical(z)
+    {}
+};
+
+struct UniqueTestingDatum {
+    Context context;
+    int uid;
+    ContextProperties properties;
+
+    UniqueTestingDatum(Context c, int u, ContextProperties p) : context(c), uid(u), properties(p) {}
+};
+
 class MyData {
 public:
     // Note: this isn't currently used. It's a copy-paste relic
@@ -36,6 +78,11 @@ public:
     std::vector<TestingDatum> json_file_to_testing_data(const std::string& filename) {
         json j_object = json_file_to_item(filename);
         return json_item_to_testing_data(j_object);
+    }
+
+    std::vector<UniqueTestingDatum> json_file_to_unique_testing_data(const std::string& filename) {
+        json j_object = json_file_to_item(filename);
+        return json_item_to_unique_testing_data(j_object);
     }
 
 private:
@@ -66,6 +113,15 @@ private:
         return testing_data;
     }
 
+    std::vector<UniqueTestingDatum> json_item_to_unique_testing_data(json& j_object){
+        std::vector<UniqueTestingDatum> testing_data;
+        for (auto& [key, val] : j_object.items()) {
+            // std::cout << "key: " << key << ", value:" << val << '\n';
+            testing_data.emplace_back(json_item_to_unique_testing_datum(val));
+        }
+        return testing_data;
+    }
+
     // Parse datum
     MyInput json_item_to_datum(json j){
         const Context& context = json_item_to_context(j["scene"]);
@@ -77,6 +133,13 @@ private:
         const Context& context = json_item_to_context(j["scene"]);
         const Label& label = json_item_to_label(j["label"]);
         return TestingDatum(context, label);
+    }
+
+    UniqueTestingDatum json_item_to_unique_testing_datum(const json& j) {
+        const Context& context = json_item_to_context(j["scene"]);
+        const int& uid = j["uid"];
+        const ContextProperties& properties = json_item_to_context_properties(j["properties"]);
+        return UniqueTestingDatum(context, uid, properties);
     }
 
     // Parse Scene
@@ -120,5 +183,15 @@ private:
             truth_value[item.key()] = item.value();
         }
         return truth_value;
+    }
+
+    ContextProperties json_item_to_context_properties(const json& j) {
+        return ContextProperties(
+            j["intrinsic_description"],
+            j["relative_description"],
+            j["ground_x_canonical"],
+            j["ground_y_canonical"],
+            j["ground_z_canonical"]
+        );
     }
 };
