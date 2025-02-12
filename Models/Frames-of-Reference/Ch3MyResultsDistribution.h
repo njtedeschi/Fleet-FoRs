@@ -175,14 +175,19 @@ private:
                 double weight = weights.at(word).at(sense);
                 int judgment_value = static_cast<int>(judgment);
 
-                double p = (1.0 - alpha_t) * weight / denominators[0];
-                p += (judgment_value >= 1) ? alpha_t * weight / denominators[1] : 0;
-
+                double p = 0;
+                if (denominators[1] > 0) {
+                    p += (1 - alpha_t) * weight / denominators[0];
+                    p += (judgment_value >= 1) ? alpha_t * weight / denominators[1] : 0;
+                }
+                else {
+                    p = weight / denominators[0];
+                }
                 description_distribution[word][sense] = log(p);
             }
         }
 
-        // assert_probabilities_sum_to_one(description_distribution);
+        assert_probabilities_sum_to_one(description_distribution);
 
         return description_distribution;
     }
