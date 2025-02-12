@@ -33,7 +33,7 @@ training3:
 	g++-10 Ch3Train.cpp -o train_3_$(CPU) -O2 $(FLEET_FLAGS) $(FLEET_INCLUDE) -I  /usr/include/eigen3/ $(FLEET_LIBS) -DSELECTED_GRAMMAR=$(GRAMMAR)
 
 testing3:
-	g++-10 Ch3Test.cpp -o test_3_$(CPU) -O2 $(FLEET_FLAGS) $(FLEET_INCLUDE) -I  /usr/include/eigen3/ $(FLEET_LIBS) -DSELECTED_GRAMMAR=$(GRAMMAR)
+	g++-10 Ch3TestDistributions.cpp -o test_3_$(CPU) -O2 $(FLEET_FLAGS) $(FLEET_INCLUDE) -I  /usr/include/eigen3/ $(FLEET_LIBS) -DSELECTED_GRAMMAR=$(GRAMMAR)
 
 deserialize3:
 	g++-10 Ch3DeserializeModels.cpp -o deserialize_3 -O2 $(FLEET_FLAGS) $(FLEET_INCLUDE) -I  /usr/include/eigen3/ $(FLEET_LIBS) -DSELECTED_GRAMMAR=$(GRAMMAR)
