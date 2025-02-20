@@ -131,39 +131,14 @@ private:
 
         DescriptionDistribution description_distribution;
 
-        // "Corrected" likelihood
-        // double denominators[3] = {0};
-        // for (const auto& [word, sense_judgments] : judgments) {
-        //     for (const auto& [sense, judgment] : sense_judgments) {
-        //         double weight = weights.at(word).at(sense);
-        //         for (int j = 0; j < 3; j++) {
-        //             if (to_int(judgment) >= j) {
-        //                 denominators[j] += weight;
-        //             }
-        //         }
-        //     }
-        // }
-
-        // for (const auto& [word, sense_judgments] : judgments) {
-        //     for (const auto& [sense, judgment] : sense_judgments) {
-        //         double weight = weights.at(word).at(sense);
-        //         int judgment_value = to_int(judgment);
-
-        //         double p = (1.0 - alpha_t) * weight / denominators[0];
-        //         p += (judgment_value >= 1) ? alpha_t * (1-alpha_f) * weight / denominators[1] : 0;
-        //         p += (judgment_value >= 2) ? alpha_t * alpha_f * weight / denominators[2] : 0;
-
-        //         description_distribution[word][sense] = log(p);
-        //     }
-        // }
-
-        // "Original" likelihood
-        double denominators[2] = {0};
+        // TODO: add ability to switch likelihoods
+        // "Intended" likelihood
+        double denominators[3] = {0};
         for (const auto& [word, sense_judgments] : judgments) {
             for (const auto& [sense, judgment] : sense_judgments) {
                 double weight = weights.at(word).at(sense);
-                for (int j = 0; j < 2; j++) {
-                    if (static_cast<int>(judgment) >= j) {
+                for (int j = 0; j < 3; j++) {
+                    if (to_int(judgment) >= j) {
                         denominators[j] += weight;
                     }
                 }
@@ -173,11 +148,16 @@ private:
         for (const auto& [word, sense_judgments] : judgments) {
             for (const auto& [sense, judgment] : sense_judgments) {
                 double weight = weights.at(word).at(sense);
-                int judgment_value = static_cast<int>(judgment);
+                int judgment_value = to_int(judgment);
 
                 double p = 0;
-                if (denominators[1] > 0) {
-                    p += (1 - alpha_t) * weight / denominators[0];
+                if (denominators[2] > 0) {
+                    p += (1.0 - alpha_t) * weight / denominators[0];
+                    p += (judgment_value >= 1) ? alpha_t * (1-alpha_f) * weight / denominators[1] : 0;
+                    p += (judgment_value >= 2) ? alpha_t * alpha_f * weight / denominators[2] : 0;
+                }
+                else if (denominators[1] > 0) {
+                    p += (1.0 - alpha_t) * weight / denominators[0];
                     p += (judgment_value >= 1) ? alpha_t * weight / denominators[1] : 0;
                 }
                 else {
@@ -186,6 +166,36 @@ private:
                 description_distribution[word][sense] = log(p);
             }
         }
+
+        // // "Unintended" likelihood
+        // double denominators[2] = {0};
+        // for (const auto& [word, sense_judgments] : judgments) {
+        //     for (const auto& [sense, judgment] : sense_judgments) {
+        //         double weight = weights.at(word).at(sense);
+        //         for (int j = 0; j < 2; j++) {
+        //             if (static_cast<int>(judgment) >= j) {
+        //                 denominators[j] += weight;
+        //             }
+        //         }
+        //     }
+        // }
+
+        // for (const auto& [word, sense_judgments] : judgments) {
+        //     for (const auto& [sense, judgment] : sense_judgments) {
+        //         double weight = weights.at(word).at(sense);
+        //         int judgment_value = static_cast<int>(judgment);
+
+        //         double p = 0;
+        //         if (denominators[1] > 0) {
+        //             p += (1 - alpha_t) * weight / denominators[0];
+        //             p += (judgment_value >= 1) ? alpha_t * weight / denominators[1] : 0;
+        //         }
+        //         else {
+        //             p = weight / denominators[0];
+        //         }
+        //         description_distribution[word][sense] = log(p);
+        //     }
+        // }
 
         assert_probabilities_sum_to_one(description_distribution);
 
