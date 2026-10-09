@@ -1,0 +1,190 @@
+# -------------------------------
+# Chapter 2 (symmetrically unbalanced) plot styling
+# -------------------------------
+# This file controls *formatting only* (labels, colors, layout).
+# It does not affect any analysis or curve computation.
+#
+# Curves (DiffType)
+#   - Int-Rel : IntOnly - RelOnly under intrinsic-majority (e.g., 67% intrinsic)
+#   - Rel-Int : RelOnly - IntOnly under relative-majority (e.g., 33% intrinsic)
+
+curve_order:
+  - Int-Rel
+  - Rel-Int
+
+curve_labels:
+  Int-Rel: "Intrinsic posterior boost"
+  Rel-Int: "Relative posterior boost"
+
+# Option A (simple): specify colors/linestyles separately
+curve_colors:
+  Int-Rel: "#1f77b4"
+  Rel-Int: "#d62728"
+
+curve_linestyles:
+  Int-Rel: "-"
+  Rel-Int: "-"
+
+# Option B (more flexible): per-curve matplotlib kwargs (overrides curve_colors/curve_linestyles)
+curve_plot_kwargs:
+  Int-Rel: {marker: "o", markersize: 3.5}
+  Rel-Int: {marker: "o", markersize: 3.5}
+
+language_order:
+  - English
+  # - Engtec
+  # - Mixtec
+
+language_labels:
+  English: "\\textbf{{\\textit{{English}}}}"
+  Engtec: "\\textbf{{\\textit{{Engtec}}}}"
+  Mixtec: "\\textbf{{\\textit{{Mixtec}}}}"
+
+# Labels for facet variable names (used for the *outer* facet labels when enabled).
+facet_var_labels:
+  Language: "\\textbf{{Language}} (least to most meronymic)"
+  Word: "\\textbf{{Word pair}}"
+
+# word_order: [above/below, front/behind, left/right, side]
+word_order: [front/behind, left/right, side]
+word_labels:
+  front/behind: "\\textbf{{\\textit{{front/behind}}}}"
+  left/right: "\\textbf{{\\textit{{right/left}}}}"
+  above/below: "above/below"
+  side: "\\textbf{{\\textit{{side}}}}"
+
+plot:
+  # --- Figure sizing ---
+  dpi: 300
+  figsize_per_cell: [3.2, 2.6]
+  single_figsize: [4.2, 3.0]
+  sharex: true
+  sharey: true
+
+  # --- Axes defaults ---
+  y_lim: [-1.0, 1.0]
+  # xscale: "log"
+  zero_line: true
+
+  axes:
+    grid: true
+    grid_alpha: 0.25
+    spines:
+      top: false
+      right: false
+
+  # --- Curve styling ---
+  curves:
+    show_ci: true
+    ci_alpha: 0.18
+    line_width: 2.0
+    # Optional:
+    # line_kwargs: {marker: "o", markersize: 3}
+    # ci_kwargs: {alpha: 0.18}
+
+  # --- Data-axis labels ---
+  axis_labels:
+    show_on: edge
+    x: {text: "Amount of training data"}
+    y: {text: "Posterior difference"}
+
+  # --- Facet labels ---
+  facets:
+    outer:
+      enabled: true
+      col_position: top
+      col_pad_points: 10
+      row_orientation: vertical
+      row_pad_points: 10
+      kwargs: {fontsize: 12, fontweight: bold}
+
+      # Horizontal arrow between outer column label and inner column labels
+      col_arrow:
+        enabled: true
+        direction: right        # right | left
+        # length: 0.80 for langauge
+        length: 0.80            # 0..1, fraction of grid width (centered)
+        pad_points: 4           # keeps arrow away from text above/below (in points)
+
+        color: "0.25"
+        linewidth: 1.4
+        alpha: 0.8
+        arrowstyle: "-|>"       # matplotlib arrowstyle
+        mutation_scale: 14      # arrowhead size
+        zorder: 3
+
+      # Vertical arrow between outer row label and inner row labels
+      row_arrow:
+        enabled: false
+        direction: down         # down | up
+        # length: 0.90 for int frequency
+        length: 0.90            # 0..1, fraction of grid height (centered)
+        pad_points: 4           # keeps arrow away from text left/right (in points)
+
+        color: "0.25"
+        linewidth: 1.4
+        alpha: 0.8
+        arrowstyle: "-|>"
+        mutation_scale: 14
+        zorder: 3
+
+    inner:
+      enabled: true
+      row_orientation: vertical
+      row_pad_points: 8
+      col_pad_points: 8
+      row: {fontweight: bold}
+      col: {fontweight: bold}
+      bbox:
+        row:
+          enabled: true
+          facecolor: "0.95"
+          edgecolor: "0.80"
+          boxstyle: "round,pad=0.2"
+          linewidth: 0.8
+          alpha: 1.0
+        col:
+          enabled: true
+          facecolor: "0.95"
+          edgecolor: "0.80"
+          boxstyle: "round,pad=0.2"
+          linewidth: 0.8
+          alpha: 1.0
+
+  # --- Figure-level title ---
+  figure_title:
+    # Example template:
+    template: "\\textbf{{Posterior difference curves for \\textit{{{word}}}}}"
+    # template: "{word}"
+    pad_points: 8
+    kwargs: {fontsize: 16}
+
+  # --- Legend ---
+  legend:
+    enabled: true
+    position: bottom      # top | bottom | inside
+    pad_points: 6
+    ncol: 2
+    frameon: true
+    # For position=inside:
+    loc_inside: "best"
+    kwargs: {}
+
+  layout:
+    tight_layout_pad: 1.0
+
+  # Optional divider lines between facet columns/rows.
+  facet_separators:
+    enabled: false
+    rows: false
+    cols: true
+    linewidth: 0.8
+    color: "0.85"
+    alpha: 1.0
+    linestyle: "-"
+    padding: 0.0
+
+  # Global font defaults
+  font:
+    family: DejaVu Sans
+    size: 10

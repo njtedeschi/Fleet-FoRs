@@ -1,0 +1,231 @@
+# -----------------------
+# Chapter 3 (old model) plot styling
+# -----------------------
+# Formatting-only controls for POCO hypothesis-class posterior shares.
+
+# word_order: [above/below, front/behind, left/right, side]
+# word_order: [above/below, front/behind, left/right]
+# word_order: [above/below, left/right]
+word_order: [left/right]
+# word_order: [left/right, above/below]
+word_labels:
+  above/below: "\\textbf{{\\textit{{above/below}}}}"
+  front/behind: "\\textbf{{\\textit{{front/behind}}}}"
+  left/right: "\\textbf{{\\textit{{right/left}}}}"
+  side: "side"
+
+# Hypothesis-type order for lines + legend
+sense_order: [NoPOCO, POCO, StrongPOCO, NoInt]
+
+sense_labels:
+  NoPOCO: "\\textit{{NoPOCO}} (all contexts)"
+  POCO: "\\textbf{{\\textit{{POCO}}}} (canonical contexts)"
+  StrongPOCO: "\\textit{{AbsPOCO}} (absolutely canonical contexts)"
+  NoInt: "\\textit{{NoInt}} (no contexts)"
+
+# Option A: colors/linestyles
+sense_colors:
+  # NoPOCO: "#1f77b4"      # blue
+  # # POCO: "#2ca02c"        # green
+  # POCO: "#9467bd"        # purple
+  # StrongPOCO: "#ff7f0e"  # orange
+  # NoInt: "#d62728"       # red
+  NoPOCO: "#0072B2"      # blue
+  # NoPOCO: "#56B4E9"      # blue
+  POCO: "#009E73"        # green
+  StrongPOCO: "#F0E442"  # yellow
+  NoInt: "#D55E00"       # red
+
+sense_linestyles:
+  NoPOCO: "-"
+  POCO: "-"
+  StrongPOCO: "-"
+  NoInt: "-"
+
+# Option B: per-sense matplotlib kwargs (overrides sense_colors/sense_linestyles)
+sense_plot_kwargs:
+  NoPOCO: {marker: "s", markersize: 2.5, linewidth: 1.0}
+  POCO: {marker: "o", markersize: 4.0, linewidth: 2.0}
+  StrongPOCO: {marker: "s", markersize: 2.5, linewidth: 1.0}
+  NoInt: {marker: "s", markersize: 2.5, linewidth: 1.0}
+
+language_order: [English, Engtec, Mixtec]
+language_labels:
+  English: English
+  Engtec: Engtec
+  Mixtec: Mixtec
+
+intrinsic_order:
+  - 33
+  - 50
+  # - 67
+intrinsic_labels:
+  33: "\\textbf{{33\\% intrinsic}}"
+  50: "\\textbf{{50\\% intrinsic}}"
+  67: "\\textbf{{67\\% intrinsic}}"
+  # 33: "$p_\\textnormal{{int}}^{{(c)}} = 0.33$"
+  # 50: "$p_\\textnormal{{int}}^{{(c)}} = 0.5$"
+  # 67: "$p_\\textnormal{{int}}^{{(c)}} = 0.67$"
+
+canonical_order: [83, 50, 17]
+canonical_labels:
+  # 17: "\\textbf{{83\\% non-canonical}}"
+  # 50: "\\textbf{{50\\% non-canonical}}"
+  # 83: "\\textbf{{17\\% non-canonical}}"
+  # 17: "$p_\\textnormal{{upright}} = 0.17$"
+  # 50: "$p_\\textnormal{{upright}} = 0.5$"
+  # 83: "$p_\\textnormal{{upright}} = 0.83$"
+  # 17: "\\textbf{{50\\% non-canonical}}"
+  # 50: "\\textbf{{30\\% non-canonical}}"
+  # 83: "\\textbf{{10\\% non-canonical}}"
+  17: "\\textbf{{50\\% canonical}}"
+  50: "\\textbf{{70\\% canonical}}"
+  83: "\\textbf{{90\\% canonical}}"
+
+# odds_reduction_order: [1, 2, 4, 8, 16, inf]
+# odds_reduction_order: [1, 2, 4, 8]
+odds_reduction_order: [1, 4, 16]
+odds_reduction_labels:
+  1: "$k_{{POCO}} = 1$"
+  2: "$k_{{POCO}} = 2$"
+  4: "$k_{{POCO}} = 4$"
+  8: "$k_{{POCO}} = 8$"
+  16: "$k_{{POCO}} = 16$"
+  inf: "$k_{{POCO}}=\\infty$"
+
+date_order: ["2024-10-14", "2024-11-12"]
+date_labels:
+  "2024-10-14": "2024-10-14"
+  "2024-11-12": "2024-11-12"
+
+facet_var_labels:
+  Language: "Language"
+  Word: "\\textbf{{Word pair}}"
+  "%IntrinsicData": "\\textbf{{Frequency of intrinsic descriptions}}"
+  # "%CanonicalData": "\\textbf{{Frequency of non-canonical contexts}}"
+  "%CanonicalData": "\\textbf{{Frequency of \\textit{{non-canonical}} contexts}}"
+  NoncanonicalOddsReduction: "\\textbf{{\\textit{{POCO}} strength}}"
+
+plot:
+  dpi: 300
+  figsize_per_cell: [3.2, 2.6]
+  single_figsize: [4.4, 3.2]
+  sharex: true
+  sharey: true
+
+  y_lim: [0.0, 1.0]
+  # xscale: "log"
+
+  axes:
+    grid: true
+    grid_alpha: 0.25
+    spines:
+      top: false
+      right: false
+
+  curves:
+    show_ci: true
+    ci_alpha: 0.18
+    line_width: 2.0
+
+  axis_labels:
+    show_on: edge
+    x: {text: "Amount of training data"}
+    y: {text: "Posterior probability"}
+
+  facets:
+    outer:
+      enabled: true
+      col_position: top
+      col_pad_points: 10
+      row_orientation: vertical
+      row_pad_points: 10
+      kwargs: {fontsize: 12, fontweight: bold}
+
+      # Horizontal arrow between outer column label and inner column labels
+      col_arrow:
+        enabled: true
+        direction: right        # right | left
+        # length: 0.80 for langauge
+        length: 0.90            # 0..1, fraction of grid width (centered)
+        pad_points: 4           # keeps arrow away from text above/below (in points)
+
+        color: "0.25"
+        linewidth: 1.4
+        alpha: 0.8
+        arrowstyle: "-|>"       # matplotlib arrowstyle
+        mutation_scale: 14      # arrowhead size
+        zorder: 3
+
+      # Vertical arrow between outer row label and inner row labels
+      row_arrow:
+        enabled: true
+        # enabled: false          # for word pair
+        direction: down         # down | up
+        # length: 0.90 for int frequency
+        length: 0.90            # 0..1, fraction of grid height (centered)
+        pad_points: 4           # keeps arrow away from text left/right (in points)
+
+        color: "0.25"
+        linewidth: 1.4
+        alpha: 0.8
+        arrowstyle: "-|>"
+        mutation_scale: 14
+        zorder: 3
+
+    inner:
+      enabled: true
+      row_orientation: vertical
+      row_pad_points: 8
+      col_pad_points: 8
+      row: {fontweight: bold}
+      col: {fontweight: bold}
+      bbox:
+        row:
+          enabled: true
+          facecolor: "0.95"
+          edgecolor: "0.80"
+          boxstyle: "round,pad=0.2"
+          linewidth: 0.8
+          alpha: 1.0
+        col:
+          enabled: true
+          facecolor: "0.95"
+          edgecolor: "0.80"
+          boxstyle: "round,pad=0.2"
+          linewidth: 0.8
+          alpha: 1.0
+
+  figure_title:
+    # template: "\\textbf{{Learning curves for \\textit{{{word}}} (categorical POCO)}}"
+    # template: "\\textbf{{Learning curves for \\textit{{{word}}} (uniform ground orientations)}}"
+    pad_points: 8
+    kwargs: {fontsize: 16, fontweight: bold}
+
+  legend:
+    enabled: true
+    position: bottom
+    pad_points: 6
+    ncol: 4
+    frameon: true
+    loc_inside: "best"
+    kwargs:
+      title: "\\textbf{{Hypothesis class}} (by contexts where intrinsic descriptions are allowed)"
+
+  layout:
+    tight_layout_pad: 1.0
+
+  facet_separators:
+    enabled: false
+    rows: true
+    cols: false
+    linewidth: 0.8
+    color: "0.85"
+    alpha: 1.0
+    linestyle: "-"
+    padding: 0.0
+
+  # Global font defaults
+  font:
+    family: DejaVu Sans
+    size: 10

@@ -1,0 +1,234 @@
+# -----------------------
+# Chapter 3 (new model) plot styling
+# -----------------------
+# Formatting-only controls for Experiment 2 learning curves.
+#
+# The y-value in the prepared summary table is already:
+#   (Intrinsic probability) − (Relative probability)
+# aggregated across runs.
+
+# Line order in the legend (Canonicity)
+canonicity_order: [1.0, 0.5, 0.0]
+
+canonicity_labels:
+  "1.0": "\\textit{{Absolutely}} canonical"
+  "0.5": "\\textit{{Conditionally}} canonical"
+  "0.0": "Non-canonical"
+
+canonicity_colors:
+  # "1.0": "#1f77b4"
+  # "0.5": "#9467bd"
+  # "0.0": "#d62728"
+  # "1.0": "#009E73" # green
+  "1.0": "#0072B2" # blue
+  "0.5": "#F0E442" # yellow
+  "0.0": "#D55E00" # red
+
+canonicity_linestyles:
+  "1.0": "-"
+  "0.5": "-"
+  "0.0": "-"
+
+# Optional: per-level matplotlib kwargs (overrides colors/linestyles)
+canonicity_plot_kwargs:
+  "1.0": {marker: "o", markersize: 3.5}
+  "0.5": {marker: "o", markersize: 3.5}
+  "0.0": {marker: "o", markersize: 3.5}
+
+# intrinsic_order: [33, 50, 67, 80, 89]
+# intrinsic_order: [50, 67, 80, 89]
+intrinsic_order: [50, 67, 80]
+intrinsic_labels:
+  33: "\\textbf{{33\\% intrinsic}}"
+  50: "\\textbf{{50\\% intrinsic}}"
+  67: "\\textbf{{67\\% intrinsic}}"
+  80: "\\textbf{{80\\% intrinsic}}"
+  89: "\\textbf{{89\\% intrinsic}}"
+  # 33: "$p_\\textnormal{{int}}^{{(c)}} = 0.33$"
+  # 50: "$p_\\textnormal{{int}}^{{(c)}} = 0.5$"
+  # 67: "$p_\\textnormal{{int}}^{{(c)}} = 0.67$"
+  # 80: "$p_\\textnormal{{int}}^{{(c)}} = 0.8$"
+  # 89: "$p_\\textnormal{{int}}^{{(c)}} = 0.89$"
+
+# canonical_order: [89, 80, 67, 50, 17]
+# canonical_order: [89, 50]
+canonical_order: [89]
+canonical_labels:
+  # 17: "\\textbf{{83\\% non-canonical}}"
+  # 50: "\\textbf{{50\\% non-canonical}}"
+  # 67: "\\textbf{{33\\% non-canonical}}"
+  # 80: "\\textbf{{20\\% non-canonical}}"
+  # 89: "\\textbf{{11\\% non-canonical}}"
+  # 17: "$p_\\textnormal{{upright}} = 0.17$"
+  # 50: "$p_\\textnormal{{upright}} = 0.5$"
+  # 67: "$p_\\textnormal{{upright}} = 0.67$"
+  # 80: "$p_\\textnormal{{upright}} = 0.8$"
+  # 89: "$p_\\textnormal{{upright}} = 0.89$"
+  # 17: "\\textbf{{50\\% non-canonical}}"
+  # 50: "\\textbf{{30\\% non-canonical}}"
+  # 67: "\\textbf{{20\\% non-canonical}}"
+  # 80: "\\textbf{{12\\% non-canonical}}"
+  # 89: "\\textbf{{7\\% non-canonical}}"
+  17: "\\textbf{{50\\% canonical}}"
+  50: "\\textbf{{70\\% canonical}}"
+  67: "\\textbf{{80\\% canonical}}"
+  80: "\\textbf{{88\\% canonical}}"
+  89: "\\textbf{{93\\% canonical}}"
+
+# odds_reduction_order: [1, 2, 4, 8, 16, inf]
+# odds_reduction_order: [1, 2, 4]
+odds_reduction_order: [1, 4, 16]
+odds_reduction_labels:
+  1: "$k_{{POCO}} = 1$"
+  2: "$k_{{POCO}} = 2$"
+  4: "$k_{{POCO}} = 4$"
+  8: "$k_{{POCO}} = 8$"
+  16: "$k_{{POCO}} = 16$"
+  inf: "$k_{{POCO}}=\\infty$"
+
+date_order: ["2024-11-04", "2024-12-17"]
+date_labels:
+  "2024-11-04": "2024-11-04"
+  "2024-12-17": "2024-12-17"
+
+facet_var_labels:
+  "%IntrinsicData": "\\textbf{{Frequency of intrinsic descriptions}} (training)"
+  "%CanonicalData": "\\textbf{{Frequency of non-canonical contexts}} (training)"
+  NoncanonicalOddsReduction: "\\textbf{{\\textit{{POCO}} strength}}"
+  Date: "Date"
+
+plot:
+  dpi: 300
+  figsize_per_cell: [3.2, 2.7]
+  single_figsize: [5.2, 3.6]
+  sharex: true
+  sharey: true
+
+  xscale: "log"
+  # y_lim: [-1.0, 1.0]
+  y_lim: [0.0, 1.0]
+  zero_line: false
+
+  target_line: true
+  target_line_from: "%IntrinsicData"
+  target_line_kwargs:
+    color: "black"
+    linestyle: "--"
+    alpha: 0.75
+    linewidth: 1.5
+    zorder: 1
+
+  axes:
+    grid: true
+    grid_alpha: 0.25
+    spines:
+      top: false
+      right: false
+
+  curves:
+    show_ci: true
+    ci_alpha: 0.18
+    line_width: 2.0
+    # ci_style: "band"   # band | bars
+
+  axis_labels:
+    show_on: edge
+    x: {text: "Amount of training data"}
+    y: {text: "Posterior intrinsic probability"}
+
+  facets:
+    outer:
+      enabled: true
+      col_position: top
+      col_pad_points: 10
+      row_orientation: vertical
+      row_pad_points: 10
+      kwargs: {fontsize: 12, fontweight: bold}
+
+      # Horizontal arrow between outer column label and inner column labels
+      col_arrow:
+        enabled: true
+        direction: right        # right | left
+        # length: 0.80 for langauge
+        # length: 0.90 for POCO strength
+        # length: 0.95 for Noncanonical frequency
+        length: 0.90            # 0..1, fraction of grid width (centered)
+        pad_points: 4           # keeps arrow away from text above/below (in points)
+
+        color: "0.25"
+        linewidth: 1.4
+        alpha: 0.9
+        arrowstyle: "-|>"       # matplotlib arrowstyle
+        mutation_scale: 14      # arrowhead size
+        zorder: 3
+
+      # Vertical arrow between outer row label and inner row labels
+      row_arrow:
+        enabled: true
+        # enabled: true
+        direction: down         # down | up
+        # length: 0.92 for int frequency (ch3_new)
+        length: 0.92            # 0..1, fraction of grid height (centered)
+        pad_points: 4           # keeps arrow away from text left/right (in points)
+
+        color: "0.25"
+        linewidth: 1.4
+        alpha: 0.8
+        arrowstyle: "-|>"
+        mutation_scale: 14
+        zorder: 3
+
+    inner:
+      enabled: true
+      row_orientation: vertical
+      row_pad_points: 8
+      col_pad_points: 8
+      row: {fontweight: bold}
+      col: {fontweight: bold}
+      bbox:
+        row:
+          enabled: true
+          facecolor: "0.95"
+          edgecolor: "0.80"
+          boxstyle: "round,pad=0.2"
+          linewidth: 0.8
+          alpha: 1.0
+        col:
+          enabled: true
+          facecolor: "0.95"
+          edgecolor: "0.80"
+          boxstyle: "round,pad=0.2"
+          linewidth: 0.8
+          alpha: 1.0
+
+  figure_title:
+    # template: "\\textbf{{Posterior probability of intrinsic descriptions by context class}}"
+    pad_points: 8
+    kwargs: {fontsize: 16}
+
+  legend:
+    enabled: true
+    position: bottom
+    pad_points: 6
+    ncol: 3
+    frameon: true
+    loc_inside: "best"
+    kwargs: {title: "\\textbf{{Context class}}", title_fontproperties: {weight: bold}}
+
+  layout:
+    tight_layout_pad: 1.0
+
+  facet_separators:
+    enabled: false
+    rows: true
+    cols: true
+    linewidth: 0.8
+    color: "0.85"
+    alpha: 1.0
+    linestyle: "-"
+    padding: 0.0
+
+  # Global font defaults
+  font:
+    family: DejaVu Sans
+    size: 10

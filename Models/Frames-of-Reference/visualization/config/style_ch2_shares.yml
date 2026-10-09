@@ -1,0 +1,291 @@
+# -----------------------
+# Chapter 2 plot styling
+# -----------------------
+# This file controls *formatting only* (labels, colors, layout).
+# It does not affect any analysis or curve computation.
+
+sense_order:
+  - Int
+  - Rel
+  - IntRel
+
+sense_labels:
+  # Int: "Intrinsic Only"
+  # Rel: "Relative Only"
+  # IntRel: "\\textbf{{Intrinsic and Relative}}"
+  Int: "\\textbf{{\\textit{{IntOnly}}}}"
+  Rel: "\\textbf{{\\textit{{RelOnly}}}}"
+  IntRel: "\\textbf{{\\textit{{IntRel}}}}"
+
+sense_colors:
+  # Int: "#1f77b4" # blue
+  # Rel: "#d62728" # red
+  # # IntRel: "#2ca02c" # green
+  # IntRel: "#9467bd" # purple
+  Int: "#0072B2" # blue
+  # Int: "#56B4E9" # blue
+  # Rel: "#D55E00" # red (defense draft color)
+  Rel: "#C62828" # red (defense presentation text color)
+  IntRel: "#009E73" # green
+
+sense_linestyles:
+  Int: "-"
+  Rel: "-"
+  IntRel: "-"
+
+sense_plot_kwargs:
+  Int: {marker: "s", markersize: 2.5, linewidth: 1.0}
+  # Rel: {marker: "s", markersize: 2.5, linewidth: 1.0} # (defense draft)
+  Rel: {marker: "^", markersize: 2.5, linewidth: 1.0} # (defense presentation)
+  IntRel: {marker: "o", markersize: 4.0, linewidth: 2.0}
+
+language_order:
+  - English
+  # - Engtec
+  # - Mixtec
+
+language_labels:
+  English: "\\textbf{{\\textit{{English}}}}"
+  Engtec: "\\textbf{{\\textit{{Engtec}}}}"
+  Mixtec: "\\textbf{{\\textit{{Mixtec}}}}"
+
+intrinsic_order:
+  # - 33
+  - 50
+  # - 67
+
+intrinsic_labels:
+  33: "\\textbf{{33\\% intrinsic}}"
+  50: "\\textbf{{50\\% intrinsic}}"
+  67: "\\textbf{{67\\% intrinsic}}"
+
+# Labels for facet variable names (used for the *outer* facet labels when enabled).
+facet_var_labels:
+  Language: "\\textbf{Language} (least to most meronymic)"
+  "%IntrinsicData": "\\textbf{Frequency of intrinsic descriptions}"
+
+word_order:
+  - front/behind
+  - left/right
+  - above/below
+  - side
+
+word_labels:
+  front/behind: "front/behind"
+  left/right: "right/left"
+  above/below: "above/below"
+  side: "side"
+
+plot:
+  # --- Figure sizing ---
+  dpi: 300
+  figsize_per_cell: [3.2, 2.6]
+  single_figsize: [4.2, 3.0]
+  sharex: true
+  sharey: true
+
+  # --- Axes defaults ---
+  y_lim: [0.0, 1.0]
+
+  axes:
+    grid: true
+    grid_alpha: 0.25
+    spines:
+      top: false
+      right: false
+
+  # --- Curve styling ---
+  curves:
+    show_ci: true
+    ci_alpha: 0.18
+    line_width: 2.0
+
+  # --- Data-axis labels (NOT the facet variable labels) ---
+  # These appear on panels according to show_on *when* facets.outer.enabled is true.
+  # If facets.outer.enabled is false, these become figure-wide labels via supxlabel/supylabel.
+  axis_labels:
+    # Where to show the per-panel axis labels in grids:
+    #   - edge: bottom row gets x-label; first column gets y-label  (recommended)
+    #   - upper_left: only the top-left panel has both labels
+    #   - all: every panel gets both labels
+    #   - none: no per-panel labels
+    show_on: edge
+
+    x:
+      text: "Amount of training data"
+      # Any matplotlib Text kwargs are allowed here, e.g.:
+      # fontsize: 11
+      # fontstyle: italic
+
+    y:
+      text: "Posterior probability"
+      # fontsize: 11
+      # fontstyle: italic
+
+  # --- Facet labels ---
+  # "Outer" labels = variable names ("Language", "Intrinsic frequency")
+  # "Inner" labels = variable levels ("English", "50% intrinsic")
+  facets:
+    outer:
+      enabled: true
+
+      # Where to place the outer column-variable label:
+      #   - top: above the grid (recommended)
+      #   - bottom: use Matplotlib's supxlabel
+      col_position: top
+
+      # Extra vertical padding (points) above the grid content when col_position: top
+      col_pad_points: 10
+
+      # Orientation of the outer row-variable label
+      row_orientation: vertical
+
+      # Horizontal gap (points) between the outer row label and the inner row labels
+      row_pad_points: 10
+
+      # (Back-compat) The renderer still accepts `row_gap_points`, but `row_pad_points`
+      # is preferred for symmetry with `inner.row_pad_points`.
+
+      # Shared kwargs applied to both outer labels
+      kwargs:
+        fontsize: 12
+        fontweight: bold
+
+      # Optional explicit text override (otherwise uses facet_var_labels):
+      # col: {text: "Language"}
+      # row: {text: "Intrinsic frequency"}
+
+      # Horizontal arrow between outer column label and inner column labels
+      col_arrow:
+        enabled: true
+        direction: right        # right | left
+        # length: 0.80 for langauge
+        length: 0.80            # 0..1, fraction of grid width (centered)
+        pad_points: 4           # keeps arrow away from text above/below (in points)
+
+        color: "0.25"
+        linewidth: 1.4
+        alpha: 0.8
+        arrowstyle: "-|>"       # matplotlib arrowstyle
+        mutation_scale: 14      # arrowhead size
+        zorder: 3
+
+      # Vertical arrow between outer row label and inner row labels
+      row_arrow:
+        enabled: true
+        direction: down         # down | up
+        # length: 0.90 for int frequency
+        length: 0.90            # 0..1, fraction of grid height (centered)
+        pad_points: 4           # keeps arrow away from text left/right (in points)
+
+        color: "0.25"
+        linewidth: 1.4
+        alpha: 0.8
+        arrowstyle: "-|>"
+        mutation_scale: 14
+        zorder: 3
+
+    inner:
+      enabled: true
+
+      # Row inner label orientation: vertical (90°) or horizontal (0°)
+      row_orientation: vertical
+
+      # Padding (points) between the leftmost axis content (ticks/y-label) and the inner row labels
+      row_pad_points: 8
+
+      # Padding (points) between the top of each subplot and the inner column labels (subplot titles).
+      # This is passed through to Matplotlib as Axes.set_title(pad=...).
+      col_pad_points: 8
+
+      # Inner label text kwargs (applied to all row/col labels)
+      # (Put any matplotlib Text kwargs here: fontsize, fontweight, fontstyle, etc.)
+      row: {fontweight: bold}
+      col: {fontweight: bold}
+
+      # Optional "strip" style boxes for the inner labels (like facet strips)
+      bbox:
+        row:
+          enabled: true
+          facecolor: "0.95"   # grayscale: 0=black, 1=white
+          edgecolor: "0.80"
+          boxstyle: "round,pad=0.2"
+          linewidth: 0.8
+          alpha: 1.0
+
+        col:
+          enabled: true
+          facecolor: "0.95"
+          edgecolor: "0.80"
+          boxstyle: "round,pad=0.2"
+          linewidth: 0.8
+          alpha: 1.0
+
+  # --- Figure title (top) ---
+  # Uses Python's format() placeholders.
+  #
+  # Available fields:
+  #   {word}      -> display form from word_labels
+  #   {word_raw}  -> raw key from the summary table
+  #   {row_var}   -> facet_var_labels for the row variable
+  #   {col_var}   -> facet_var_labels for the column variable
+  #
+  # Example:
+  #   template: "Learning curves for '{word}'"
+  figure_title:
+    # template: "\\textbf{{Learning curves for \\textit{{{word}}}}}"
+    pad_points: 8
+    kwargs: {fontsize: 16, fontweight: bold}
+
+  # --- Legend (grid-level by default) ---
+  legend:
+    enabled: true
+
+    # Grid legend placement:
+    #   - bottom: below the grid, centered
+    #   - top: above the grid, centered
+    #   - inside: let Matplotlib decide (or use location/bbox_to_anchor manually)
+    position: bottom
+
+    # Padding (points) between the grid content and the legend when position is top/bottom
+    pad_points: 10
+
+    ncol: 3
+    frameon: true
+
+    # For single plots, the legend is placed inside the axes using this loc:
+    loc_inside: best
+
+    # Extra kwargs passed to Legend (fontsize, title_fontsize, handlelength, etc.)
+    kwargs:
+      title: "\\textbf{Hypothesis class}"
+      title_fontproperties: {weight: bold}
+
+  # --- Layout ---
+  layout:
+    # Passed to fig.tight_layout(pad=...)
+    tight_layout_pad: 1.0
+
+  # Optional divider lines *between* facet rows/columns (figure-level separators).
+  facet_separators:
+    enabled: false
+    rows: true
+    cols: false
+    linewidth: 0.8
+    color: "0.85"
+    alpha: 1.0
+    linestyle: "-"
+    padding: 0.0
+
+  # Global font defaults
+  font:
+    family: DejaVu Sans
+    size: 10
+
+# --- Optional: per-sense matplotlib line kwargs ---
+# If provided, these override sense_colors / sense_linestyles for each Sense.
+# Put *any* matplotlib Axes.plot kwargs here (marker, dashes, alpha, etc.).
+# sense_plot_kwargs:
+#   Int: {color: "#1f77b4", linestyle: "-"}
+#   Rel: {color: "#d62728", linestyle: "-"}
+#   IntRel: {color: "#2ca02c", linestyle: "-"}
