@@ -1,0 +1,17 @@
+# Configuration for the unified remote script
+
+# Directory where experiments are stored
+EXPERIMENTS_DIR="experiments/2024-12-17"
+
+# Remote script to execute
+REMOTE_SCRIPT="test_3.sh"
+
+# Make command template (with {CPU} as a placeholder)
+MAKE_COMMAND="make testing3 CPU={CPU}"
+
+# List of server-argument pairs
+server_args=(
+  "pitts:1 2 3 4 5"
+  "wittgenstein:6 7 8 9 10"
+  "tarski:11 12 13 14 15 16"
+)

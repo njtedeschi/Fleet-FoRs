@@ -1,0 +1,63 @@
+---
+# data_sources:
+results_files:
+  # results_type -> results_file
+  simplified_shares: "simplified_shares.csv"
+  # all_metrics: "all_metrics.csv"
+
+dates_to_use:
+  "English": "2024-02-08"
+  "Engtec": "2024-03-07"
+  "Mixtec": "2024-03-07"
+  # "Mixtec_80": "2024-02-08"
+
+factors:
+  "Language":
+    - "English"
+    - "Engtec"
+    - "Mixtec"
+    # - "Mixtec_80"
+  "%IntrinsicData":
+    - 33
+    - 50
+    - 67
+  "Word":
+    # - "near/far"
+    # - "above/below"
+    - "front/behind"
+    - "left/right"
+    - "side"
+    # - "head"
+    # - "belly"
+    # - "face"
+    # - "back"
+    # - "flank"
+  "Sense":
+    - "Int"
+    - "Rel"
+    # - "Abs"
+    - "IntRel"
+    # - "IntAbs"
+    # - "RelAbs"
+    # - "IntRelAbs"
+    # - "SIntRel"
+    # - "SIntAbs"
+    # - "SIntRelAbs"
+    # - "MIntRel"
+    # - "MIntAbs"
+    # - "MIntRelAbs"
+
+metrics:
+  - "Share"
+  - "Precision"
+  - "Recall"
+  - "Accuracy"
+  - "F1"
+
+plot_formatting:
+  title:
+    "Sense": '{Language} ({%IntrinsicData}% intrinsic): "{Word}"'
+    # "Word": ''
+  filename:
+    "Sense": '{Language}_{Word}_int_{%IntrinsicData}'
+    # "Word": ''

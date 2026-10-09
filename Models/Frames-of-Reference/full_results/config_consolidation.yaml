@@ -1,0 +1,48 @@
+---
+dates:
+  # dir_date: csv_date
+  "2023-12-10": "2023-12-10" # English-Engtec
+  "2024-02-08": "2024-02-08" # English-Mixtec (80/20)
+  "2024-03-07": "2024-03-07" # Engtec-Mixtec (50/50)
+  "2024-03-12": "2024-03-07" # Engtec-Mixtec (50/50)
+  "2024-03-15": "2024-02-08" # English-Mixtec (80/20)
+  # "2024-02-21": "2024-02-21" # POCO
+result_types:
+  - "simplified_shares"
+  # - "all_metrics"
+factors:
+  - "%IntrinsicData"
+  # - "%NoncanonicalAdjustment"
+  # - "%BipedalGround"
+index_cols:
+  - "Date"
+  - "Language"
+  ### BEGIN FACTORS ###
+  - "%IntrinsicData"
+  # - "%NoncanonicalAdjustment"
+  # - "%BipedalGround" # Only varies across experiments
+  ### END FACTORS ###
+  - "TrainingSize"
+  - "Iteration"
+  - "Word"
+  - "Sense"
+metrics:
+  "simplified_shares":
+    - "Share"
+  "all_metrics":
+    - "Share"
+    - "Precision"
+    - "Recall"
+    - "Accuracy"
+    - "F1"
+default_factor_values:
+  "2023-12-10":
+    # "%NoncanonicalAdjustment": 0
+    # "%BipedalGround": 100
+  "2024-02-08":
+    # "%NoncanonicalAdjustment": 0
+    # "%BipedalGround": 80
+  "2024-03-07":
+    # "%NoncanonicalAdjustment": 0
+    # "%BipedalGround": 50
+  # "2024-02-21": {}

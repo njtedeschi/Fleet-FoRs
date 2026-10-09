@@ -1,0 +1,33 @@
+---
+experiment:
+  repetitions: 1
+  train_min: 1000
+  train_max: 1000
+  train_step: 25
+  test_size: 1000
+
+hyperparameters:
+  # Language
+  language: {
+    "lang_0": "english",
+    "lang_1": "mixtec"
+  }
+  # Probabilities
+  p_datum_is_reliable: 0.9
+  ## Scene probabilities
+  p_scene_is_direct: 0.2
+  p_figure_is_near: 0.5
+  p_figure_is_on_axis: 0.9
+  p_speaker_is_canonical: 0.8
+  p_speaker_is_upside_down: 0.2
+  p_ground_is_canonical: 0.8
+  p_ground_is_upside_down: 0.2
+  p_ground_is_biped: 0.8
+  ## Description probabilities
+  p_description_is_angular: 0.9
+  p_description_is_intrinsic: {
+    "int_33": 0.333333333,
+    "int_50": 0.5,
+    "int_67": 0.666666666
+  }
+  p_description_is_absolute: 0.8
