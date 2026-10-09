@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Dict
 
 from .scene import Scene
@@ -53,3 +53,17 @@ class TrainingDatum(Datum):
 @dataclass
 class TestingDatum(Datum):
     label: Dict[str, Dict[str, bool]] # word to sense to truth value
+
+@dataclass
+class SceneProperties:
+    intrinsic_description: str
+    relative_description: str
+    ground_x_canonical: bool
+    ground_y_canonical: bool
+    ground_z_canonical: bool
+
+
+@dataclass
+class UniqueTestingDatum(Datum):
+    uid: int
+    properties: SceneProperties

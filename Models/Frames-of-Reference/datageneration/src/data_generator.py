@@ -1,9 +1,10 @@
 from contextlib import contextmanager
+from itertools import product
 
 import numpy as np
 
 from .structures.scene import BaseObject, OrientedObject, Scene
-from .structures.experiment import Datum, TrainingDatum, TestingDatum
+from .structures.experiment import Datum, TrainingDatum, TestingDatum, UniqueTestingDatum, SceneProperties
 from .constants.space import (UP, DOWN, NORTH, SOUTH, EAST, WEST,
                               CARDINAL_DIRECTIONS_4,
                               CARDINAL_DIRECTIONS_6)
@@ -227,29 +228,25 @@ class DescriptionGenerator:
 
     # TODO: decide whether non-canonical *speakers* should actually be handled
     def angular_description(self, scene):
-        if scene.satisfies_POCO:
-            return self._angular_description_canonical(scene)
-        else:
-            return self._angular_description_noncanonical(scene)
-
-    def _angular_description_canonical(self, scene):
-        # For now, absolute descriptions are only for the vertical, and coincide with both intrinsic and relative
-        return self.intrinsic_or_relative_description(scene)
-
-    def _angular_description_noncanonical(self, scene):
         if scene.figure_is_on_axis(2) and self.sampler.flip("description_is_absolute"):
-            description = self.language.absolute_vertical_description(scene)
+            return self.language.absolute_vertical_description(scene)
         else:
-            print("Violates POCO")
-            description = self.intrinsic_or_relative_description(scene, "noncanonical_adjustment")
-        return description
+            return self.intrinsic_or_relative_description(scene)
 
-    def intrinsic_or_relative_description(self, scene, adjustment=None):
+    def intrinsic_or_relative_description(self, scene):
+        if scene.satisfies_POCO:
+            return self._intrinsic_or_relative_description(scene)
+        else:
+            return self._intrinsic_or_relative_description(scene, adjustment="noncanonical_adjustment")
+
+    def _intrinsic_or_relative_description(self, scene, adjustment=None):
         # Direct scenes automatically use intrinsic description
         # as direct frame of reference
-        if scene.is_direct or self.sampler.flip("description_is_intrinsic",
-                                                  adjustment):
+        # NOTE: this assumes speakers are upright
+        if scene.is_direct or self.sampler.flip("description_is_intrinsic", adjustment):
             descriptions = self.language.intrinsic_descriptions(scene)
+            if not descriptions:
+                descriptions = self.language.relative_descriptions(scene)
         else:
             descriptions = self.language.relative_descriptions(scene)
 
@@ -323,3 +320,50 @@ class TestingDataGenerator(DataGenerator):
         label = self.language.label_scene(scene, self.chapter)
         datum = TestingDatum(scene, label)
         return datum
+
+    ### Unique scene generation
+    ### NOTE: CHAPTER 3, ENGLISH ONLY
+    def generate_unique_data(self):
+        scenes = self._build_all_scenes()
+
+        data = []
+        uid = 0
+        for scene in scenes:
+            intrinsic_descriptions = self.language.intrinsic_descriptions(scene)
+            relative_descriptions = self.language.relative_descriptions(scene)
+
+            if not (len(intrinsic_descriptions) == len(relative_descriptions) == 1):
+                raise ValueError("Expected exactly one intrinsic and one relative description")
+
+            intrinsic_description, = intrinsic_descriptions
+            relative_description, = relative_descriptions
+
+            if intrinsic_description != relative_description:
+                canonicity_by_axis = scene._ground_canonicity_by_axis()
+                scene_properties = SceneProperties(
+                    intrinsic_description,
+                    relative_description,
+                    canonicity_by_axis["rightward"],
+                    canonicity_by_axis["forward"],
+                    canonicity_by_axis["upward"]
+                )
+                datum = UniqueTestingDatum(scene, uid, scene_properties)
+                data.append(datum)
+                uid += 1
+
+        return data
+
+    def _build_all_scenes(self):
+        speaker = CANONICAL_NONDIRECT_SPEAKER
+        grounds = self._build_all_grounds()
+        figures = [BaseObject(position) for position in CARDINAL_DIRECTIONS_6]
+        return [Scene(speaker, ground, figure)
+                for ground, figure in product(grounds, figures)]
+
+    def _build_all_grounds(self):
+        grounds = []
+        for forward, upward in product(CARDINAL_DIRECTIONS_6, repeat=2):
+            if np.dot(forward, upward == 0):
+                ground = OrientedObject.ground(forward, upward, "biped")
+                grounds.append(ground)
+        return grounds

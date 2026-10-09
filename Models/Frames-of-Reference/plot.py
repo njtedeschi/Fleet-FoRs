@@ -66,5 +66,8 @@ if __name__ == "__main__":
         )
     ### End "Other" calculation
 
-    plot_manager.create_all_plots(data, metric, factor)
+    # plot_manager.create_all_plots(data, metric, factor)
     # plot_manager.create_all_plot_grids(data, metric, factor, "%IntrinsicData", "Language")
+    # plot_manager.create_all_plot_grids(data, metric, factor, "NoncanonicalOddsReduction", "Word")
+    plot_manager.create_all_plot_grids(data, metric, factor, "%CanonicalData", "%IntrinsicData")
+    # plot_manager.create_all_plot_grids(data, metric, factor, "%CanonicalData", "Word")

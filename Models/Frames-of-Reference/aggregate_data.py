@@ -50,6 +50,15 @@ SENSE_GROUPINGS_SIMPLE = {
     "SIntRelAbs": "IntRelAbs",
     "MIntRelAbs": "IntRelAbs"
 }
+SENSE_GROUPINGS_POCO = {
+    "Int": "NoPOCO",
+    "IntRel": "NoPOCO",
+    "PInt": "POCO",
+    "PIntRel": "POCO",
+    "QInt": "StrongPOCO",
+    "QIntRel": "StrongPOCO",
+    "Rel": "NoInt"
+}
 
 def load_config(root):
     try:
@@ -97,6 +106,10 @@ if __name__ == "__main__":
                         action='store_true',
                         help=""
     )
+    parser.add_argument('--poco',
+                        action='store_true',
+                        help=""
+    )
     # parser.add_argument('config', help="Name of config file in root")
     args = parser.parse_args()
 
@@ -106,6 +119,10 @@ if __name__ == "__main__":
     if args.simple:
         word_groupings = WORD_GROUPINGS_SIMPLE
         sense_groupings = SENSE_GROUPINGS_SIMPLE
+        output_filename = OUTPUT_FILENAME_SHARES
+    elif args.poco:
+        word_groupings = WORD_GROUPINGS_SIMPLE
+        sense_groupings = SENSE_GROUPINGS_POCO
         output_filename = OUTPUT_FILENAME_SHARES
     else:
         word_groupings = WORD_GROUPINGS

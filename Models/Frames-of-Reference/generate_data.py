@@ -37,7 +37,7 @@ def generate_train_data(root, chapter, seed, verbose):
                                                     repetition)  # File name part 2
                     pbar.update(train_size)  # Update progress bar by 1 per iteration
 
-def generate_test_data(root, chapter, seed, verbose):
+def generate_test_data_from_config(root, chapter, seed, verbose):
     file_manager = FileManager(root, training=False)
 
     test_size = file_manager.get_from_config("test_size")
@@ -47,10 +47,23 @@ def generate_test_data(root, chapter, seed, verbose):
     test_data = data_generator.generate_data(test_size)
     file_manager.save_testing_data(test_data, test_condition)
 
+# NOTE: Chapter 3 only
+def generate_unique_test_data(root):
+    file_manager = FileManager(root, training=False)
+    test_condition = file_manager.determine_test_condition()
+    data_generator = TestingDataGenerator(test_condition,
+                                          chapter=3)
+    test_data = data_generator.generate_unique_data()
+    file_manager.save_testing_data(test_data, test_condition)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('root', help="Path to the output root directory")  # e.g. results/DATE/
-    parser.add_argument('--type', choices=['train', 'test'], required=True,
+    parser.add_argument('--type',
+                        choices=['train',
+                                 'test_config',
+                                 'test_unique'],
+                        required=True,
                         help="Specify whether to generate training or testing data")
     parser.add_argument('--chapter', choices=[2, 3], required=True, type=int,
                         help="Chapter number of model data is being generated for")
@@ -66,8 +79,10 @@ def main():
 
     if data_type == 'train':
         generate_train_data(root, chapter, seed, verbose)
-    elif data_type == 'test':
-        generate_test_data(root, chapter, seed, verbose)
+    elif data_type == 'test_config':
+        generate_test_data_from_config(root, chapter, seed, verbose)
+    elif data_type == 'test_unique':
+        generate_unique_test_data(root)
 
 if __name__ == "__main__":
     main()

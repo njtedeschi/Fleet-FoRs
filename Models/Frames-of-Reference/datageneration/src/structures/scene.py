@@ -108,7 +108,6 @@ class Scene:
             if (abs(cosine_similarity) == 1):
                 return axis
 
-
     def ground_figure_displacement(self):
         return self.figure.position - self.ground.position
 

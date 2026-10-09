@@ -244,7 +244,7 @@ class PlotManager(DataManager):
         # Determine grid size
         nrows, ncols = len(row_values), len(col_values)
         # fig, axs = plt.subplots(nrows, ncols, figsize=(5 * ncols, 4 * nrows), sharex=True, sharey=True)
-        fig, axs = plt.subplots(nrows, ncols, figsize=(4 * ncols, 4 * nrows), sharex=True, sharey=True)
+        fig, axs = plt.subplots(nrows, ncols, figsize=(4 * ncols, 2.75 * nrows), sharex=True, sharey=True)
 
         # Make sure axs is a 2D array
         if nrows == 1 or ncols == 1:
@@ -272,9 +272,9 @@ class PlotManager(DataManager):
                         )
 
                     # ax.set_title(f"{row_value} | {col_value}")
-                    # if col_idx == 0:
-                    #     # Label for rows
-                    #     ax.set_ylabel(row_value, fontsize=12)  # Adjust fontsize as needed
+                    if col_idx == 0:
+                        # Label for rows
+                        ax.set_ylabel(row_value, fontsize=12)  # Adjust fontsize as needed
 
                     if row_idx == 0:
                         # Label for columns

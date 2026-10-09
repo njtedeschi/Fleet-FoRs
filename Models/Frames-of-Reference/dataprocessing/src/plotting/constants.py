@@ -23,6 +23,11 @@ SENSE_LABELS = {
     "SIntRelAbs": "All frames (symmetric intrinsic)",
     "MIntRelAbs":  "All frames (meronymic intrinsic)",
     #########
+    "NoPOCO": "Int without POCO",
+    "POCO": "Int with POCO",
+    "StrongPOCO": "Int with 'strong' POCO",
+    "NoInt": "No Int",
+    #########
     "Other": "Other"
 }
 ### END LABELS ###
@@ -36,10 +41,17 @@ class Color(Enum):
     GREEN = "green"
     ORANGE = "orange"
     BLACK = "black"
+# SENSE_COLORS = {
+#     "Int": Color.BLUE.value,
+#     "Rel": Color.RED.value,
+#     "IntRel": Color.GREEN.value,
+#     "Other": "grey"
+# }
 SENSE_COLORS = {
-    "Int": Color.BLUE.value,
-    "Rel": Color.RED.value,
-    "IntRel": Color.GREEN.value,
+    "NoPOCO": Color.BLUE.value,
+    "POCO": Color.GREEN.value,
+    "StrongPOCO": Color.ORANGE.value,
+    "NoInt": Color.RED.value,
     "Other": "grey"
 }
 # Color assignments dictionary
