@@ -1,0 +1,105 @@
+sense_order:
+- Int
+- Rel
+- IntRel
+sense_labels:
+  Int: "Intrinsic Only"
+  Rel: "Relative Only"
+  IntRel: "Intrinsic and Relative"
+sense_colors:
+  Int: '#1f77b4'
+  Rel: '#d62728'
+  IntRel: '#2ca02c'
+language_order:
+- English
+- Engtec
+- Mixtec
+language_labels:
+  English: "English"
+  Engtec: "Engtec"
+  Mixtec: "Mixtec"
+intrinsic_order:
+- 67
+- 50
+- 33
+intrinsic_labels:
+  33: "33% intrinsic"
+  50: "50% intrinsic"
+  67: "67% intrinsic"
+word_order:
+- front/behind
+- left/right
+- above/below
+- side
+word_labels:
+  front/behind: front/behind
+  left/right: left/right
+  above/below: above/below
+  side: side
+plot:
+  dpi: 300
+  figsize_per_cell:
+  - 3.2
+  - 2.6
+  sharey: true
+  sharex: true
+  y_lim:
+  - 0.0
+  - 1.0
+  x_label: Training examples
+  y_label: Posterior share
+
+  # Optional matplotlib text kwargs. These let you set *global* label/title styling
+  # without touching the code (e.g., fontsize, fontweight, fontstyle).
+  #
+  # Examples:
+  #   x_label_kwargs: {fontsize: 11}
+  #   y_label_kwargs: {fontsize: 11, fontstyle: italic}
+  #   title_kwargs: {fontsize: 11, fontweight: bold}
+  #   legend:
+  #     kwargs: {fontsize: 9, title_fontsize: 9}
+  x_label_kwargs: {fontweight: bold}
+  y_label_kwargs: {fontweight: bold}
+  title_kwargs: {}
+  suptitle_kwargs: {fontweight: bold, fontstyle: italic}
+  col_title_kwargs: {}
+  row_label_kwargs: {}
+
+  show_ci: true
+  ci_alpha: 0.18
+  line_width: 2.0
+  grid: true
+  legend:
+    enabled: true
+    location: upper center
+    ncol: 3
+    frameon: false
+    bbox_to_anchor:
+    - 0.5
+    - 1.02
+    # Extra kwargs passed through to matplotlib.legend.Legend.
+    # (e.g., fontsize, title_fontsize, handlelength, borderaxespad, ...)
+    kwargs: {}
+  titles:
+    col: '{col}'
+    row: '{row}'
+  font:
+    family: DejaVu Sans
+    size: 10
+  spines:
+    top: false
+    right: false
+
+  # Optional divider lines *between* facet rows/columns (figure-level separators).
+  # Useful when the main comparison is within rows and you want clearer row demarcation.
+  #
+  # Set enabled: true to turn on.
+  facet_separators:
+    enabled: true
+    rows: true
+    cols: false
+    linewidth: 1.5
+    color: "0.5"   # grayscale string is convenient: 0=black, 1=white
+    alpha: 1.0
+    linestyle: "-"
+    padding: 0.0

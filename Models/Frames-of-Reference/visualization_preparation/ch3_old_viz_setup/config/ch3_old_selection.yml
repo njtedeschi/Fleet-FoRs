@@ -1,0 +1,28 @@
+# Chapter 3 (old model): which rows to include for plotting
+
+# Which run dates to include (these come from the filenames shares_YYYY-MM-DD.csv)
+date_by_language:
+  English:
+    - "2024-10-14"
+    - "2024-11-12"
+
+# Max training size to include (keep higher sizes for appendix later)
+max_training_size: 1000
+
+# Optional: restrict to particular word pairs (omit to include all)
+# include_words: [front/behind, left/right, above/below, side]
+
+# Optional: restrict intrinsic levels (omit to include all)
+# include_intrinsic_levels: [50, 67]
+
+# Optional: restrict canonical levels (omit to include all)
+# include_canonical_levels: [17, 50, 83]
+
+# Optional: restrict odds-reduction levels (omit to include all)
+# include_odds_reduction: [1, 2, 4, 8, 16, inf]
+
+ci:
+  method: bootstrap   # bootstrap | sem
+  level: 0.95
+  n_boot: 2000
+  seed: 0

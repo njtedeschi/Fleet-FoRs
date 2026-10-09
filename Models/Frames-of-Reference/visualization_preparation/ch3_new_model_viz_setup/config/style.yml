@@ -1,0 +1,103 @@
+# Formatting-only options for Chapter 3 (new model) learning curves
+#
+# The plotted y-value is:  (IntP_mean - RelP_mean)
+# where IntP_mean and RelP_mean are already computed per Iteration.
+
+# Line order in the legend
+canonicity_order: [1.0, 0.5, 0.0]
+
+# Legend labels (you can rename freely without touching data)
+canonicity_labels:
+  "1.0": "Fully canonical"
+  "0.5": "Weakly non-canonical"
+  "0.0": "Fully non-canonical"
+
+# Colors for each canonicity curve
+canonicity_colors:
+  "1.0": "tab:blue"
+  "0.5": "tab:purple"
+  "0.0": "tab:red"
+
+# Optional facet ordering + labels for grid layouts
+intrinsic_order: [89, 80, 67, 50]
+intrinsic_labels:
+  "50": "50% intrinsic"
+  "67": "67% intrinsic"
+  "80": "80% intrinsic"
+  "89": "89% intrinsic"
+
+canonical_order: [89, 80, 67, 50, 17]
+canonical_labels:
+  "17": "17% canonical"
+  "50": "50% non-canonical"
+  "67": "33% non-canonical"
+  "80": "20% non-canonical"
+  "89": "11% non-canonical"
+
+odds_reduction_order: [inf, 16, 8, 4, 2, 1]
+odds_reduction_labels:
+  "inf": "∞"
+  "16": "16"
+  "8": "8"
+  "4": "4"
+  "2": "2"
+  "1": "1"
+
+plot:
+  # Geometry
+  dpi: 300
+  single_figsize: [5.2, 3.6]
+  figsize_per_cell: [3.2, 2.7]
+  sharex: true
+  sharey: true
+
+  # Axes
+  xscale: "log"
+  # y_limits: [-1, 1]
+  y_limits: [0, 1]
+  x_label: "Training Size"
+  y_label: "Intrinsic − Relative probability"
+
+  # Optional matplotlib text kwargs (fontsize, fontweight, fontstyle, ...)
+  x_label_kwargs: {}
+  y_label_kwargs: {}
+  title_kwargs: {}
+  suptitle_kwargs: {}
+  col_title_kwargs: {}
+  row_label_kwargs: {}
+  zero_line: true
+
+  # Lines / CI
+  show_ci: true          # CI band between ci_low and ci_high
+  ci_style: "band"      # band | bars
+  ci_alpha: 0.18
+  line_width: 2.0
+  marker: "o"
+  markersize: 3.5
+  grid: true
+
+  # For grid mode: show row/col headers
+  facet_titles: true
+
+  # Optional divider lines *between* facet rows/columns (figure-level separators).
+  # Useful when the main comparison is within rows and you want clearer row demarcation.
+  facet_separators:
+    enabled: false
+    rows: true
+    cols: false
+    linewidth: 0.8
+    color: "0.85"
+    alpha: 1.0
+    linestyle: "-"
+    padding: 0.0
+
+legend:
+  enabled: true
+  location: "upper center"
+  bbox_to_anchor: [0.5, 1.06]
+  ncol: 3
+  frameon: false
+  single_location: "best"
+  # Extra kwargs passed through to matplotlib.legend.Legend.
+  kwargs: {}
+

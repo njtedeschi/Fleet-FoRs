@@ -1,0 +1,106 @@
+# Formatting-only options for Chapter 3 (old model) posterior-share learning curves
+
+word_labels:
+  above/below: "above/below"
+  front/behind: "front/behind"
+  left/right: "left/right"
+  side: "side"
+
+# Class/"sense" order for lines + legend
+sense_order:
+  - NoPOCO
+  - POCO
+  - StrongPOCO
+  - NoInt
+
+# Legend labels (you can rename freely without touching the data)
+sense_labels:
+  NoPOCO: "NoPOCO"
+  POCO: "POCO"
+  StrongPOCO: "AbsPOCO"
+  NoInt: "NoInt"
+
+# Default colors (you can change globally here)
+# (These match a common blue/green/orange/red scheme.)
+sense_colors:
+  NoPOCO: "#1f77b4"   # blue
+  POCO: "#2ca02c"     # green
+  StrongPOCO: "#ff7f0e"  # orange
+  NoInt: "#d62728"    # red
+
+# Optional ordering/labels for facet variables
+intrinsic_order: [50, 67]
+intrinsic_labels:
+  50: "p_intrinsic=50%"
+  67: "p_intrinsic=67%"
+
+canonical_order: [17, 50, 83]
+canonical_labels:
+  17: "p_canonical=17%"
+  50: "p_canonical=50%"
+  83: "p_canonical=83%"
+
+odds_reduction_order: [1, 2, 4, 8, 16, inf]
+odds_reduction_labels:
+  1: "k=1"
+  2: "k=2"
+  4: "k=4"
+  8: "k=8"
+  16: "k=16"
+  inf: "k=∞"
+
+plot:
+  x_label: "Training examples"
+  y_label: "Posterior share"
+  y_lim: [0, 1]
+
+  # Optional matplotlib text kwargs (fontsize, fontweight, fontstyle, ...)
+  x_label_kwargs: {}
+  y_label_kwargs: {}
+  title_kwargs: {}
+  suptitle_kwargs: {}
+  col_title_kwargs: {}
+  row_label_kwargs: {}
+
+  figsize_per_cell: [3.2, 2.6]
+  single_figsize: [4.4, 3.2]
+  dpi: 300
+
+  show_ci: true
+  ci_alpha: 0.18
+  line_width: 2.0
+  grid: true
+
+  sharex: true
+  sharey: true
+
+  spines:
+    top: false
+    right: false
+
+  font:
+    family: "DejaVu Sans"
+    size: 10
+
+  legend:
+    enabled: true
+    location: "upper center"
+    bbox_to_anchor: [0.5, 1.02]
+    ncol: 4
+    frameon: false
+
+    # For single plots
+    single_location: "best"
+    # Extra kwargs passed through to matplotlib.legend.Legend.
+    kwargs: {}
+
+  # Optional divider lines *between* facet rows/columns (figure-level separators).
+  facet_separators:
+    enabled: false
+    rows: true
+    cols: false
+    linewidth: 0.8
+    color: "0.85"
+    alpha: 1.0
+    linestyle: "-"
+    padding: 0.0

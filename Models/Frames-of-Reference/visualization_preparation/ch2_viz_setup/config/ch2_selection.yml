@@ -1,0 +1,26 @@
+description: Default selection for main-text Chapter 2 figures.
+date_by_language:
+  English: '2024-02-08'
+  Engtec: '2024-03-07'
+  Mixtec: '2024-03-07'
+max_training_size: 1000
+include_words:
+- front/behind
+- left/right
+- above/below
+- side
+include_intrinsic_levels:
+- 33
+- 50
+- 67
+ci:
+  method: bootstrap
+  level: 0.95
+  n_boot: 2000
+  seed: 12345
+smoothing:
+  enabled: true
+  window: 9
+  polyorder: 2
+  # method: median
+  # window: 7

@@ -1,0 +1,81 @@
+# Styling + labels for Chapter 2 "symmetrically unbalanced" difference plots.
+
+# These plots overlay two curves:
+#   - Int-Rel at the intrinsic-majority condition (typically 67% intrinsic)
+#   - Rel-Int at the relative-majority condition (typically 33% intrinsic)
+
+curve_order:
+  - Int-Rel
+  - Rel-Int
+
+curve_labels:
+  Int-Rel: "Int-Only − Rel-Only (67% intrinsic)"
+  Rel-Int: "Rel-Only − Int-Only (33% intrinsic)"
+
+# Default to reusing the Int/Rel colors from the main learning-curve plots.
+curve_colors:
+  Int-Rel: "#1f77b4"
+  Rel-Int: "#d62728"
+
+language_order:
+  - English
+  - Engtec
+  - Mixtec
+
+language_labels:
+  English: English
+  Engtec: Engtec
+  Mixtec: Mixtec
+
+word_labels:
+  front/behind: front/behind
+  left/right: left/right
+  above/below: above/below
+  side: side
+
+plot:
+  dpi: 300
+  # Uses the same "per panel" sizing convention as the main renderer.
+  figsize_per_cell: [3.2, 2.6]
+  sharex: true
+  sharey: true
+  # Differences can be negative; keep symmetric by default.
+  y_lim: [-1.0, 1.0]
+  x_label: Training examples
+  y_label: Posterior difference
+
+  # Optional matplotlib text kwargs (fontsize, fontweight, fontstyle, etc.)
+  x_label_kwargs: {}
+  y_label_kwargs: {}
+  title_kwargs: {}
+  suptitle_kwargs: {}
+  show_ci: true
+  ci_alpha: 0.18
+  line_width: 2.0
+  grid: true
+  legend:
+    enabled: true
+    location: upper center
+    ncol: 2
+    frameon: false
+    bbox_to_anchor: [0.5, 1.02]
+    single_location: best
+    # Extra kwargs passed through to matplotlib.legend.Legend.
+    kwargs: {}
+  font:
+    family: DejaVu Sans
+    size: 10
+  spines:
+    top: false
+    right: false
+
+  # Optional divider lines between facet columns/rows.
+  facet_separators:
+    enabled: false
+    rows: false
+    cols: true
+    linewidth: 0.8
+    color: "0.85"
+    alpha: 1.0
+    linestyle: "-"
+    padding: 0.0
